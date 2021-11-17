@@ -59,7 +59,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-const url = config.mongoUrl;
+const url = config.MONGO_URL;
 const connect = mongoose.connect(url, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,

@@ -2,16 +2,16 @@ const braintree = require("braintree");
 
 const paymentOptionsModel = require("../models/paymentAccounts");
 const {
-	braintreeMerchantId,
-	braintreePublicKey,
-	braintreePrivateKey,
+	BRAINTREE_MERCHANT_ID,
+	BRAINTREE_PUBLIC_KEY,
+	BRAINTREE_PRIVATE_KEY,
 } = require("../services/config");
 
 const gateway = new braintree.BraintreeGateway({
 	environment: braintree.Environment.Sandbox,
-	merchantId,
-	publicKey,
-	privateKey,
+	merchantId: BRAINTREE_MERCHANT_ID,
+	publicKey: BRAINTREE_PUBLIC_KEY,
+	privateKey: BRAINTREE_PRIVATE_KEY,
 });
 
 exports.getClientToken = (req, res, next) => {

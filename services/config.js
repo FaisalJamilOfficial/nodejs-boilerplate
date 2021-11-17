@@ -1,10 +1,10 @@
 module.exports = {
-	mongoUrl:
+	MONGO_URL:
 		"mongodb+srv://app:app@cluster0.z0gtm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-	secretKey: "",
+	SECRET_KEY: "",
 	TWILIO_ACCOUNT_SID: "",
 	TWILIO_AUTH_TOKEN: "",
-	braintreeMerchantId: "",
-	braintreePublicKey: "",
-	braintreePrivateKey: "",
+	BRAINTREE_MERCHANT_ID: "",
+	BRAINTREE_PUBLIC_KEY: "",
+	BRAINTREE_PRIVATE_KEY: "",
 };

@@ -17,7 +17,7 @@ const jwtStrategy = async (jwt_payload) => {
 };
 
 exports.getToken = function (user) {
-	return jwt.sign(user, config.secretKey);
+	return jwt.sign(user, config.SECRET_KEY);
 };
 
 exports.verifyToken = async (req, res, next) => {
@@ -25,7 +25,7 @@ exports.verifyToken = async (req, res, next) => {
 		if (req.headers.authorization) {
 			const token = req.headers.authorization.split(" ")[1];
 			if (token) {
-				const verificationObject = jwt.verify(token, config.secretKey);
+				const verificationObject = jwt.verify(token, config.SECRET_KEY);
 				if (verificationObject) {
 					const exists = await jwtStrategy(verificationObject);
 					if (exists) {

@@ -1,4 +1,5 @@
 const express = require("express");
+const passport = require("passport");
 const router = express.Router();
 
 const users = require("../controllers/users");
@@ -7,23 +8,18 @@ const {
 	verifyAdmin,
 } = require("../middlewares/public/authenticator");
 const { sendOtp, verifyOtp } = require("../middlewares/public/otpManager");
-const {
-	upload,
-	PROFILE_PICTURES_DIRECTORY,
-} = require("../middlewares/public/uploader");
+const { upload, uploadTemporary } = require("../middlewares/public/uploader");
 const { resizeProfilePicture } = require("../middlewares/private/imageResizer");
 
-router.post("/login", verifyToken, verifyOtp, users.login);
-router.post("/register", verifyToken, verifyOtp, users.register);
+router.post("/login", passport.authenticate("local"), users.login);
+router.post("/signup", users.signup);
 router
 	.route("/profilePicture")
-	.put(
+	.post(
 		verifyToken,
-		upload(PROFILE_PICTURES_DIRECTORY).fields([
-			{ name: "profilePicture", maxCount: 1 },
-		]),
+		uploadTemporary.fields([{ name: "profilePicture", maxCount: 1 }]),
 		resizeProfilePicture,
 		users.setProfilePicture
 	)
-	.patch(verifyToken, users.removeProfilePicture);
+	.put(verifyToken, users.removeProfilePicture);
 module.exports = router;

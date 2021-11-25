@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const passportLocalMongoose = require("passport-local-mongoose");
+
 const users = new Schema(
 	{
 		phone: {
@@ -35,22 +37,9 @@ const users = new Schema(
 			},
 			index: true,
 		},
-		username: {
-			type: String,
-			trim: true,
-			required: true,
-			unique: true,
-			index: true,
-		},
 		profilePicture: {
 			type: String,
 			trim: true,
-		},
-		type: {
-			type: String,
-			enum: ["consultant", "consultee"],
-			required: true,
-			index: true,
 		},
 		fcm: {
 			type: String,
@@ -68,17 +57,10 @@ const users = new Schema(
 			default: "online",
 			index: true,
 		},
-		subUser: {
-			type: Schema.Types.ObjectId,
-		},
-		wallet: {
-			type: Number,
-			default: 0,
-			required: true,
-		},
 	},
 	{
 		timestamps: true,
 	}
 );
+users.plugin(passportLocalMongoose);
 module.exports = mongoose.model("users", users);

@@ -1,44 +1,45 @@
 const jwt = require("jsonwebtoken");
-const config = require("../../services/config");
+const passport = require("passport");
+const localstrategy = require("passport-local");
+var ExtractJwt = require("passport-jwt").ExtractJwt;
+var jwtStrategy = require("passport-jwt").Strategy;
+const { SECRET_KEY } = process.env;
 
-var { usersModel } = require("../../models");
+const { usersModel } = require("../../models");
 
-const jwtStrategy = async (jwt_payload) => {
-	if (jwt_payload.otpValidation) {
-		return jwt_payload;
-	} else
-		try {
-			const user = await usersModel.findOne({ _id: jwt_payload._id });
-			if (user?.status === "deleted") throw new Error("Unauthorized");
-			else return user;
-		} catch (error) {
-			throw error;
-		}
-};
+exports.local = passport.use(new localstrategy(usersModel.authenticate()));
+passport.serializeUser(usersModel.serializeUser());
+passport.deserializeUser(usersModel.deserializeUser());
 
 exports.getToken = function (user) {
-	return jwt.sign(user, config.SECRET_KEY);
+	return jwt.sign(user, SECRET_KEY);
 };
 
-exports.verifyToken = async (req, res, next) => {
-	try {
-		if (req.headers.authorization) {
-			const token = req.headers.authorization.split(" ")[1];
-			if (token) {
-				const verificationObject = jwt.verify(token, config.SECRET_KEY);
-				if (verificationObject) {
-					const exists = await jwtStrategy(verificationObject);
-					if (exists) {
-						req.user = exists;
-						next();
-					} else next(new Error("Token verification failed!"));
-				} else next(new Error("Malformed JWT!"));
-			} else next(new Error("Invalid JWT!"));
-		} else next(new Error("Unauthorized!"));
-	} catch (error) {
-		next(error);
-	}
-};
+const opts = {};
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = SECRET_KEY;
+
+exports.jwtpassport = passport.use(
+	new jwtStrategy(opts, (jwt_payload, done) => {
+		if (jwt_payload.otpValidation) {
+			return done(null, jwt_payload);
+		} else
+			usersModel.findOne({ _id: jwt_payload._id }, (err, user) => {
+				if (err) {
+					return done(err, false);
+				} else if (user.status == "deleted") {
+					err = new Error("Unauthorized");
+					return done(err, false);
+				} else if (user) {
+					return done(null, user);
+				} else {
+					return done(null, false);
+				}
+			});
+	})
+);
+
+exports.verifyToken = passport.authenticate("jwt", { session: false });
 
 exports.verifyAdmin = (req, res, next) => {
 	if (req.user.type === "admin") {

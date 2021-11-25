@@ -1,14 +1,12 @@
 const otpGenerator = require("otp-generator");
 
 const { getToken } = require("./authenticator");
-const {
-	TWILIO_ACCOUNT_SID,
-	TWILIO_AUTH_TOKEN,
-} = require("../../services/config");
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = process.env;
 
 const client = require("twilio")(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 exports.sendOtp = async (req, res, next) => {
+	const { _id } = req.user;
 	console.log("PHONE NUMBER MUST BE IN INTERNATIONAL FORMAT!");
 	const { phone } = req.body;
 	try {
@@ -17,6 +15,8 @@ exports.sendOtp = async (req, res, next) => {
 			upperCase: false,
 			specialChars: false,
 		});
+		console.log("OTP----->", otp);
+
 		client.messages
 			.create({
 				body: "Your App verification code is: " + otp,
@@ -24,7 +24,7 @@ exports.sendOtp = async (req, res, next) => {
 				to: phone,
 			})
 			.then(() => {
-				var token = getToken({ phone, otp, otpValidation: true });
+				const token = getToken({ _id, phone, otp, otpValidation: true });
 
 				res.json({
 					success: true,
@@ -37,12 +37,13 @@ exports.sendOtp = async (req, res, next) => {
 };
 
 exports.verifyOtp = (req, res, next) => {
-	const { otp, phone } = req.user;
+	const { otp, _id } = req.user;
 	const { code } = req.body;
 	if (Number(code) === Number(otp)) {
-		const token = getToken({ phone, otp, otpValidation: true });
+		const token = getToken({ _id });
 		res.json({
 			success: true,
+			user: req.user,
 			token,
 		});
 	} else {

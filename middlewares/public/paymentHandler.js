@@ -1,11 +1,8 @@
 const braintree = require("braintree");
 
 const paymentOptionsModel = require("../models/paymentAccounts");
-const {
-	BRAINTREE_MERCHANT_ID,
-	BRAINTREE_PUBLIC_KEY,
-	BRAINTREE_PRIVATE_KEY,
-} = require("../services/config");
+const { BRAINTREE_MERCHANT_ID, BRAINTREE_PUBLIC_KEY, BRAINTREE_PRIVATE_KEY } =
+	process.env;
 
 const gateway = new braintree.BraintreeGateway({
 	environment: braintree.Environment.Sandbox,

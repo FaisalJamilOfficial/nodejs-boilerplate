@@ -2,52 +2,6 @@ const sharp = require("sharp");
 const uuid = require("uuid");
 
 const imageMimeTypes = ["image/png", "image/jpg", "image/jpeg"];
-//
-exports.resizeProfilePicture = async (req, res, next) => {
-	try {
-		const { profilePicture } = req.files || {};
-
-		if (profilePicture) {
-			const PATH = "public/images/profilePictures/";
-			const images = profilePicture;
-
-			// imagesData contains 1.image_name 2.image_path
-			const imagesData = { images, PATH };
-
-			req.files.profilePicture = await this.resizeImagesWithThumbnails(
-				imagesData
-			);
-			next();
-		} else {
-			next();
-		}
-	} catch (error) {
-		next(error);
-	}
-};
-
-exports.resizeCertificates = async (req, res, next) => {
-	try {
-		const { certificates } = req.files || {};
-
-		if (certificates) {
-			const PATH = "public/images/certificates/";
-			const images = certificates;
-
-			// imagesData contains 1.image_name 2.image_path
-			const imagesData = { images, PATH };
-
-			req.files.certificates = await this.resizeImagesWithThumbnails(
-				imagesData
-			);
-			next();
-		} else {
-			next();
-		}
-	} catch (error) {
-		next(error);
-	}
-};
 
 exports.resizeImages = async (imagesData) => {
 	const { images, PATH } = imagesData;
@@ -84,6 +38,7 @@ exports.resizeImages = async (imagesData) => {
 		return array;
 	} else return;
 };
+
 exports.resizeImagesWithThumbnails = async (imagesData) => {
 	const { images, PATH } = imagesData;
 
@@ -93,6 +48,7 @@ exports.resizeImagesWithThumbnails = async (imagesData) => {
 			if (imageMimeTypes.includes(images[i].mimetype)) {
 				const buffer = images[i].buffer;
 				const id = uuid.v4() + ".jpeg";
+
 				try {
 					sharp(buffer)
 						.resize({

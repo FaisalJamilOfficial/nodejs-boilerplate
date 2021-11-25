@@ -5,51 +5,35 @@ const { getToken } = require("../middlewares/public/authenticator");
 const { usersModel } = require("../models");
 const { deleteProfilePicture } = require("../middlewares/private/deleter");
 
-exports.register = async (userData) => {
+exports.signup = async (req, res, next) => {
 	try {
-		const { phone, firstName, lastName, email, username, type } = userData;
-		let user = {};
-		if (phone) user.phone = phone;
-		if (firstName) user.firstName = firstName;
-		if (lastName) user.lastName = lastName;
-		if (email) user.email = email;
+		const { username, password, type } = req.body;
+		const user = {};
 		if (username) user.username = username;
 		if (type) user.type = type;
-		user = await usersModel.create(user);
-		return user;
-	} catch (error) {
-		throw error;
-	}
-};
-
-exports.editProfile = async (userData) => {
-	try {
-		const { firstName, lastName, profilePicture } = userData;
-		if (firstName) userData.firstName = firstName;
-		if (lastName) userData.lastName = lastName;
-		if (profilePicture && profilePicture[0].path)
-			userData.profilePicture = profilePicture[0].path;
-		const update = await usersModel.updateOne({ _id: userData._id }, userData, {
-			useFindAndModify: false,
-			new: true,
-			runValidators: true,
+		usersModel.register(new usersModel(user), password, async (error, user) => {
+			if (error) {
+				return next(error);
+			} else if (user) {
+				var token = getToken({ _id: user._id });
+				return res.status(400).json({
+					success: true,
+					token,
+					user,
+				});
+			}
 		});
-		if (update.modifiedCount === 0) throw new Error("User updation failed!");
-		else return { success: true };
 	} catch (error) {
-		throw error;
+		return next(error);
 	}
 };
 
 exports.login = async (req, res, next) => {
 	try {
-		const user = await usersModel.findOne({ phone: req.user.phone });
-		if (user) {
-			const token = getToken({ _id: user._id });
-			res.json({ success: true, user, token });
-		} else next(new Error("User does not exist!"));
+		const token = getToken({ _id: req.user._id });
+		return res.status(400).json({ success: true, user: req.user, token });
 	} catch (error) {
-		next(error);
+		return next(error);
 	}
 };
 
@@ -63,11 +47,11 @@ exports.setProfilePicture = async (req, res, next) => {
 			user.profilePicture = profilePicture[0].path;
 			await user.save();
 			if (existsProfilePicture) deleteProfilePicture(existsProfilePicture);
-			res.json({
+			return res.status(400).json({
 				success: true,
 				profilePicture: profilePicture[0].originalname,
 			});
-		} else next(new Error("Profile picture not found!"));
+		} else return next(new Error("Please add profile picture!"));
 	} catch (error) {
 		next(error);
 	}
@@ -76,23 +60,48 @@ exports.setProfilePicture = async (req, res, next) => {
 exports.removeProfilePicture = async (req, res, next) => {
 	try {
 		const user = await usersModel.findOne({ _id: req.user._id });
-		const profilePicture = user.profilePicture;
+		if (user.profilePicture) deleteProfilePicture(user.profilePicture);
+		else return next(new Error("Profile picture not yet set!"));
 		user.profilePicture = "";
 		await user.save();
-		if (profilePicture) deleteProfilePicture(profilePicture);
-		res.json({
+
+		return res.status(400).json({
 			success: true,
 		});
 	} catch (error) {
-		next(error);
+		return next(error);
+	}
+};
+
+exports.editProfile = async (req, res, next) => {
+	try {
+		const { firstName, lastName } = req.body;
+		const user = {};
+		if (firstName) user.firstName = firstName;
+		if (lastName) user.lastName = lastName;
+		const update = await usersModel.updateOne({ _id: req.user._id }, user, {
+			useFindAndModify: false,
+			new: true,
+			runValidators: true,
+		});
+		return res.status(400).json({
+			success: update.modifiedCount == 0 ? false : true,
+			user: update.modifiedCount == 0 ? null : user,
+		});
+	} catch (error) {
+		return next(error);
 	}
 };
 
 exports.changeStatus = async (req, res, next) => {
-	const { user, status } = req.body;
-	if (user && req.user.type != "admin")
-		return next(new Error("Unauthorized to deactivate user!"));
-	if (isValidObjectId(user)) {
+	try {
+		const { user, status } = req.body;
+		if (user)
+			if (isValidObjectId(user)) {
+				if (req.user.type != "admin")
+					return next(new Error("Unauthorized to change user status!"));
+			} else return next(new Error("Please enter valid user id!"));
+
 		const update = await usersModel.updateOne(
 			{ _id: user ? user : req.user._id },
 			{ status },
@@ -102,40 +111,54 @@ exports.changeStatus = async (req, res, next) => {
 				runValidators: true,
 			}
 		);
-		res.json({ success: update.modifiedCount == 0 ? false : true });
-	} else next(new Error("Please enter valid user id!"));
+		return res
+			.status(400)
+			.json({ success: update.modifiedCount == 0 ? false : true });
+	} catch (error) {
+		return next(error);
+	}
 };
 
 exports.changeState = async (user, state) => {
-	if (user && isValidObjectId(user))
-		throw new Error("Please enter valid user id!");
-	if (state) {
+	try {
+		if (user && isValidObjectId(user))
+			throw new Error("Please enter valid user id!");
+		if (state) {
+			const update = await usersModel.updateOne(
+				{ _id: user },
+				{ state },
+				{
+					useFindAndModify: false,
+					new: true,
+					runValidators: true,
+				}
+			);
+			return { success: update.modifiedCount == 0 ? false : true };
+		}
+		throw new Error("Please enter user state!");
+	} catch (error) {
+		throw error;
+	}
+};
+
+exports.changePhone = async (req, res, next) => {
+	try {
+		const { phone } = req.user;
 		const update = await usersModel.updateOne(
-			{ _id: user },
-			{ state },
+			{ _id: req.user._id },
+			{ phone },
 			{
 				useFindAndModify: false,
 				new: true,
 				runValidators: true,
 			}
 		);
-		return { success: update.modifiedCount == 0 ? false : true };
+		return res
+			.status(400)
+			.json({ success: update.modifiedCount == 0 ? false : true });
+	} catch (error) {
+		return next(error);
 	}
-	throw new Error("Please enter user state!");
-};
-
-exports.changePhone = async (req, res, next) => {
-	const { phone } = req.user;
-	const update = await usersModel.updateOne(
-		{ _id: req.user._id },
-		{ phone },
-		{
-			useFindAndModify: false,
-			new: true,
-			runValidators: true,
-		}
-	);
-	res.json({ success: update.modifiedCount == 0 ? false : true });
 };
 
 exports.getAllUsers = (req, res, next) => {
@@ -163,7 +186,9 @@ exports.getAllUsers = (req, res, next) => {
 				.limit(limit),
 		]).then(([total, users]) => {
 			const totalPages = Math.ceil(total / limit);
-			res.json({ success: true, users, currentPage: page, totalPages });
+			return res
+				.status(400)
+				.json({ success: true, users, currentPage: page, totalPages });
 		});
 	} catch (error) {
 		next(error);
@@ -185,7 +210,7 @@ exports.setFcm = async (req, res, next) => {
 	try {
 		const { fcm } = req.body;
 		const update = await usersModel.updateOne({ _id: req.user._id }, { fcm });
-		res.json({ success: update.modifiedCount == 0 ? false : true });
+		res.status(400).json({ success: update.modifiedCount == 0 ? false : true });
 	} catch (error) {
 		next(error);
 	}

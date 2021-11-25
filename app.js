@@ -1,7 +1,9 @@
+require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+var passport = require("passport");
 
 const logger = require("morgan");
 const cors = require("cors");
@@ -20,7 +22,7 @@ const accessLogStream = fs.createWriteStream(
 	}
 );
 const indexRouter = require("./routes/index");
-const config = require("./services/config");
+const { MONGO_URL } = process.env;
 const errorHandler = require("./middlewares/public/errorHandler");
 
 const app = express();
@@ -59,8 +61,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-const url = config.MONGO_URL;
-const connect = mongoose.connect(url, {
+const connect = mongoose.connect(MONGO_URL, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 });
@@ -84,6 +85,7 @@ const format = json({
 	status: ":status",
 });
 
+app.use(passport.initialize());
 app.use(logger(format, { stream: accessLogStream }));
 app.use(logger("dev"));
 app.use(express.json());

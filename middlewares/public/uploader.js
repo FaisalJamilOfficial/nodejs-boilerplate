@@ -1,14 +1,9 @@
 const multer = require("multer");
 const uuid = require("uuid");
 
-const imageMimeTypes = ["image/png", "image/jpg", "image/jpeg"];
-const documentMimeTypes = ["application/pdf"];
-
-exports.PUBLIC_DIRECTORY = "public/";
-exports.IMAGES_DIRECTORY = "public/images/";
-exports.DOCUMENTS_DIRECTORY = "public/documents/";
-exports.ATTACHMENTS_DIRECTORY = "public/attachments/";
-exports.PROFILE_PICTURES_DIRECTORY = "public/profilePictures/";
+const PUBLIC_DIRECTORY = "public/";
+const DOCUMENTS_DIRECTORY = "public/documents/";
+const ATTACHMENTS_DIRECTORY = "public/attachments/";
 
 exports.upload = (directory) => {
 	return multer({

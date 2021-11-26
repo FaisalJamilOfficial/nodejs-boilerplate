@@ -13,7 +13,7 @@ const socketio = require("socket.io");
 const mongoose = require("mongoose");
 const fs = require("fs");
 
-const usersController = require("./controllers/users");
+const { changeState } = require("./controllers/users");
 
 const accessLogStream = fs.createWriteStream(
 	path.join(__dirname, "access.log"),
@@ -34,7 +34,7 @@ io.on("connection", (socket) => {
 		console.log(data);
 		console.log("---------entered------------");
 		try {
-			usersController.changeState(data, "online");
+			changeState(data, "online");
 		} catch (error) {
 			next(error);
 		}
@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
 		console.log(data);
 		console.log("---------exit------------");
 		try {
-			usersController.changeState(data, "offline");
+			changeState(data, "offline");
 		} catch (error) {
 			next(error);
 		}
@@ -107,4 +107,4 @@ app.use(function (req, res, next) {
 // error handler
 app.use(errorHandler);
 
-module.exports = app;
+module.exports = { app, server };

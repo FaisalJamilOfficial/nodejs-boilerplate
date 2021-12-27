@@ -16,7 +16,7 @@ exports.signup = async (req, res, next) => {
 				return next(error);
 			} else if (user) {
 				var token = getToken({ _id: user._id });
-				return res.status(400).json({
+				return res.json({
 					success: true,
 					token,
 					user,
@@ -31,7 +31,7 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
 	try {
 		const token = getToken({ _id: req.user._id });
-		return res.status(400).json({ success: true, user: req.user, token });
+		return res.json({ success: true, user: req.user, token });
 	} catch (error) {
 		return next(error);
 	}
@@ -47,7 +47,7 @@ exports.setProfilePicture = async (req, res, next) => {
 			user.profilePicture = profilePicture[0].path;
 			await user.save();
 			if (existsProfilePicture) deleteProfilePicture(existsProfilePicture);
-			return res.status(400).json({
+			return res.json({
 				success: true,
 				profilePicture: profilePicture[0].originalname,
 			});
@@ -65,7 +65,7 @@ exports.removeProfilePicture = async (req, res, next) => {
 		user.profilePicture = "";
 		await user.save();
 
-		return res.status(400).json({
+		return res.json({
 			success: true,
 		});
 	} catch (error) {
@@ -84,7 +84,7 @@ exports.editProfile = async (req, res, next) => {
 			new: true,
 			runValidators: true,
 		});
-		return res.status(400).json({
+		return res.json({
 			success: update.modifiedCount == 0 ? false : true,
 			user: update.modifiedCount == 0 ? null : user,
 		});
@@ -111,9 +111,7 @@ exports.changeStatus = async (req, res, next) => {
 				runValidators: true,
 			}
 		);
-		return res
-			.status(400)
-			.json({ success: update.modifiedCount == 0 ? false : true });
+		return res.json({ success: update.modifiedCount == 0 ? false : true });
 	} catch (error) {
 		return next(error);
 	}
@@ -153,9 +151,7 @@ exports.changePhone = async (req, res, next) => {
 				runValidators: true,
 			}
 		);
-		return res
-			.status(400)
-			.json({ success: update.modifiedCount == 0 ? false : true });
+		return res.json({ success: update.modifiedCount == 0 ? false : true });
 	} catch (error) {
 		return next(error);
 	}
@@ -210,7 +206,7 @@ exports.setFcm = async (req, res, next) => {
 	try {
 		const { fcm } = req.body;
 		const update = await usersModel.updateOne({ _id: req.user._id }, { fcm });
-		res.status(400).json({ success: update.modifiedCount == 0 ? false : true });
+		res.json({ success: update.modifiedCount == 0 ? false : true });
 	} catch (error) {
 		next(error);
 	}

@@ -11,6 +11,6 @@ exports.deleteProfilePicture = (profilePicture) => {
 		deleteFiles(array);
 		return { success: true };
 	} catch (error) {
-		throw error;
+		return error;
 	}
 };

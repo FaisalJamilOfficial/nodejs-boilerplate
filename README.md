@@ -1,7 +1,7 @@
 # backend-boilerplate
  NodeJS Backend Boilerplate
  
- ![image](https://user-images.githubusercontent.com/26728753/154281713-4a41080e-e5bc-417d-89eb-96c8c2300c9d.png)
+![giphy (1)](https://user-images.githubusercontent.com/26728753/154282029-586106e2-5b93-49a6-b4b6-945e57c608aa.gif)
 
 
 Author: Faisal Jamil [Develo IT Solutions Pvt Ltd.]

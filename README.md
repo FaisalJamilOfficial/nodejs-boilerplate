@@ -6,4 +6,4 @@
 
 Author: Faisal Jamil Khan [Develo IT Solutions Pvt Ltd.]
 
-Coordinator: Malik Abdullah https://github.com/abdullah2011-gif [Develo IT Solutions Pvt Ltd.]
+Coordinator: -[Malik Abdullah](https://github.com/abdullah2011-gif) [Develo IT Solutions Pvt Ltd.]

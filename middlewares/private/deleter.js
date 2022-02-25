@@ -1,6 +1,5 @@
-const { deleteFiles } = require("../public/deleter");
-
-const PROFILE_PICTURES_DIRECTORY = "public/profilePictures/";
+const { deleteFiles } = require("../../utils/filesDeleter");
+const { PROFILE_PICTURES_DIRECTORY } = require("../../configs/directories");
 
 exports.deleteProfilePicture = (profilePicture) => {
 	try {

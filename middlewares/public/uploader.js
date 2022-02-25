@@ -1,10 +1,6 @@
 const multer = require("multer");
 const uuid = require("uuid");
 
-const PUBLIC_DIRECTORY = "public/";
-const DOCUMENTS_DIRECTORY = "public/documents/";
-const ATTACHMENTS_DIRECTORY = "public/attachments/";
-
 exports.upload = (directory) => {
 	return multer({
 		storage: multer.diskStorage({
@@ -20,3 +16,11 @@ exports.upload = (directory) => {
 };
 
 exports.uploadTemporary = multer({ storage: multer.memoryStorage() });
+
+exports.uploadFiles = (file, directory) => {
+	const fileExtension = mime.extension(file.mimetype);
+	file.filename = uuid.v4() + "." + fileExtension;
+	file.path = directory + file.filename;
+	fs.createWriteStream(file.path).write(file.buffer);
+	return file;
+};

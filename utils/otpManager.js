@@ -1,13 +1,13 @@
 const otpGenerator = require("otp-generator");
 
-const { getToken } = require("./authenticator");
+const { getToken } = require("../middlewares/public/authenticator");
 const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = process.env;
 
 const client = require("twilio")(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 exports.sendOtp = async (req, res, next) => {
 	const { _id } = req.user;
-	console.log("PHONE NUMBER MUST BE IN INTERNATIONAL FORMAT!");
+	// PHONE NUMBER MUST BE IN INTERNATIONAL FORMAT!
 	const { phone } = req.body;
 	try {
 		const otp = otpGenerator.generate(6, {
@@ -20,7 +20,7 @@ exports.sendOtp = async (req, res, next) => {
 		client.messages
 			.create({
 				body: "Your App verification code is: " + otp,
-				from: "+13158401425",
+				from: "+19105438838",
 				to: phone,
 			})
 			.then(() => {

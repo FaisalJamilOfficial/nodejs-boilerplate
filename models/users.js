@@ -5,25 +5,6 @@ const passportLocalMongoose = require("passport-local-mongoose");
 
 const users = new Schema(
 	{
-		phone: {
-			type: String,
-			trim: true,
-			required: true,
-			unique: true,
-			index: true,
-		},
-		firstName: {
-			type: String,
-			trim: true,
-			required: true,
-			index: true,
-		},
-		lastName: {
-			type: String,
-			trim: true,
-			required: true,
-			index: true,
-		},
 		email: {
 			type: String,
 			trim: true,
@@ -37,24 +18,33 @@ const users = new Schema(
 			},
 			index: true,
 		},
-		profilePicture: {
-			type: String,
-			trim: true,
-		},
 		fcm: {
 			type: String,
 			default: "",
 		},
+		type: {
+			type: String,
+			enum: ["user", "admin"],
+			required: true,
+			index: true,
+		},
 		status: {
 			type: String,
-			enum: ["active", "in-active", "deleted"],
+			enum: ["active", "deleted"],
 			default: "active",
+			required: true,
 			index: true,
 		},
 		state: {
 			type: String,
-			enum: ["online", "offline", "oncall"],
+			enum: ["online", "offline"],
 			default: "online",
+			required: true,
+			index: true,
+		},
+		profile: {
+			type: Schema.Types.ObjectId,
+			ref: "profiles",
 			index: true,
 		},
 	},
@@ -62,5 +52,13 @@ const users = new Schema(
 		timestamps: true,
 	}
 );
-users.plugin(passportLocalMongoose);
+users.plugin(passportLocalMongoose, {
+	usernameField: "email",
+	lastLoginField: "lastLogin",
+	attemptsField: "loginAttempts",
+	maxAttempts: 10,
+	maxInterval: 30000,
+	limitAttempts: true,
+	usernameLowerCase: true,
+});
 module.exports = mongoose.model("users", users);

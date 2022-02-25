@@ -1,9 +1,9 @@
-const { isValidObjectId } = require("mongoose");
 const moment = require("moment");
+const { isValidObjectId } = require("mongoose");
 
 const { getToken } = require("../middlewares/public/authenticator");
 const { usersModel } = require("../models");
-const { deleteProfilePicture } = require("../middlewares/private/deleter");
+const { updateProfile } = require("./profiles");
 
 exports.signup = async (req, res, next) => {
 	try {
@@ -30,6 +30,10 @@ exports.signup = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
 	try {
+		if (req.user) {
+			if (req.user.status === "deleted")
+				return next(new Error("User deleted!"));
+		}
 		const token = getToken({ _id: req.user._id });
 		return res.json({ success: true, user: req.user, token });
 	} catch (error) {
@@ -37,90 +41,32 @@ exports.login = async (req, res, next) => {
 	}
 };
 
-exports.setProfilePicture = async (req, res, next) => {
+exports.editUserProfile = async (req, res, next) => {
 	try {
-		const { profilePicture } = req.files || {};
-
-		if (profilePicture && profilePicture[0].path) {
-			const user = await usersModel.findOne({ _id: req.user._id });
-			const existsProfilePicture = user.profilePicture;
-			user.profilePicture = profilePicture[0].path;
-			await user.save();
-			if (existsProfilePicture) deleteProfilePicture(existsProfilePicture);
-			return res.json({
-				success: true,
-				profilePicture: profilePicture[0].originalname,
-			});
-		} else return next(new Error("Please add profile picture!"));
-	} catch (error) {
-		next(error);
-	}
-};
-
-exports.removeProfilePicture = async (req, res, next) => {
-	try {
-		const user = await usersModel.findOne({ _id: req.user._id });
-		if (user.profilePicture) deleteProfilePicture(user.profilePicture);
-		else return next(new Error("Profile picture not yet set!"));
-		user.profilePicture = "";
-		await user.save();
-
+		const { user } = req.body;
+		if (user) {
+			if (req.user.type === "admin")
+				if (isValidObjectId(user))
+					if (await usersModel.exists({ _id: user })) {
+					} else return next(new Error("User not found!"));
+				else return next(new Error("Please enter valid user id!"));
+			else return next(new Error("Unauthorized as ADMIN!"));
+		}
+		const responseProfileUpdate = updateProfile(req, res, next);
+		const responseUserUpdate = updateUser(req, res, next);
 		return res.json({
-			success: true,
+			success: responseProfileUpdate && responseUserUpdate,
+			user: await usersModel.findOne({ _id: req.user._id }).populate("profile"),
 		});
 	} catch (error) {
 		return next(error);
 	}
 };
 
-exports.editProfile = async (req, res, next) => {
+exports.setState = async (user, state) => {
 	try {
-		const { firstName, lastName } = req.body;
-		const user = {};
-		if (firstName) user.firstName = firstName;
-		if (lastName) user.lastName = lastName;
-		const update = await usersModel.updateOne({ _id: req.user._id }, user, {
-			useFindAndModify: false,
-			new: true,
-			runValidators: true,
-		});
-		return res.json({
-			success: update.modifiedCount == 0 ? false : true,
-			user: update.modifiedCount == 0 ? null : user,
-		});
-	} catch (error) {
-		return next(error);
-	}
-};
-
-exports.changeStatus = async (req, res, next) => {
-	try {
-		const { user, status } = req.body;
-		if (user)
-			if (isValidObjectId(user)) {
-				if (req.user.type != "admin")
-					return next(new Error("Unauthorized to change user status!"));
-			} else return next(new Error("Please enter valid user id!"));
-
-		const update = await usersModel.updateOne(
-			{ _id: user ? user : req.user._id },
-			{ status },
-			{
-				useFindAndModify: false,
-				new: true,
-				runValidators: true,
-			}
-		);
-		return res.json({ success: update.modifiedCount == 0 ? false : true });
-	} catch (error) {
-		return next(error);
-	}
-};
-
-exports.changeState = async (user, state) => {
-	try {
-		if (user && isValidObjectId(user))
-			throw new Error("Please enter valid user id!");
+		if (!user) throw new Error("Please enter user id!");
+		if (!isValidObjectId(user)) throw new Error("Please enter valid user id!");
 		if (state) {
 			const update = await usersModel.updateOne(
 				{ _id: user },
@@ -139,21 +85,33 @@ exports.changeState = async (user, state) => {
 	}
 };
 
-exports.changePhone = async (req, res, next) => {
+exports.checkUserExists = async (req, res, next) => {
 	try {
-		const { phone } = req.user;
-		const update = await usersModel.updateOne(
-			{ _id: req.user._id },
-			{ phone },
-			{
-				useFindAndModify: false,
-				new: true,
-				runValidators: true,
-			}
-		);
-		return res.json({ success: update.modifiedCount == 0 ? false : true });
+		const exists = await usersModel.exists({ phone: req.body.phone });
+		if (exists) {
+			next();
+		} else next(new Error("User does not exist!"));
 	} catch (error) {
-		return next(error);
+		next(error);
+	}
+};
+
+exports.getUser = async (req, res, next) => {
+	try {
+		const { user } = req.params;
+		if (user)
+			if (isValidObjectId(user)) {
+				const response = await usersModel
+					.findOne({ _id: user })
+					.populate("profile");
+				return res.json({
+					success: "true",
+					user: response,
+				});
+			} else return next(new Error("Please enter valid user id!"));
+		else return next(new Error("Please enter user id!"));
+	} catch (error) {
+		next(error);
 	}
 };
 
@@ -186,27 +144,6 @@ exports.getAllUsers = (req, res, next) => {
 				.status(400)
 				.json({ success: true, users, currentPage: page, totalPages });
 		});
-	} catch (error) {
-		next(error);
-	}
-};
-
-exports.checkUserExists = async (req, res, next) => {
-	try {
-		const exists = await usersModel.exists({ phone: req.body.phone });
-		if (exists) {
-			next();
-		} else next(new Error("User does not exist!"));
-	} catch (error) {
-		next(error);
-	}
-};
-
-exports.setFcm = async (req, res, next) => {
-	try {
-		const { fcm } = req.body;
-		const update = await usersModel.updateOne({ _id: req.user._id }, { fcm });
-		res.json({ success: update.modifiedCount == 0 ? false : true });
 	} catch (error) {
 		next(error);
 	}

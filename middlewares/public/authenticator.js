@@ -27,8 +27,8 @@ exports.jwtpassport = passport.use(
 			usersModel.findOne({ _id: jwt_payload._id }, (err, user) => {
 				if (err) {
 					return done(err, false);
-				} else if (user.status == "deleted") {
-					err = new Error("Unauthorized");
+				} else if (user.status === "deleted") {
+					err = new Error("Account deleted!");
 					return done(err, false);
 				} else if (user) {
 					return done(null, user);
@@ -42,10 +42,20 @@ exports.jwtpassport = passport.use(
 exports.verifyToken = passport.authenticate("jwt", { session: false });
 
 exports.verifyAdmin = (req, res, next) => {
-	if (req.user.type === "admin") {
+	if (req.user.type === "admin" && req.user.status === "active") {
 		next();
 	} else {
 		const error = new Error("You are not authorized as admin!");
+		error.status = 403;
+		return next(error);
+	}
+};
+
+exports.verifyUser = (req, res, next) => {
+	if (req.user && req.user.status === "active") {
+		next();
+	} else {
+		const error = new Error("You are not authorized as user!");
 		error.status = 403;
 		return next(error);
 	}

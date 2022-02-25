@@ -1,7 +1,16 @@
 const sharp = require("sharp");
 const uuid = require("uuid");
 
-const imageMimeTypes = ["image/png", "image/jpg", "image/jpeg"];
+const imageMimeTypes = [
+	"image/png",
+	"image/jpg",
+	"image/jpeg",
+	"application/octet-stream",
+	"image/vnd.microsoft.icon",
+	"image/bmp",
+	"image/svg+xml",
+	"image/gif",
+];
 
 exports.resizeImages = async (imagesData) => {
 	const { images, PATH } = imagesData;

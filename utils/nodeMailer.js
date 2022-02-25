@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendEmail = async (email, subject, text) => {
+const sendEmail = async (email, subject, text, html) => {
 	try {
 		const transporter = nodemailer.createTransport({
 			host: "smtp.gmail.com",
@@ -13,16 +13,16 @@ const sendEmail = async (email, subject, text) => {
 			},
 		});
 
-		await transporter.sendMail({
+		const response = await transporter.sendMail({
 			from: `BACKEND BOILERPLATE <${process.env.EMAIL_USER}>`,
 			to: email,
-			subject: subject,
-			text: text,
+			subject,
+			text,
+			html,
 		});
-
-		console.log("email sent sucessfully");
+		return response;
 	} catch (error) {
-		console.log(error, "email not sent");
+		throw error;
 	}
 };
 

@@ -1,10 +1,6 @@
 const { resizeImagesWithThumbnails } = require("../public/imageResizer");
 
-const PUBLIC_DIRECTORY = "public/";
-const IMAGES_DIRECTORY = "public/images/";
-const DOCUMENTS_DIRECTORY = "public/documents/";
-const ATTACHMENTS_DIRECTORY = "public/attachments/";
-const PROFILE_PICTURES_DIRECTORY = "public/profilePictures/";
+const { PROFILE_PICTURES_DIRECTORY } = require("../../configs/directories");
 
 exports.resizeProfilePicture = async (req, res, next) => {
 	try {

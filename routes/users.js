@@ -26,5 +26,6 @@ router.get("/:user", verifyToken, verifyUser, users.getUser);
 
 router.post("/login", passport.authenticate("local"), users.login);
 router.post("/signup", users.signup);
+router.post("/otp", sendOtp);
 
 module.exports = router;

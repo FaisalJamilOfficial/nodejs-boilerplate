@@ -74,3 +74,24 @@ exports.updateUser = async (req, res, next) => {
 		next(error);
 	}
 };
+
+exports.changePhone = async (req, res, next) => {
+	try {
+		const { phone } = req.user;
+		const update = await usersModel.updateOne(
+			{ _id: req.user._id },
+			{ phone },
+			{
+				useFindAndModify: false,
+				new: true,
+				runValidators: true,
+			}
+		);
+		return res.json({
+			success: update.modifiedCount == 0 ? false : true,
+			user: await usersModel.findOne({ _id: req.user._id }).populate("profile"),
+		});
+	} catch (error) {
+		return next(error);
+	}
+};

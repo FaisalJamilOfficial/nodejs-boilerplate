@@ -96,7 +96,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/v1", indexRouter);
 
 app.get("/*", (req, res, next) => {
-	res.json({ message: "server is working", success: true });
+	res.sendFile(path.join(__dirname, "/public/images/3909236.png"));
 });
 
 // catch 404 and forward to error handler

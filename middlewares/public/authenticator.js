@@ -27,7 +27,7 @@ exports.jwtpassport = passport.use(
 			usersModel.findOne({ _id: jwt_payload._id }, (err, user) => {
 				if (err) {
 					return done(err, false);
-				} else if (user.status === "deleted") {
+				} else if (user?.status === "deleted") {
 					err = new Error("Account deleted!");
 					return done(err, false);
 				} else if (user) {
@@ -58,5 +58,25 @@ exports.verifyUser = (req, res, next) => {
 		const error = new Error("You are not authorized as user!");
 		error.status = 403;
 		return next(error);
+	}
+};
+
+exports.alterLogin = (req, res, next) => {
+	const { email } = req.body;
+	if (email) req.body.username = email;
+	next();
+};
+
+exports.verifyUserToken = async (req, res, next) => {
+	try {
+		if (req.user._id) {
+			next();
+		} else {
+			const error = new Error("You are not authorized as existing user!");
+			error.status = 403;
+			return next(error);
+		}
+	} catch (error) {
+		next(error);
 	}
 };

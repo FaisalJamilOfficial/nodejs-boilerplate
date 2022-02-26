@@ -7,8 +7,10 @@ const {
 	verifyToken,
 	verifyUser,
 	verifyAdmin,
+	alterLogin,
+	verifyUserToken,
 } = require("../middlewares/public/authenticator");
-const { sendOtp, verifyOtp } = require("../utils/otpManager");
+const { sendOtp, verifyOtp } = require("../middlewares/public/otpManager");
 const { upload, uploadTemporary } = require("../middlewares/public/uploader");
 const { resizeProfilePicture } = require("../middlewares/private/imageResizer");
 
@@ -24,8 +26,25 @@ router
 	.get(verifyToken, verifyAdmin, users.getAllUsers);
 router.get("/:user", verifyToken, verifyUser, users.getUser);
 
-router.post("/login", passport.authenticate("local"), users.login);
+router
+	.route("/login")
+	.post(alterLogin, passport.authenticate("local"), users.login)
+	.put(verifyToken, verifyOtp, users.checkUserPhoneExists, users.login);
 router.post("/signup", users.signup);
-router.post("/otp", sendOtp);
+router.put(
+	"/phone",
+	verifyToken,
+	verifyOtp,
+	verifyUserToken,
+	users.editUserProfile
+);
+router.put(
+	"/password",
+	alterLogin,
+	passport.authenticate("local"),
+	users.editUserProfile
+);
+
+router.route("/otp").post(verifyToken, verifyUser, sendOtp).put(sendOtp);
 
 module.exports = router;

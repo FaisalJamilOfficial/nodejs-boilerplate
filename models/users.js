@@ -18,6 +18,12 @@ const users = new Schema(
 			},
 			index: true,
 		},
+		phone: {
+			type: String,
+			trim: true,
+			unique: true,
+			index: true,
+		},
 		fcm: {
 			type: String,
 			default: "",
@@ -47,6 +53,11 @@ const users = new Schema(
 			ref: "profiles",
 			index: true,
 		},
+		isPasswordSet: {
+			type: Boolean,
+			default: false,
+			required: true,
+		},
 	},
 	{
 		timestamps: true,
@@ -59,6 +70,6 @@ users.plugin(passportLocalMongoose, {
 	maxAttempts: 10,
 	maxInterval: 30000,
 	limitAttempts: true,
-	usernameLowerCase: true,
+	// usernameLowerCase: true,
 });
 module.exports = mongoose.model("users", users);

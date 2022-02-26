@@ -2,42 +2,67 @@ const moment = require("moment");
 const { isValidObjectId } = require("mongoose");
 
 const { getToken } = require("../middlewares/public/authenticator");
-const { usersModel } = require("../models");
-const { updateProfile } = require("./profiles");
+const { usersModel, profilesModel } = require("../models");
+const { updateProfile, updateUser } = require("./profiles");
 
 exports.signup = async (req, res, next) => {
 	try {
-		const { username, password, type } = req.body;
-		const user = {};
-		if (username) user.username = username;
-		if (type) user.type = type;
-		usersModel.register(new usersModel(user), password, async (error, user) => {
-			if (error) {
-				return next(error);
-			} else if (user) {
-				var token = getToken({ _id: user._id });
-				return res.json({
-					success: true,
-					token,
-					user,
-				});
+		const { username, email, password, phone, type } = req.body;
+		const userObj = {};
+		if (username) userObj.username = username;
+		if (email) userObj.email = email;
+		if (type) userObj.type = type;
+		if (phone) userObj.phone = phone;
+		usersModel.register(
+			new usersModel(userObj),
+			password,
+			async (error, user) => {
+				if (error) {
+					return next(error);
+				} else if (user) {
+					const profileObj = {};
+					profileObj.user = user._id;
+					profilesModel.create(profileObj, async (err, profile) => {
+						if (err) await user.remove();
+						else if (profile) {
+							user.profile = profile._id;
+							await user.save();
+						}
+						var token = getToken({ _id: user._id });
+						return res.json({
+							success: true,
+							user: await usersModel
+								.findOne({ _id: user._id })
+								.populate("profile"),
+							token,
+						});
+					});
+				}
 			}
-		});
+		);
 	} catch (error) {
-		return next(error);
+		next(error);
 	}
 };
 
 exports.login = async (req, res, next) => {
 	try {
-		if (req.user) {
-			if (req.user.status === "deleted")
-				return next(new Error("User deleted!"));
-		}
-		const token = getToken({ _id: req.user._id });
-		return res.json({ success: true, user: req.user, token });
+		const { _id, phone } = req.user;
+		const query = { status: "active" };
+		if (phone) query.phone = phone;
+		else if (_id) query._id = _id;
+		const userExists = await usersModel.findOne(query).populate("profile");
+		if (userExists) {
+		} else return next(new Error("User deleted!"));
+
+		const token = getToken({ _id: userExists._id });
+		return res.json({
+			success: true,
+			user: userExists,
+			token,
+		});
 	} catch (error) {
-		return next(error);
+		next(error);
 	}
 };
 
@@ -52,14 +77,14 @@ exports.editUserProfile = async (req, res, next) => {
 				else return next(new Error("Please enter valid user id!"));
 			else return next(new Error("Unauthorized as ADMIN!"));
 		}
-		const responseProfileUpdate = updateProfile(req, res, next);
-		const responseUserUpdate = updateUser(req, res, next);
+		const responseProfileUpdate = await updateProfile(req, res, next);
+		const responseUserUpdate = await updateUser(req, res, next);
 		return res.json({
 			success: responseProfileUpdate && responseUserUpdate,
 			user: await usersModel.findOne({ _id: req.user._id }).populate("profile"),
 		});
 	} catch (error) {
-		return next(error);
+		next(error);
 	}
 };
 
@@ -85,7 +110,7 @@ exports.setState = async (user, state) => {
 	}
 };
 
-exports.checkUserExists = async (req, res, next) => {
+exports.checkUserPhoneExists = async (req, res, next) => {
 	try {
 		const exists = await usersModel.exists({ phone: req.body.phone });
 		if (exists) {
@@ -116,10 +141,11 @@ exports.getUser = async (req, res, next) => {
 };
 
 exports.getAllUsers = (req, res, next) => {
-	let { q, page, limit, type } = req.query;
+	let { q, page, limit, type, status } = req.query;
 	const { _id } = req.user;
 	const query = {};
 	if (type) query.type = type;
+	if (status) query.status = status;
 	if (q) {
 		query.$or = [
 			{ username: { $regex: q, $options: "i" } },

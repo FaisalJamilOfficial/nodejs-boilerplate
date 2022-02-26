@@ -3,15 +3,6 @@ const Schema = mongoose.Schema;
 
 const profiles = new Schema(
 	{
-		phone: {
-			type: String,
-			trim: true,
-			index: true,
-		},
-		picture: {
-			type: String,
-			trim: true,
-		},
 		firstname: {
 			type: String,
 			trim: true,
@@ -36,6 +27,10 @@ const profiles = new Schema(
 			},
 		},
 		address: {
+			type: String,
+			trim: true,
+		},
+		picture: {
 			type: String,
 			trim: true,
 		},

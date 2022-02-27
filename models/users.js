@@ -21,7 +21,6 @@ const users = new Schema(
 		phone: {
 			type: String,
 			trim: true,
-			unique: true,
 			index: true,
 		},
 		fcm: {

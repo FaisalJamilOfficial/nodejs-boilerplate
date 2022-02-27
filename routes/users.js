@@ -2,7 +2,8 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 
-const users = require("../controllers/users");
+const usersController = require("../controllers/users");
+const notificationsController = require("../controllers/notifications");
 const {
 	verifyToken,
 	verifyUser,
@@ -21,30 +22,43 @@ router
 		verifyUser,
 		uploadTemporary.fields([{ name: "picture", maxCount: 1 }]),
 		resizeProfilePicture,
-		users.editUserProfile
+		usersController.editUserProfile
 	)
-	.get(verifyToken, verifyAdmin, users.getAllUsers);
-router.get("/:user", verifyToken, verifyUser, users.getUser);
+	.get(verifyToken, verifyAdmin, usersController.getAllUsers);
 
 router
 	.route("/login")
-	.post(alterLogin, passport.authenticate("local"), users.login)
-	.put(verifyToken, verifyOtp, users.checkUserPhoneExists, users.login);
-router.post("/signup", users.signup);
+	.post(alterLogin, passport.authenticate("local"), usersController.login)
+	.put(
+		verifyToken,
+		verifyOtp,
+		usersController.checkUserPhoneExists,
+		usersController.login
+	);
+router.post("/signup", usersController.signup);
 router.put(
 	"/phone",
 	verifyToken,
 	verifyOtp,
 	verifyUserToken,
-	users.editUserProfile
+	usersController.editUserProfile
 );
 router.put(
 	"/password",
 	alterLogin,
 	passport.authenticate("local"),
-	users.editUserProfile
+	usersController.editUserProfile
 );
 
 router.route("/otp").post(verifyToken, verifyUser, sendOtp).put(sendOtp);
+
+router.get(
+	"/notifications",
+	verifyToken,
+	verifyUser,
+	notificationsController.getAllNotifications
+);
+
+router.get("/:user", verifyToken, verifyUser, usersController.getUser);
 
 module.exports = router;

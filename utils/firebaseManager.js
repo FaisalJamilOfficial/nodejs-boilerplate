@@ -1,6 +1,6 @@
 const admin = require("firebase-admin");
 
-const serviceAccount = require("../../services/backend-boilerplate-official-firebase-adminsdk-o1ajl-593da86247.json");
+const serviceAccount = require("../services/backend-boilerplate-official-firebase-adminsdk-o1ajl-593da86247.json");
 
 const connection = admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount),

@@ -8,8 +8,8 @@ exports.updateProfile = async (req, res, next) => {
 	try {
 		const {
 			user,
-			firstName,
-			lastName,
+			firstname,
+			lastname,
 			longitude,
 			latitude,
 			address,
@@ -19,8 +19,8 @@ exports.updateProfile = async (req, res, next) => {
 		const profileObj = {};
 		console.log("req.files", req.files);
 
-		if (firstName) profileObj.firstName = firstName;
-		if (lastName) profileObj.lastName = lastName;
+		if (firstname) profileObj.firstname = firstname;
+		if (lastname) profileObj.lastname = lastname;
 		if (address) profileObj.address = address;
 		if (Number(longitude) && Number(latitude))
 			profileObj.location = {

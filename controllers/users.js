@@ -3,7 +3,7 @@ const { isValidObjectId } = require("mongoose");
 
 const { getToken } = require("../middlewares/public/authenticator");
 const { usersModel, profilesModel } = require("../models");
-const { updateProfile, updateUser } = require("./profiles");
+const profilesController = require("./profiles");
 
 exports.signup = async (req, res, next) => {
 	try {
@@ -77,8 +77,16 @@ exports.editUserProfile = async (req, res, next) => {
 				else return next(new Error("Please enter valid user id!"));
 			else return next(new Error("Unauthorized as ADMIN!"));
 		}
-		const responseProfileUpdate = await updateProfile(req, res, next);
-		const responseUserUpdate = await updateUser(req, res, next);
+		const responseProfileUpdate = await profilesController.updateProfile(
+			req,
+			res,
+			next
+		);
+		const responseUserUpdate = await profilesController.updateUser(
+			req,
+			res,
+			next
+		);
 		return res.json({
 			success: responseProfileUpdate && responseUserUpdate,
 			user: await usersModel.findOne({ _id: req.user._id }).populate("profile"),

@@ -23,8 +23,10 @@ exports.signup = async (req, res, next) => {
 					const profileObj = {};
 					profileObj.user = user._id;
 					profilesModel.create(profileObj, async (err, profile) => {
-						if (err) await user.remove();
-						else if (profile) {
+						if (err) {
+							await user.remove();
+							return next(err);
+						} else if (profile) {
 							user.profile = profile._id;
 							await user.save();
 						}
@@ -77,12 +79,12 @@ exports.editUserProfile = async (req, res, next) => {
 				else return next(new Error("Please enter valid user id!"));
 			else return next(new Error("Unauthorized as ADMIN!"));
 		}
-		const responseProfileUpdate = await profilesController.updateProfile(
+		const responseUserUpdate = await profilesController.updateUser(
 			req,
 			res,
 			next
 		);
-		const responseUserUpdate = await profilesController.updateUser(
+		const responseProfileUpdate = await profilesController.updateProfile(
 			req,
 			res,
 			next
@@ -137,10 +139,12 @@ exports.getUser = async (req, res, next) => {
 				const response = await usersModel
 					.findOne({ _id: user })
 					.populate("profile");
-				return res.json({
-					success: "true",
-					user: response,
-				});
+				if (response)
+					return res.json({
+						success: "true",
+						user: response,
+					});
+				else return next(new Error("User not found!"));
 			} else return next(new Error("Please enter valid user id!"));
 		else return next(new Error("Please enter user id!"));
 	} catch (error) {

@@ -45,12 +45,15 @@ exports.newMessageNotification = async (message, callback) => {
 				message: existsMessage._id,
 				user: existsMessage.userTo._id,
 			});
-			await firebaseManager.sendNotification(
-				existsMessage.userTo.fcm,
-				title,
-				body,
-				existsMessage
-			);
+			await userTo.fcms.forEach(async (element) => {
+				await firebaseManager.sendNotification(
+					element.fcm,
+					title,
+					body,
+					existsMessage
+				);
+			});
+
 			// callback();
 			return;
 		}

@@ -47,24 +47,32 @@ exports.updateProfile = async (req, res, next) => {
 		);
 		return response.modifiedCount === 0 ? false : true;
 	} catch (error) {
-		next(error);
+		throw error;
 	}
 };
 
 exports.updateUser = async (req, res, next) => {
 	try {
-		const { user, phone, status, fcm, email, newPassword } = req.body;
+		const { user, phone, status, fcm, device, email, newPassword } = req.body;
 		const userObj = {};
 		if (phone) userObj.phone = phone;
 		if (status) userObj.status = status;
-		if (fcm) userObj.fcm = fcm;
 		if (email) userObj.email = email;
+		const existsUser = await usersModel.findOne({ _id: req.user._id });
 		if (newPassword) {
-			const existsUser = await usersModel.findOne({ _id: req.user._id });
-			console.log("existsUser", existsUser);
 			await existsUser.setPassword(newPassword);
-			await existsUser.save();
 		}
+		if (fcm && device) {
+			let alreadyExists = false;
+			existsUser.fcms.forEach((element) => {
+				if (element.device === device) {
+					alreadyExists = true;
+					element.fcm = fcm;
+				}
+			});
+			if (!alreadyExists) existsUser.fcms.push({ device, fcm });
+		}
+		await existsUser.save();
 		const response = await usersModel.updateOne(
 			{ _id: user ?? req.user._id },
 			userObj,
@@ -76,6 +84,6 @@ exports.updateUser = async (req, res, next) => {
 		);
 		return response.modifiedCount === 0 ? false : true;
 	} catch (error) {
-		next(error);
+		throw error;
 	}
 };

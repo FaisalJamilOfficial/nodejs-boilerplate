@@ -3,6 +3,11 @@ const Schema = mongoose.Schema;
 
 const passportLocalMongoose = require("passport-local-mongoose");
 
+const fcm = {
+	device: { type: String, required: true },
+	fcm: { type: String, required: true },
+};
+
 const users = new Schema(
 	{
 		email: {
@@ -23,10 +28,7 @@ const users = new Schema(
 			trim: true,
 			index: true,
 		},
-		fcm: {
-			type: String,
-			default: "",
-		},
+		fcms: [fcm],
 		type: {
 			type: String,
 			enum: ["user", "admin"],

@@ -13,36 +13,20 @@ exports.signup = async (req, res, next) => {
 		if (email) userObj.email = email;
 		if (type) userObj.type = type;
 		if (phone) userObj.phone = phone;
-		usersModel.register(
-			new usersModel(userObj),
-			password,
-			async (error, user) => {
-				if (error) {
-					return next(error);
-				} else if (user) {
-					const profileObj = {};
-					profileObj.user = user._id;
-					profilesModel.create(profileObj, async (err, profile) => {
-						if (err) {
-							await user.remove();
-							return next(err);
-						} else if (profile) {
-							user.profile = profile._id;
-							await user.save();
-						}
-						var token = getToken({ _id: user._id });
-						return res.json({
-							success: true,
-							user: await usersModel
-								.findOne({ _id: user._id })
-								.populate("profile"),
-							token,
-						});
-					});
-				}
-			}
-		);
+		var user = await usersModel.register(new usersModel(userObj), password);
+		const profileObj = {};
+		profileObj.user = user._id;
+		const profile = await profilesModel.create(profileObj);
+		user.profile = profile._id;
+		await user.save();
+		const token = getToken({ _id: user._id });
+		return res.json({
+			success: true,
+			user: await usersModel.findOne({ _id: user._id }).populate("profile"),
+			token,
+		});
 	} catch (error) {
+		if (user) await user.remove();
 		next(error);
 	}
 };
@@ -152,7 +136,7 @@ exports.getUser = async (req, res, next) => {
 	}
 };
 
-exports.getAllUsers = (req, res, next) => {
+exports.getAllUsers = async (req, res, next) => {
 	let { q, page, limit, type, status } = req.query;
 	const { _id } = req.user;
 	const query = {};
@@ -170,18 +154,14 @@ exports.getAllUsers = (req, res, next) => {
 	if (!limit) limit = 10;
 	if (!page) page = 1;
 	try {
-		Promise.all([
-			usersModel.find({ ...query }).count(),
-			usersModel
-				.find({ ...query })
-				.skip((page - 1) * limit)
-				.limit(limit),
-		]).then(([total, users]) => {
-			const totalPages = Math.ceil(total / limit);
-			return res
-				.status(400)
-				.json({ success: true, users, currentPage: page, totalPages });
-		});
+		const total = await usersModel.find({ ...query }).count();
+		const users = await usersModel
+			.find({ ...query })
+			.skip((page - 1) * limit)
+			.limit(limit);
+		return res
+			.status(400)
+			.json({ success: true, totalPages: Math.ceil(total / limit), users });
 	} catch (error) {
 		next(error);
 	}

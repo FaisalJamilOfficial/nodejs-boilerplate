@@ -34,18 +34,30 @@ exports.newMessageNotification = async (message, callback) => {
 	try {
 		const existsMessage = await messagesModel
 			.findOne({ _id: message })
-			.populate("userFrom userTo");
+			.populate([
+				{
+					path: "userTo",
+					populate: { path: "profile", model: "profiles" },
+				},
+				{
+					path: "userFrom",
+					populate: { path: "profile", model: "profiles" },
+				},
+				// {
+				// 	path: "conversation",
+				// },
+			]);
 		if (existsMessage) {
 			const title = "New Message";
-			const body = `New message from ${existsMessage.userFrom._id}!`;
-
+			let body = `New message from {"user":"${existsMessage.userFrom._id}"} !`;
 			await notificationsModel.create({
 				type: "new-message",
 				text: body,
 				message: existsMessage._id,
-				user: existsMessage.userTo._id,
+				user: existsMessage.userTo,
 			});
-			await userTo.fcms.forEach(async (element) => {
+			body = `New message from ${existsMessage.userFrom.profile.firstname}!`;
+			await existsMessage.userTo.fcms.forEach(async (element) => {
 				await firebaseManager.sendNotification(
 					element.fcm,
 					title,
@@ -53,11 +65,25 @@ exports.newMessageNotification = async (message, callback) => {
 					existsMessage
 				);
 			});
-
 			// callback();
 			return;
-		}
+			console.log(searchObjectsInArray(body, ["user"]));
+		} else throw new Error("Message not found!");
 	} catch (error) {
-		return error;
+		throw error;
 	}
 };
+
+function searchObjectsInArray(string, keysArray) {
+	const strArray = string.split(" ");
+	let object = {};
+	keysArray.forEach((element) => {
+		const obj = JSON.parse(
+			strArray.find(function (str) {
+				return str.includes(element);
+			})
+		);
+		object = { ...object, ...obj };
+	});
+	return object;
+}

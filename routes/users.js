@@ -17,6 +17,7 @@ const { resizeProfilePicture } = require("../middlewares/private/imageResizer");
 
 router
 	.route("/")
+	.post(usersController.signup)
 	.put(
 		verifyToken,
 		verifyUser,
@@ -35,7 +36,6 @@ router
 		usersController.checkUserPhoneExists,
 		usersController.login
 	);
-router.post("/signup", usersController.signup);
 router.put(
 	"/phone",
 	verifyToken,

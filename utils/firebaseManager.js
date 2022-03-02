@@ -7,17 +7,21 @@ const connection = admin.initializeApp({
 });
 
 exports.sendNotification = async (fcm, title, body, data) => {
-	const payload = {
-		notification: {
-			title,
-			body,
-			sound: "default",
-		},
-		data,
-	};
-	connection
-		.messaging()
-		.sendToDevice([fcm], payload)
-		.then((res) => console.log(res))
-		.catch((error) => console.log(error));
+	try {
+		const payload = {
+			notification: {
+				title,
+				body,
+				sound: "default",
+			},
+			data,
+		};
+		connection
+			.messaging()
+			.sendToDevice([fcm], payload)
+			.then((res) => console.log(res))
+			.catch((error) => console.log(error));
+	} catch (error) {
+		console.error(error);
+	}
 };

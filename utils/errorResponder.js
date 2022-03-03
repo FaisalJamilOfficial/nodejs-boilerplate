@@ -4,4 +4,9 @@ class ErrorResponder extends Error {
 		this.statusCode = statusCode;
 	}
 }
-module.exports = ErrorResponder;
+
+const throwError = (message) => {
+	throw new Error(message);
+};
+
+module.exports = { ErrorResponder, throwError };

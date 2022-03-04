@@ -9,6 +9,6 @@ exports.deleteFiles = (files) => {
 			}
 		}
 	} catch (error) {
-		return error;
+		throw error;
 	}
 };

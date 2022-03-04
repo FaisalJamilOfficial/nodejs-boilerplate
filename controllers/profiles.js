@@ -1,5 +1,4 @@
-const moment = require("moment");
-const { isValidObjectId } = require("mongoose");
+const dayjs = require("dayjs");
 
 const { usersModel, profilesModel } = require("../models");
 const { deleteProfilePicture } = require("../middlewares/private/deleter");
@@ -10,6 +9,7 @@ exports.updateProfile = async (req, res, next) => {
 			user,
 			firstname,
 			lastname,
+			birthdate,
 			longitude,
 			latitude,
 			address,
@@ -21,6 +21,8 @@ exports.updateProfile = async (req, res, next) => {
 
 		if (firstname) profileObj.firstname = firstname;
 		if (lastname) profileObj.lastname = lastname;
+		if (birthdate && dayjs().isValid(birthdate))
+			profileObj.birthdate = birthdate;
 		if (address) profileObj.address = address;
 		if (Number(longitude) && Number(latitude))
 			profileObj.location = {

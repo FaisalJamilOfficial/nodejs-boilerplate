@@ -1,4 +1,3 @@
-const moment = require("moment");
 const { isValidObjectId } = require("mongoose");
 
 const { getToken } = require("../middlewares/public/authenticator");
@@ -117,7 +116,9 @@ exports.checkUserPhoneExists = async (req, res, next) => {
 
 exports.getUser = async (req, res, next) => {
 	try {
-		const { user } = req.params;
+		let { user } = req.params;
+		const { isMe } = req.query;
+		if (isMe) if (req?.user?._id) user = req.user._id;
 		if (user)
 			if (isValidObjectId(user)) {
 				const response = await usersModel

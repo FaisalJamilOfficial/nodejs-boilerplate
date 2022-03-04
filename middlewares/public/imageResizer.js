@@ -34,7 +34,7 @@ exports.resizeImages = async (imagesData) => {
 									: 65,
 							background: "white",
 						})
-						.toFile(PATH + id, (err, info) => {});
+						.toFile(PATH + id);
 					array.push({
 						...images[i],
 						path: id,
@@ -66,7 +66,7 @@ exports.resizeImagesWithThumbnails = async (imagesData) => {
 							background: "white",
 						})
 						.jpeg({ mozjpeg: true })
-						.toFile(PATH + "thumbnails/" + id, (err, info) => {});
+						.toFile(PATH + "thumbnails/" + id);
 					sharp(buffer)
 						.jpeg({
 							mozjpeg: true,
@@ -80,7 +80,7 @@ exports.resizeImagesWithThumbnails = async (imagesData) => {
 									: 65,
 							background: "white",
 						})
-						.toFile(PATH + id, (err, info) => {});
+						.toFile(PATH + id);
 					array.push({
 						...images[i],
 						path: id,

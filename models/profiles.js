@@ -13,6 +13,9 @@ const profiles = new Schema(
 			trim: true,
 			index: true,
 		},
+		birthdate: {
+			type: Date,
+		},
 		location: {
 			type: {
 				type: String,

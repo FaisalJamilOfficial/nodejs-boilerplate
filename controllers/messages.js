@@ -23,9 +23,9 @@ exports.send = async (req, res, next) => {
 			if (isValidObjectId(userTo)) {
 				const existsUserTo = await usersModel.exists({ _id: userTo });
 				if (existsUserTo) messageObj.userTo = userTo;
-				else throw new Error("userTo not found!");
-			} else throw new Error("Please enter valid userTo id!");
-		} else throw new Error("Please enter userTo id!");
+				else return next(new Error("userTo not found!"));
+			} else return next(new Error("Please enter valid userTo id!"));
+		} else return next(new Error("Please enter userTo id!"));
 
 		const existsConversation = await conversationsModel.findOne(query);
 		if (existsConversation) {
@@ -105,8 +105,8 @@ exports.updateMessage = async (req, res, next) => {
 		const messageObj = {};
 		if (message) {
 			if (isValidObjectId(message)) messageObj._id = message;
-			else throw new Error("Please enter valid message id!");
-		} else throw new Error("Please enter message id!");
+			else return next(new Error("Please enter valid message id!"));
+		} else return new Error("Please enter message id!");
 		if (text) {
 			messageObj.text = text;
 		}

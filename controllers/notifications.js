@@ -15,7 +15,7 @@ exports.getAllNotifications = (req, res, next) => {
 			notificationsModel.find(query).count(),
 			notificationsModel
 				.find(query)
-				.populate("user message conversation")
+				.populate("")
 				.sort("-createdAt")
 				.skip((page - 1) * limit)
 				.limit(limit),
@@ -41,9 +41,6 @@ exports.newMessageNotification = async (message, callback) => {
 					path: "userFrom",
 					populate: { path: "profile", model: "profiles" },
 				},
-				// {
-				// 	path: "conversation",
-				// },
 			]);
 		if (existsMessage) {
 			const title = "New Message";
@@ -52,6 +49,7 @@ exports.newMessageNotification = async (message, callback) => {
 				type: "new-message",
 				text: body,
 				message: existsMessage._id,
+				messenger: existsMessage.userFrom,
 				user: existsMessage.userTo,
 			});
 			body = `New message from ${existsMessage.userFrom.profile.firstname}!`;

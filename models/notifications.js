@@ -19,9 +19,9 @@ const notifications = new Schema(
 			ref: "messages",
 			index: true,
 		},
-		conversation: {
+		messenger: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "conversations",
+			ref: "users",
 			index: true,
 		},
 		user: {

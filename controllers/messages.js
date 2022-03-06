@@ -21,20 +21,20 @@ exports.send = async (req, res, next) => {
 
 		if (userTo) {
 			if (isValidObjectId(userTo)) {
-				const existsUserTo = await usersModel.exists({ _id: userTo });
-				if (existsUserTo) messageObj.userTo = userTo;
+				const userToExists = await usersModel.exists({ _id: userTo });
+				if (userToExists) messageObj.userTo = userTo;
 				else return next(new Error("userTo not found!"));
 			} else return next(new Error("Please enter valid userTo id!"));
 		} else return next(new Error("Please enter userTo id!"));
 
-		const existsConversation = await conversationsModel.findOne(query);
-		if (existsConversation) {
-			messageObj.conversation = existsConversation._id;
-			if (existsConversation.status === "pending") {
-				if (req.user._id.equals(existsConversation.userTo)) {
-					existsConversation.status = "accepted";
-					await existsConversation.save();
-				} else if (existsConversation.status === "rejected") {
+		const conversationExists = await conversationsModel.findOne(query);
+		if (conversationExists) {
+			messageObj.conversation = conversationExists._id;
+			if (conversationExists.status === "pending") {
+				if (req.user._id.equals(conversationExists.userTo)) {
+					conversationExists.status = "accepted";
+					await conversationExists.save();
+				} else if (conversationExists.status === "rejected") {
 					return next(new Error("Conversation request rejected!"));
 				}
 			}

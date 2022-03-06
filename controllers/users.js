@@ -105,8 +105,8 @@ exports.setState = async (user, state) => {
 
 exports.checkUserPhoneExists = async (req, res, next) => {
 	try {
-		const exists = await usersModel.exists({ phone: req.body.phone });
-		if (exists) {
+		const userExists = await usersModel.exists({ phone: req.body.phone });
+		if (userExists) {
 			next();
 		} else next(new Error("User does not exist!"));
 	} catch (error) {

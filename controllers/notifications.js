@@ -30,7 +30,7 @@ exports.getAllNotifications = (req, res, next) => {
 
 exports.newMessageNotification = async (message, callback) => {
 	try {
-		const existsMessage = await messagesModel
+		const messageExists = await messagesModel
 			.findOne({ _id: message })
 			.populate([
 				{
@@ -42,23 +42,23 @@ exports.newMessageNotification = async (message, callback) => {
 					populate: { path: "profile", model: "profiles" },
 				},
 			]);
-		if (existsMessage) {
+		if (messageExists) {
 			const title = "New Message";
-			let body = `New message from {"user":"${existsMessage.userFrom._id}"} !`;
+			let body = `New message from {"user":"${messageExists.userFrom._id}"} !`;
 			await notificationsModel.create({
 				type: "new-message",
 				text: body,
-				message: existsMessage._id,
-				messenger: existsMessage.userFrom,
-				user: existsMessage.userTo,
+				message: messageExists._id,
+				messenger: messageExists.userFrom,
+				user: messageExists.userTo,
 			});
-			body = `New message from ${existsMessage.userFrom.profile.firstname}!`;
-			await existsMessage.userTo.fcms.forEach(async (element) => {
+			body = `New message from ${messageExists.userFrom.profile.firstname}!`;
+			await messageExists.userTo.fcms.forEach(async (element) => {
 				await firebaseManager.sendNotification(
 					element.fcm,
 					title,
 					body,
-					existsMessage
+					messageExists
 				);
 			});
 			// callback();

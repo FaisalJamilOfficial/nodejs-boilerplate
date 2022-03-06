@@ -60,21 +60,24 @@ exports.updateUser = async (req, res, next) => {
 		if (phone) userObj.phone = phone;
 		if (status) userObj.status = status;
 		if (email) userObj.email = email;
-		const existsUser = await usersModel.findOne({ _id: req.user._id });
+		const userExists = await usersModel.findOne({ _id: req.user._id });
 		if (newPassword) {
-			await existsUser.setPassword(newPassword);
+			await userExists.setPassword(newPassword);
+			if (userExists.isPasswordSet) {
+			} else userExists.isPasswordSet = true;
 		}
 		if (fcm && device) {
 			let alreadyExists = false;
-			existsUser.fcms.forEach((element) => {
+			userExists.fcms.forEach((element) => {
 				if (element.device === device) {
 					alreadyExists = true;
 					element.fcm = fcm;
 				}
 			});
-			if (!alreadyExists) existsUser.fcms.push({ device, fcm });
+			if (alreadyExists) {
+			} else userExists.fcms.push({ device, fcm });
 		}
-		await existsUser.save();
+		await userExists.save();
 		const response = await usersModel.updateOne(
 			{ _id: user ?? req.user._id },
 			userObj,

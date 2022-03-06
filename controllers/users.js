@@ -138,31 +138,84 @@ exports.getUser = async (req, res, next) => {
 };
 
 exports.getAllUsers = async (req, res, next) => {
-	let { q, page, limit, type, status } = req.query;
-	const { _id } = req.user;
-	const query = {};
-	if (type) query.type = type;
-	if (status) query.status = status;
-	if (q) {
-		query.$or = [
-			{ username: { $regex: q, $options: "i" } },
-			{ phone: { $regex: q, $options: "i" } },
-		];
-	}
-	query._id = { $ne: _id };
-	page = Number(page);
-	limit = Number(limit);
-	if (!limit) limit = 10;
-	if (!page) page = 1;
 	try {
-		const total = await usersModel.find({ ...query }).count();
+		let { q, page, limit, status, type } = req.query;
+		const { _id } = req.user;
+		const query = {};
+		page = Number(page);
+		limit = Number(limit);
+		if (!limit) limit = 10;
+		if (!page) page = 1;
+		query._id = { $ne: _id };
+		if (type) query.type = type;
+		if (status) query.status = status;
+		if (q && q.trim() !== "") {
+			var wildcard = [
+				{
+					$regexMatch: {
+						input: "$firstname",
+						regex: q,
+						options: "i",
+					},
+				},
+				{
+					$regexMatch: {
+						input: "$lastname",
+						regex: q,
+						options: "i",
+					},
+				},
+			];
+		}
+		const aggregation = [
+			{ $match: query },
+			{ $project: { profile: 1 } },
+			{
+				$lookup: {
+					from: "profiles",
+					let: { profile: "$profile" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$and: [{ $eq: ["$$profile", "$_id"] }],
+										},
+										{
+											$or: wildcard ?? {},
+										},
+									],
+								},
+							},
+						},
+					],
+					as: "profile",
+				},
+			},
+			{ $unwind: { path: "$profile" } },
+		];
+
 		const users = await usersModel
-			.find({ ...query })
+			.aggregate(aggregation)
 			.skip((page - 1) * limit)
-			.limit(limit);
-		return res
-			.status(400)
-			.json({ success: true, totalPages: Math.ceil(total / limit), users });
+			.limit(limit)
+			.sort({ createdAt: -1 });
+
+		aggregation.push(
+			...[
+				{ $group: { _id: null, count: { $sum: 1 } } },
+				{ $project: { _id: 0 } },
+			]
+		);
+
+		const totalCount = await usersModel.aggregate(aggregation);
+
+		return res.status(200).json({
+			success: true,
+			totalPages: Math.ceil((totalCount[0]?.count ?? 0) / limit),
+			users,
+		});
 	} catch (error) {
 		next(error);
 	}

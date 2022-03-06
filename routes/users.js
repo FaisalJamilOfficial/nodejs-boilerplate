@@ -52,6 +52,11 @@ router.put(
 
 router.route("/otp").post(verifyToken, verifyUser, sendOtp).put(sendOtp);
 
+router
+	.route("/password/email")
+	.post(usersController.emailResetPassword)
+	.put(usersController.resetPassword);
+
 router.get(
 	"/notifications",
 	verifyToken,

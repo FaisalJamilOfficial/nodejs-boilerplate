@@ -137,6 +137,63 @@ exports.getUser = async (req, res, next) => {
 	}
 };
 
+exports.emailResetPassword = async (req, res, next) => {
+	try {
+		const { email } = req.body;
+		const userExists = await usersModel.findOne({ email });
+		if (userExists) {
+		} else return next(new Error("User with given email doesn't exist!"));
+
+		let passwordTokenExists = await passwordTokensModel.findOne({
+			user: userExists._id,
+		});
+		if (passwordTokenExists) {
+		} else {
+			const passwordTokenObj = {};
+			passwordTokenObj.user = userExists._id;
+			passwordTokenObj.token = getToken({ _id: userExists._id });
+			passwordTokenExists = await new passwordTokensModel(
+				passwordTokenObj
+			).save();
+		}
+
+		const link = `${process.env.BASE_URL}password/email?user=${userExists._id}&token=${passwordTokenExists.token}`;
+		await sendEmail(userExists.email, "Password reset", link);
+
+		res.json({
+			success: true,
+			message: "Password reset link sent to your email address!",
+		});
+	} catch (error) {
+		return next(error);
+	}
+};
+
+exports.resetPassword = async (req, res, next) => {
+	try {
+		const { password, user, token } = req.body;
+
+		const userExists = await usersModel.findById(user);
+		if (userExists) {
+		} else return next(new Error("Invalid link!"));
+
+		const passwordTokenExists = await passwordTokensModel.findOne({
+			user,
+			token,
+		});
+		if (passwordTokenExists) {
+		} else return next(new Error("Invalid or expired link !"));
+
+		await userExists.setPassword(password);
+		await userExists.save();
+		await passwordTokenExists.delete();
+
+		res.json({ success: true, message: "Password reset sucessfully." });
+	} catch (error) {
+		return next(error);
+	}
+};
+
 exports.getAllUsers = async (req, res, next) => {
 	try {
 		let { q, page, limit, status, type } = req.query;

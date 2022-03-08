@@ -1,7 +1,7 @@
 const { messagesModel, notificationsModel } = require("../models");
 const firebaseManager = require("../utils/firebaseManager");
 
-exports.getAllNotifications = (req, res, next) => {
+exports.getAllNotifications = async (req, res, next) => {
 	try {
 		const { user, type } = req.user;
 		let { q, page, limit } = req.query;
@@ -11,18 +11,15 @@ exports.getAllNotifications = (req, res, next) => {
 		limit = Number(limit);
 		if (!limit) limit = 10;
 		if (!page) page = 1;
-		Promise.all([
-			notificationsModel.find(query).count(),
-			notificationsModel
-				.find(query)
-				.populate("")
-				.sort("-createdAt")
-				.skip((page - 1) * limit)
-				.limit(limit),
-		]).then(([total, notifications]) => {
-			const totalPages = Math.ceil(total / limit);
-			res.json({ success: true, currentPage: page, totalPages, notifications });
-		});
+		const totalCount = await notificationsModel.find(query).count();
+		const notifications = await notificationsModel
+			.find(query)
+			.populate("")
+			.sort("-createdAt")
+			.skip((page - 1) * limit)
+			.limit(limit);
+		const totalPages = Math.ceil(totalCount / limit);
+		res.json({ success: true, currentPage: page, totalPages, notifications });
 	} catch (error) {
 		next(error);
 	}

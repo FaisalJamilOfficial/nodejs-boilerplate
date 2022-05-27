@@ -7,6 +7,7 @@ const connection = admin.initializeApp({
 });
 
 exports.sendNotification = async (fcm, title, body, data) => {
+	data = data ?? {};
 	const payload = {
 		notification: {
 			title,

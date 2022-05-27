@@ -1,8 +1,9 @@
 const { isValidObjectId } = require("mongoose");
 
 const { getToken } = require("../middlewares/public/authenticator");
-const { usersModel, profilesModel } = require("../models");
+const { usersModel, profilesModel, passwordTokensModel } = require("../models");
 const profilesController = require("./profiles");
+const sendEmail = require("../utils/nodeMailer");
 
 exports.signup = async (req, res, next) => {
 	try {

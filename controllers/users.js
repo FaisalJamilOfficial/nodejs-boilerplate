@@ -158,8 +158,12 @@ exports.emailResetPassword = async (req, res, next) => {
 			).save();
 		}
 
-		const link = `${process.env.BASE_URL}password/email?user=${userExists._id}&token=${passwordTokenExists.token}`;
-		await sendEmail(userExists.email, "Password reset", link);
+		const link = `${process.env.BASE_URL}forgot-password?user=${userExists._id}&token=${passwordTokenExists.token}`;
+		const body = `
+To reset your password, click on this link 
+${link}
+Link will expire in 10 minutes.`;
+		await sendEmail(userExists.email, "Password reset", body);
 
 		res.json({
 			success: true,

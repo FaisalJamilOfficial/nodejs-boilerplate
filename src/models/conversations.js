@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const { CONVERSATION_STATUSES } = require("../configs/enums");
+const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;
+
 const conversations = new Schema(
 	{
 		userTo: {
@@ -16,9 +19,9 @@ const conversations = new Schema(
 			index: true,
 		},
 		status: {
-			type: String,
-			enum: ["pending", "accepted", "rejected"],
-			default: "pending",
+			type: Number,
+			enum: [PENDING, ACCEPTED, REJECTED],
+			default: PENDING,
 			required: true,
 			index: true,
 		},

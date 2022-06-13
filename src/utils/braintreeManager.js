@@ -1,8 +1,11 @@
 const braintree = require("braintree");
 
-const paymentOptionsModel = require("../models/paymentAccounts");
+const { paymentAccountsModel } = require("../models");
 const { BRAINTREE_MERCHANT_ID, BRAINTREE_PUBLIC_KEY, BRAINTREE_PRIVATE_KEY } =
 	process.env;
+
+const { PAYMENT_ACCOUNT_TYPES } = require("../configs/enums");
+const { BRAINTREE } = PAYMENT_ACCOUNT_TYPES;
 
 const gateway = new braintree.BraintreeGateway({
 	environment: braintree.Environment.Sandbox,
@@ -39,20 +42,18 @@ exports.setNonce = async (req, res, next) => {
 		});
 		if (result) {
 			if (result.customer) {
-				const paymentOption = {
+				const paymentAccountObj = {
 					user: req.user._id,
-					customerId: result.customer.id,
-					cardType: result.customer.paymentMethods[0].cardType,
-					cardHolderName: result.customer.paymentMethods[0].cardHolderName,
-					imageUrl: result.customer.paymentMethods[0].imageUrl,
-					last4: result.customer.paymentMethods[0].last4,
-					token: result.customer.paymentMethods[0].token,
+					type: BRAINTREE,
+					account: result.customer,
 				};
-				var customer = await paymentOptionsModel.create(paymentOption);
+				const paymentAccount = await paymentAccountsModel.create(
+					paymentAccountObj
+				);
 			}
 			return res.status(200).json({
-				success: result.success,
-				result: result.success ? customer : result.message,
+				success: true,
+				paymentAccount,
 			});
 		} else return next(new Error("Please enter valid payment method nonce"));
 	} catch (error) {
@@ -81,8 +82,8 @@ exports.checkout = (req, res, next) => {
 			(err, result) => {
 				if (err) return next(err);
 				return res.status(200).json({
-					success: result.success,
-					result: result.success ? result : result.message,
+					success: true,
+					transaction: result,
 				});
 			}
 		);
@@ -90,12 +91,12 @@ exports.checkout = (req, res, next) => {
 		next(error);
 	}
 };
-exports.getAllCards = async (req, res, next) => {
+exports.getAllAccounts = async (req, res, next) => {
 	try {
-		const cards = await paymentOptionsModel.find({ user: req.user._id });
+		const accounts = await paymentAccountsModel.find({ user: req.use._id });
 		return res.status(200).json({
 			success: true,
-			cards,
+			accounts,
 		});
 	} catch (error) {
 		next(error);

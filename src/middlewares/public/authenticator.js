@@ -7,6 +7,10 @@ const { SECRET_KEY } = process.env;
 
 const { usersModel } = require("../../models");
 
+const { USER_STATUSES, USER_TYPES } = require("../../configs/enums");
+const { ACTIVE, DELETED } = USER_STATUSES;
+const { USER, ADMIN } = USER_STATUSES;
+
 exports.local = passport.use(new localstrategy(usersModel.authenticate()));
 passport.serializeUser(usersModel.serializeUser());
 passport.deserializeUser(usersModel.deserializeUser());
@@ -27,7 +31,7 @@ exports.jwtpassport = passport.use(
 			usersModel.findOne({ _id: jwt_payload._id }, (err, user) => {
 				if (err) {
 					return done(err, false);
-				} else if (user?.status === "deleted") {
+				} else if (user?.status === DELETED) {
 					err = new Error("Account deleted!");
 					return done(err, false);
 				} else if (user) {
@@ -42,7 +46,7 @@ exports.jwtpassport = passport.use(
 exports.verifyToken = passport.authenticate("jwt", { session: false });
 
 exports.verifyAdmin = (req, res, next) => {
-	if (req.user.type === "admin" && req.user.status === "active") {
+	if (req.user.type === ADMIN && req.user.status === ACTIVE) {
 		next();
 	} else {
 		const error = new Error("You are not authorized as admin!");
@@ -52,7 +56,7 @@ exports.verifyAdmin = (req, res, next) => {
 };
 
 exports.verifyUser = (req, res, next) => {
-	if (req.user && req.user.status === "active") {
+	if (req.user && req.user.status === ACTIVE) {
 		next();
 	} else {
 		const error = new Error("You are not authorized as user!");

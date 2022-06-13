@@ -3,6 +3,11 @@ const Schema = mongoose.Schema;
 
 const passportLocalMongoose = require("passport-local-mongoose");
 
+const { USER_STATES, USER_STATUSES, USER_TYPES } = require("../configs/enums");
+const { ONLINE, OFFLINE } = USER_STATES;
+const { ACTIVE, DELETED } = USER_STATUSES;
+const { USER, ADMIN } = USER_TYPES;
+
 const fcm = {
 	device: { type: String, required: true },
 	fcm: { type: String, required: true },
@@ -31,21 +36,21 @@ const users = new Schema(
 		fcms: [fcm],
 		type: {
 			type: String,
-			enum: ["user", "admin"],
+			enum: [USER, ADMIN],
 			required: true,
 			index: true,
 		},
 		status: {
 			type: String,
-			enum: ["active", "deleted"],
+			enum: [ACTIVE, DELETED],
 			default: "active",
 			required: true,
 			index: true,
 		},
 		state: {
 			type: String,
-			enum: ["online", "offline"],
-			default: "online",
+			enum: [ONLINE, OFFLINE],
+			default: ONLINE,
 			required: true,
 			index: true,
 		},

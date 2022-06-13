@@ -1,0 +1,37 @@
+exports.CONVERSATION_STATUSES = {
+	PENDING: 0,
+	ACCEPTED: 1,
+	REJECTED: 2,
+};
+
+exports.MESSAGE_STATUSES = {
+	UNREAD: 0,
+	READ: 1,
+	DELETED: 2,
+};
+
+exports.NOTIFICATION_TYPES = {
+	NEW_MESSAGE: 0,
+	NEW_CONVERSATION: 1,
+};
+
+exports.PAYMENT_ACCOUNT_TYPES = {
+	BRAINTREE: 0,
+	STRIPE_CUSTOMER: 1,
+	STRIPE_ACCOUNT: 2,
+};
+
+exports.USER_STATES = {
+	ONLINE: 0,
+	OFFLINE: 1,
+};
+
+exports.USER_STATUSES = {
+	ACTIVE: 0,
+	DELETED: 1,
+};
+
+exports.USER_TYPES = {
+	USER: 0,
+	ADMIN: 1,
+};

@@ -3,6 +3,9 @@ const { isValidObjectId } = require("mongoose");
 const { usersModel, messagesModel, conversationsModel } = require("../models");
 const notificationsController = require("../controllers/notifications");
 
+const { CONVERSATION_STATUSES } = require("../configs/enums");
+const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;
+
 exports.send = async (req, res, next) => {
 	try {
 		const { userTo, text } = req.body;
@@ -30,11 +33,11 @@ exports.send = async (req, res, next) => {
 		const conversationExists = await conversationsModel.findOne(query);
 		if (conversationExists) {
 			messageObj.conversation = conversationExists._id;
-			if (conversationExists.status === "pending") {
+			if (conversationExists.status === PENDING) {
 				if (req.user._id.equals(conversationExists.userTo)) {
-					conversationExists.status = "accepted";
+					conversationExists.status = ACCEPTED;
 					await conversationExists.save();
-				} else if (conversationExists.status === "rejected") {
+				} else if (conversationExists.status === REJECTED) {
 					return next(new Error("Conversation request rejected!"));
 				}
 			}

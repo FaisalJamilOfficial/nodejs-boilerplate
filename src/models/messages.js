@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const { MESSAGE_STATUSES } = require("../configs/enums");
+const { UNREAD, READ, DELETED } = MESSAGE_STATUSES;
+
 const attachment = new Schema(
 	{
 		path: {
@@ -41,9 +44,9 @@ const messages = new Schema(
 		},
 		attachments: [attachment],
 		status: {
-			type: String,
-			enum: ["unread", "read", "deleted"],
-			default: "unread",
+			type: Number,
+			enum: [UNREAD, READ, DELETED],
+			default: UNREAD,
 			required: true,
 			index: true,
 		},

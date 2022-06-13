@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const { NOTIFICATION_TYPES } = require("../configs/enums");
+const { NEW_MESSAGE, NEW_CONVERSATION } = NOTIFICATION_TYPES;
+
 const notifications = new Schema(
 	{
 		type: {
 			type: String,
-			enum: ["new-message", "new-conversation"],
+			enum: [NEW_MESSAGE, NEW_CONVERSATION],
 			required: true,
 			index: true,
 		},

@@ -17,7 +17,6 @@ exports.updateProfile = async (req, res, next) => {
 		} = req.body;
 		const { picture } = req.files || {};
 		const profileObj = {};
-		console.log("req.files", req.files);
 
 		if (firstname) profileObj.firstname = firstname;
 		if (lastname) profileObj.lastname = lastname;

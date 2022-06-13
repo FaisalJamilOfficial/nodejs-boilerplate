@@ -1,6 +1,6 @@
-const { STRIPE_ID } = require("../services/config");
+const { STRIPE_SECRET_KEY } = process.env;
 
-const stripe = require("stripe")(STRIPE_ID);
+const stripe = require("stripe")(STRIPE_SECRET_KEY);
 const { paymentAccountsModel } = require("../models");
 
 const { PAYMENT_ACCOUNT_TYPES } = require("../configs/enums");

@@ -162,7 +162,9 @@ exports.emailResetPassword = async (req, res, next) => {
 		const body = `
 To reset your password, click on this link 
 ${link}
-Link will expire in 10 minutes.`;
+Link will expire in 10 minutes.
+
+If you didn't do this, click here backendboilerplate@gmail.com`;
 		await sendEmail(userExists.email, "Password reset", body);
 
 		res.json({

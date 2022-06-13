@@ -101,6 +101,11 @@ const serverFunction = async () => {
 
 		app.use("/api/v1", indexRouter);
 
+		app.use(express.static(path.join("client/build")));
+		app.get("/forgot-password", (req, res, next) => {
+			res.sendFile(path.resolve("client/build/index.html"));
+		});
+
 		app.get("/*", (req, res, next) => {
 			res.sendFile(path.join(__dirname, "/public/images/3909236.png"));
 		});

@@ -1,0 +1,28 @@
+// @import "../../theme/colorsConfig.scss";
+
+.authPage {
+  background: rgb(2,0,36);
+background: -moz-linear-gradient(150deg, rgba(2,0,36,1) 0%, rgba(66,101,7,1) 25%, rgba(9,121,103,1) 50%, rgba(7,150,45,1) 75%, rgba(255,255,255,1) 100%);
+background: -webkit-linear-gradient(150deg, rgba(2,0,36,1) 0%, rgba(66,101,7,1) 25%, rgba(9,121,103,1) 50%, rgba(7,150,45,1) 75%, rgba(255,255,255,1) 100%);
+background: linear-gradient(150deg, rgba(2,0,36,1) 0%, rgba(66,101,7,1) 25%, rgba(9,121,103,1) 50%, rgba(7,150,45,1) 75%, rgba(255,255,255,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#020024",endColorstr="#ffffff",GradientType=1);
+
+  .authHeading {
+    font-size: 40px;
+    font-weight: bold;
+    letter-spacing: 10px;
+    color: rgba(66,101,7,1);
+    font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+    text-shadow: 5px 5px 3px rgb(212, 212, 212);
+  }
+
+  .logoTitle:hover {
+    color: black;
+  }
+  .MuiButton-root {
+    background-color: rgba(66,101,7,1);
+  }
+  .MuiButton-root:hover {
+    background-color: rgba(7,150,45,1);
+  }
+}

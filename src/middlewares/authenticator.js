@@ -7,9 +7,9 @@ const { SECRET_KEY } = process.env;
 
 const { usersModel } = require("../models");
 
-const { USER_STATUSES, USER_TYPES } = require("../configs/enums");
+const { USER_STATUSES } = require("../configs/enums");
 const { ACTIVE, DELETED } = USER_STATUSES;
-const { USER, ADMIN } = USER_STATUSES;
+const { ADMIN } = USER_STATUSES;
 
 exports.local = passport.use(new localstrategy(usersModel.authenticate()));
 passport.serializeUser(usersModel.serializeUser());
@@ -44,6 +44,23 @@ exports.jwtpassport = passport.use(
 );
 
 exports.verifyToken = passport.authenticate("jwt", { session: false });
+
+exports.verifyOTP = async (req, res, next) => {
+	try {
+		const { otp, phone } = req.user;
+		const { code } = req.body;
+		if (Number(code) === Number(otp)) {
+			if (phone) req.body.phone = phone;
+			next();
+		} else {
+			err = new Error("Invalid Code!");
+			err.status = 400;
+			return next(err);
+		}
+	} catch (error) {
+		return next(error);
+	}
+};
 
 exports.verifyAdmin = (req, res, next) => {
 	if (req.user.type === ADMIN && req.user.status === ACTIVE) {
@@ -80,6 +97,17 @@ exports.verifyUserToken = async (req, res, next) => {
 			error.status = 403;
 			return next(error);
 		}
+	} catch (error) {
+		next(error);
+	}
+};
+
+exports.checkUserPhoneExists = async (req, res, next) => {
+	try {
+		const userExists = await usersModel.exists({ phone: req.body.phone });
+		if (userExists) {
+			next();
+		} else next(new Error("User does not exist!"));
 	} catch (error) {
 		next(error);
 	}

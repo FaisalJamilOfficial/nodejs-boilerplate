@@ -65,11 +65,24 @@ exports.login = async (parameters) => {
 };
 
 /**
- * Update use
+ * Update user
  * @param {string} user user id
- * @param {string} phone user phone number
- * @param {string} type user type
- * @returns {object} user data with token
+ * @param {string} phone OPTIONAL user phone number
+ * @param {string} status OPTIONAL user status
+ * @param {string} fcm OPTIONAL user firebase cloud messaging token
+ * @param {string} device OPTIONAL user device id
+ * @param {string} email OPTIONAL user email address
+ * @param {string} newPassword OPTIONAL user new password
+ * @param {string} firstname OPTIONAL user first name
+ * @param {string} lastname OPTIONAL user last name
+ * @param {date} birthdate OPTIONAL user birthdate
+ * @param {number} longitude OPTIONAL user location longitude
+ * @param {number} latitude OPTIONAL user location latitude
+ * @param {string} address OPTIONAL user address
+ * @param {boolean} removePicture OPTIONAL user profile picture removal option
+ * @param {[object]} picture OPTIONAL user profile picture
+ * @param {boolean} isAdminAction OPTIONAL users profile updation option
+ * @returns {object} user data
  */
 exports.editUserProfile = async (parameters) => {
 	const {
@@ -129,6 +142,12 @@ exports.editUserProfile = async (parameters) => {
 	};
 };
 
+/**
+ * Update user state
+ * @param {string} user user id
+ * @param {string} state user state
+ * @returns {boolean} user state updation result
+ */
 exports.setState = async (parameters) => {
 	const { user, state } = parameters;
 	if (!user) throw new Error("Please enter user id!");
@@ -148,17 +167,11 @@ exports.setState = async (parameters) => {
 	throw new Error("Please enter user state!");
 };
 
-exports.checkUserPhoneExists = async (req, res, next) => {
-	try {
-		const userExists = await usersModel.exists({ phone: req.body.phone });
-		if (userExists) {
-			next();
-		} else next(new Error("User does not exist!"));
-	} catch (error) {
-		next(error);
-	}
-};
-
+/**
+ * Get user data
+ * @param {string} user user id
+ * @returns {object} user data
+ */
 exports.getUser = async (parameters) => {
 	const { user } = parameters;
 	if (user)
@@ -176,6 +189,11 @@ exports.getUser = async (parameters) => {
 	else throw new Error("Please enter user id!");
 };
 
+/**
+ * Send reset password email
+ * @param {string} email user email address
+ * @returns {object} user password reset result
+ */
 exports.emailResetPassword = async (parameters) => {
 	const { email } = parameters;
 	const userExists = await usersModel.findOne({ email });
@@ -210,6 +228,13 @@ If you didn't do this, click here backendboilerplate@gmail.com`;
 	};
 };
 
+/**
+ * Reset user password
+ * @param {string} user user id
+ * @param {string} password user password
+ * @param {string} token reset password token
+ * @returns {object} user password reset result
+ */
 exports.resetPassword = async (parameters) => {
 	const { password, user, token } = parameters;
 
@@ -231,6 +256,16 @@ exports.resetPassword = async (parameters) => {
 	return { success: true, message: "Password reset sucessfully!" };
 };
 
+/**
+ * Get users data
+ * @param {string} user user id
+ * @param {string} q search keyword
+ * @param {number} limit messages limit
+ * @param {number} page messages page number
+ * @param {string} status user status
+ * @param {string} type user type
+ * @returns {[object]} array of users
+ */
 exports.getAllUsers = async (parameters) => {
 	const { user, q, page, limit, status, type } = parameters;
 	const query = {};

@@ -3,6 +3,19 @@ const dayjs = require("dayjs");
 const { usersModel, profilesModel } = require("../models");
 const { deleteProfilePicture } = require("../utils/FilesDeleter");
 
+/**
+ * Update user profile data
+ * @param {string} user user id
+ * @param {string} firstname OPTIONAL user first name
+ * @param {string} lastname OPTIONAL user last name
+ * @param {date} birthdate OPTIONAL user birthdate
+ * @param {number} longitude OPTIONAL user location longitude
+ * @param {number} latitude OPTIONAL user location latitude
+ * @param {string} address OPTIONAL user address
+ * @param {boolean} removePicture OPTIONAL user profile picture removal option
+ * @param {[object]} picture OPTIONAL user profile picture
+ * @returns {boolean} user profile updation result
+ */
 exports.updateProfile = async (parameters) => {
 	const {
 		user,
@@ -47,6 +60,17 @@ exports.updateProfile = async (parameters) => {
 	return response.modifiedCount === 0 ? false : true;
 };
 
+/**
+ * Update user data
+ * @param {string} user user id
+ * @param {string} phone OPTIONAL user phone number
+ * @param {string} status OPTIONAL user status
+ * @param {string} fcm OPTIONAL user firebase cloud messaging token
+ * @param {string} device OPTIONAL user device id
+ * @param {string} email OPTIONAL user email address
+ * @param {string} newPassword OPTIONAL user new password
+ * @returns {boolean} user data updation result
+ */
 exports.updateUser = async (parameters) => {
 	const { user, phone, status, fcm, device, email, newPassword } = parameters;
 	const userObj = {};

@@ -16,11 +16,3 @@ exports.upload = (directory) => {
 };
 
 exports.uploadTemporary = multer({ storage: multer.memoryStorage() });
-
-exports.uploadFiles = (file, directory) => {
-	const fileExtension = mime.extension(file.mimetype);
-	file.filename = uuid.v4() + "." + fileExtension;
-	file.path = directory + file.filename;
-	fs.createWriteStream(file.path).write(file.buffer);
-	return file;
-};

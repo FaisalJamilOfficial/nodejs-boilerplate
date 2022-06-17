@@ -6,6 +6,14 @@ const notificationsController = require("../controllers/notifications");
 const { CONVERSATION_STATUSES } = require("../configs/enums");
 const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;
 
+/**
+ * Send message
+ * @param {string} user user id
+ * @param {string} userTo receiver user id
+ * @param {string} text message text
+ * @param {[object]} attachments message attachments
+ * @returns {object} message data
+ */
 exports.send = async (parameters) => {
 	const { user, userTo, text, attachments } = parameters;
 	const messageObj = { userFrom: user };
@@ -64,15 +72,24 @@ exports.send = async (parameters) => {
 		message,
 	});
 
-	await notificationsController.newMessageNotification(message._id);
+	await notificationsController.newMessageNotification({
+		message: message._id,
+	});
 
 	return { success: true, message };
 };
 
+/**
+ * Get chat messages
+ * @param {string} conversation conversation id
+ * @param {number} limit messages limit
+ * @param {number} page messages page number
+ * @param {string} text message text
+ * @param {[object]} attachments OPTIONAL message attachments
+ * @returns {object} message data
+ */
 exports.chat = async (parameters) => {
 	const { conversation, limit, page } = parameters;
-	limit = Number(limit);
-	page = Number(page);
 	if (!limit) limit = 10;
 	if (!page) page = 0;
 	if (page) page = page - 1;
@@ -89,6 +106,13 @@ exports.chat = async (parameters) => {
 	} else throw new Error("Please enter conversation id!");
 };
 
+/**
+ * Update message data
+ * @param {string} message message id
+ * @param {string} text message text
+ * @param {string} status message status
+ * @returns {object} message data
+ */
 exports.updateMessage = async (parameters) => {
 	const { message, text, status } = parameters;
 	const messageObj = {};
@@ -112,10 +136,15 @@ exports.updateMessage = async (parameters) => {
 	};
 };
 
+/**
+ * Get user chatters
+ * @param {string} user user id
+ * @param {number} limit chatters limit
+ * @param {number} page chatters page number
+ * @returns {[object]} array of chatters
+ */
 exports.getChatters = async (parameters) => {
 	const { user, limit, page } = parameters;
-	limit = Number(limit);
-	page = Number(page);
 	if (!limit) limit = 10;
 	if (!page) page = 0;
 	if (page) page = page - 1;

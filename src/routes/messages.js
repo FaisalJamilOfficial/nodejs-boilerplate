@@ -31,7 +31,11 @@ router
 	.get(verifyToken, verifyUser, async (req, res, next) => {
 		try {
 			const { conversation, limit, page } = req.query;
-			const arguments = { conversation, limit, page };
+			const arguments = {
+				conversation,
+				limit: Number(limit),
+				page: Number(page),
+			};
 			const response = await messagesController.chat(arguments);
 			res.json(response);
 		} catch (error) {
@@ -52,7 +56,7 @@ router.get("/chatters", verifyToken, verifyUser, async (req, res, next) => {
 	try {
 		const { _id: user } = req.user;
 		const { limit, page } = req.query;
-		const arguments = { user, limit, page };
+		const arguments = { user, limit: Number(limit), page: Number(page) };
 		const response = await messagesController.getChatters(arguments);
 		res.json(response);
 	} catch (error) {

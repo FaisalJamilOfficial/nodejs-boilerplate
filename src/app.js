@@ -6,13 +6,14 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
+const logger = require("morgan");
 const cors = require("cors");
 const socketio = require("socket.io");
 const mongoose = require("mongoose");
 
 const indexRouter = require("./routes/index");
 const { setState } = require("./controllers/users");
-const errorHandler = require("./middlewares/errorHandler");
+const errorHandler = require("./utils/ErrorHandler");
 const { USER_STATES } = require("./configs/enums");
 const { OFFLINE, ONLINE } = USER_STATES;
 
@@ -71,6 +72,7 @@ const serverFunction = async () => {
 		);
 
 		app.use(passport.initialize());
+		app.use(logger("dev"));
 		app.use(express.json());
 		app.use(express.urlencoded({ extended: false }));
 		app.use(cookieParser());

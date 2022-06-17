@@ -5,13 +5,15 @@ const router = express.Router();
 const usersController = require("../controllers/users");
 const notificationsController = require("../controllers/notifications");
 const {
+	verifyOTP,
 	verifyToken,
 	verifyUser,
 	verifyAdmin,
 	alterLogin,
 	verifyUserToken,
+	checkUserPhoneExists,
 } = require("../middlewares/authenticator");
-const { sendOtp, verifyOtp } = require("../middlewares/otpManager");
+const TwilioManager = require("../utils/TwilioManager");
 const { uploadTemporary } = require("../middlewares/uploader");
 const { resizeProfilePicture } = require("../middlewares/imageResizer");
 
@@ -81,7 +83,14 @@ router
 		try {
 			const { _id: user } = req.user;
 			const { q, page, limit, status, type } = req.query;
-			const arguments = { user, q, page, limit, status, type };
+			const arguments = {
+				user,
+				q,
+				limit: Number(limit),
+				page: Number(page),
+				status,
+				type,
+			};
 			const response = await usersController.getAllUsers(arguments);
 			res.json(response);
 		} catch (error) {
@@ -101,25 +110,20 @@ router
 			next(error);
 		}
 	})
-	.put(
-		verifyToken,
-		verifyOtp,
-		usersController.checkUserPhoneExists,
-		async (req, res, next) => {
-			try {
-				const { _id: user, phone } = req.user;
-				const arguments = { user, phone };
-				const response = await usersController.login(arguments);
-				res.json(response);
-			} catch (error) {
-				next(error);
-			}
+	.put(verifyToken, verifyOTP, checkUserPhoneExists, async (req, res, next) => {
+		try {
+			const { _id: user, phone } = req.user;
+			const arguments = { user, phone };
+			const response = await usersController.login(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
 		}
-	);
+	});
 router.put(
 	"/phone",
 	verifyToken,
-	verifyOtp,
+	verifyOTP,
 	verifyUserToken,
 	async (req, res, next) => {
 		try {
@@ -157,7 +161,7 @@ router
 			const { _id: user } = req.user;
 			const { phone } = req.body;
 			const arguments = { phone, user };
-			const response = await sendOtp(arguments);
+			const response = await new TwilioManager().sendOTP(arguments);
 			res.json(response);
 		} catch (error) {
 			next(error);
@@ -167,7 +171,7 @@ router
 		try {
 			const { phone } = req.body;
 			const arguments = { phone };
-			const response = await sendOtp(arguments);
+			const response = await new TwilioManager().sendOTP(arguments);
 			res.json(response);
 		} catch (error) {
 			next(error);
@@ -205,7 +209,13 @@ router.get(
 		try {
 			const { _id: user, type } = req.user;
 			let { q, page, limit } = req.query;
-			const arguments = { user, type, q, page, limit };
+			const arguments = {
+				user,
+				type,
+				q,
+				limit: Number(limit),
+				page: Number(page),
+			};
 			const response = await notificationsController.getAllNotifications(
 				arguments
 			);

@@ -24,7 +24,7 @@ class FilesDeleter {
 
 	/**
 	 * Delete files from server
-	 * @param {[files]} files array of files
+	 * @param {[object]} files array of files
 	 * @returns {null}
 	 */
 	async deleteFiles(parameters) {

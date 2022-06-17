@@ -19,7 +19,7 @@ const conversations = new Schema(
 			index: true,
 		},
 		status: {
-			type: Number,
+			type: String,
 			enum: [PENDING, ACCEPTED, REJECTED],
 			default: PENDING,
 			required: true,

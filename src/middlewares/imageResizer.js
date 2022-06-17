@@ -12,7 +12,30 @@ const imageMimeTypes = [
 	"image/gif",
 ];
 
-exports.resizeImages = async (imagesData) => {
+const { PROFILE_PICTURES_DIRECTORY } = require("../configs/directories");
+
+exports.resizeProfilePicture = async (req, res, next) => {
+	try {
+		const { picture } = req.files || {};
+
+		if (picture) {
+			const PATH = PROFILE_PICTURES_DIRECTORY;
+			const images = picture;
+
+			// imagesData contains 1.image_name 2.image_path
+			const imagesData = { images, PATH };
+
+			req.files.picture = await resizeImagesWithThumbnails(imagesData);
+			next();
+		} else {
+			next();
+		}
+	} catch (error) {
+		next(error);
+	}
+};
+
+const resizeImages = async (imagesData) => {
 	const { images, PATH } = imagesData;
 	const array = [];
 	if (images) {
@@ -48,7 +71,7 @@ exports.resizeImages = async (imagesData) => {
 	} else return;
 };
 
-exports.resizeImagesWithThumbnails = async (imagesData) => {
+const resizeImagesWithThumbnails = async (imagesData) => {
 	const { images, PATH } = imagesData;
 
 	const array = [];

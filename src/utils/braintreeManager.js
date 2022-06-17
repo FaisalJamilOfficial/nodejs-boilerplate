@@ -1,8 +1,7 @@
-const braintree = require("braintree");
-
-const { paymentAccountsModel } = require("../models");
 const { BRAINTREE_MERCHANT_ID, BRAINTREE_PUBLIC_KEY, BRAINTREE_PRIVATE_KEY } =
 	process.env;
+
+const braintree = require("braintree");
 
 const { PAYMENT_ACCOUNT_TYPES } = require("../configs/enums");
 const { BRAINTREE } = PAYMENT_ACCOUNT_TYPES;
@@ -14,91 +13,76 @@ const gateway = new braintree.BraintreeGateway({
 	privateKey: BRAINTREE_PRIVATE_KEY,
 });
 
-exports.getClientToken = (req, res, next) => {
-	try {
-		const { customerId } = req.query;
-		gateway.clientToken.generate(
-			{
-				customerId,
-			},
-			(err, response) => {
-				if (err) next(err);
-				return res.status(200).json({ clientToken: response.clientToken });
-			}
-		);
-	} catch (error) {
-		return next(error);
+class BraintreeManager {
+	constructor() {
+		this.gateway = gateway;
 	}
-};
 
-exports.setNonce = async (req, res, next) => {
-	const { payment_method_nonce } = req.body;
-	if (!payment_method_nonce) {
-		return next(new Error("Please enter payment_method_nonce!"));
+	/**
+	 * Generate a client token
+	 * @param {string} customerId OPTIONAL braintree customer id
+	 * @returns {object} client token
+	 */
+	async generateClientToken(parameters) {
+		const { customerId } = parameters;
+		const clientTokenObj = { customerId };
+		return await gateway.clientToken.generate(clientTokenObj);
 	}
-	try {
-		const result = await gateway.customer.create({
-			paymentMethodNonce: payment_method_nonce,
-		});
-		if (result) {
-			if (result.customer) {
-				const paymentAccountObj = {
-					user: req.user._id,
-					type: BRAINTREE,
-					account: result.customer,
-				};
-				const paymentAccount = await paymentAccountsModel.create(
-					paymentAccountObj
-				);
-			}
-			return res.status(200).json({
-				success: true,
-				paymentAccount,
-			});
-		} else return next(new Error("Please enter valid payment method nonce"));
-	} catch (error) {
-		next(error);
-	}
-};
 
-exports.checkout = (req, res, next) => {
-	const { transaction_amount, device_data, customer_id, nonce } = req.body;
-	if (!transaction_amount) {
-		return next(new Error("Please enter transaction_amount!"));
-	} else if (!device_data) {
-		return next(new Error("Please enter device_data!"));
+	/**
+	 * Create a braintree customer account
+	 * @param {string} user user id
+	 * @param {string} paymentMethodNonce nonce token
+	 * @returns {object} paymentAccount
+	 */
+	async createCustomer(parameters) {
+		const { user, paymentMethodNonce } = parameters;
+		const customerObj = {};
+		if (paymentMethodNonce) customerObj.paymentMethodNonce = paymentMethodNonce;
+		else throw new Error("Please enter paymentMethodNonce!");
+		const response = await gateway.customer.create(customerObj);
+		if (response.success) {
+			const paymentAccountObj = {
+				user,
+				type: BRAINTREE,
+				account: response.customer,
+			};
+			return await paymentAccountsModel.create(paymentAccountObj);
+		} else throw new Error(response?.message);
 	}
-	try {
-		gateway.transaction.sale(
-			{
-				//paymentMethodNonce: nonce,
-				amount: transaction_amount,
-				customerId: customer_id,
-				deviceData: device_data,
-				options: {
-					submitForSettlement: true,
-				},
+
+	/**
+	 * Create a transaction
+	 * @param {number} amount transaction amount in smaller units of currency
+	 * @param {string} customerId braintree customer id
+	 * @param {string} paymentMethodNonce nonce token
+	 * @param {string} deviceData OPTIONAL
+	 * @returns {object} transaction
+	 */
+	async saleTransaction(parameters) {
+		const { amount, customerId, paymentMethodNonce, deviceData } = parameters;
+		const transactionObj = {
+			amount,
+			customerId,
+			paymentMethodNonce,
+			deviceData,
+			options: {
+				submitForSettlement: true,
 			},
-			(err, result) => {
-				if (err) return next(err);
-				return res.status(200).json({
-					success: true,
-					transaction: result,
-				});
-			}
-		);
-	} catch (error) {
-		next(error);
+		};
+		return await gateway.transaction.sale(transactionObj);
 	}
-};
-exports.getAllAccounts = async (req, res, next) => {
-	try {
-		const accounts = await paymentAccountsModel.find({ user: req.use._id });
-		return res.status(200).json({
-			success: true,
-			accounts,
-		});
-	} catch (error) {
-		next(error);
+
+	/**
+	 * Get user payment accounts
+	 * @param {string} user user id
+	 * @returns {[object]} array of paymentAccount
+	 */
+	async getAllAccounts(parameters) {
+		const { user } = parameters;
+		const query = { user };
+		return await paymentAccountsModel.find(query);
 	}
-};
+}
+
+module.exports = BraintreeManager;

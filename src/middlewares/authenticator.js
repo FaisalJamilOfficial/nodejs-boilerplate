@@ -5,9 +5,9 @@ var ExtractJwt = require("passport-jwt").ExtractJwt;
 var jwtStrategy = require("passport-jwt").Strategy;
 const { SECRET_KEY } = process.env;
 
-const { usersModel } = require("../../models");
+const { usersModel } = require("../models");
 
-const { USER_STATUSES, USER_TYPES } = require("../../configs/enums");
+const { USER_STATUSES, USER_TYPES } = require("../configs/enums");
 const { ACTIVE, DELETED } = USER_STATUSES;
 const { USER, ADMIN } = USER_STATUSES;
 

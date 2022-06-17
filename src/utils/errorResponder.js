@@ -5,8 +5,4 @@ class ErrorResponder extends Error {
 	}
 }
 
-const throwError = (message) => {
-	throw new Error(message);
-};
-
-module.exports = { ErrorResponder, throwError };
+module.exports = ErrorResponder;

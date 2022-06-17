@@ -1,37 +1,37 @@
 exports.CONVERSATION_STATUSES = {
-	PENDING: 0,
-	ACCEPTED: 1,
-	REJECTED: 2,
+	PENDING: "pending",
+	ACCEPTED: "accepted",
+	REJECTED: "rejected",
 };
 
 exports.MESSAGE_STATUSES = {
-	UNREAD: 0,
-	READ: 1,
-	DELETED: 2,
+	UNREAD: "unread",
+	READ: "read",
+	DELETED: "deleted",
 };
 
 exports.NOTIFICATION_TYPES = {
-	NEW_MESSAGE: 0,
-	NEW_CONVERSATION: 1,
+	NEW_MESSAGE: "new_message",
+	NEW_CONVERSATION: "new_conversation",
 };
 
 exports.PAYMENT_ACCOUNT_TYPES = {
-	BRAINTREE: 0,
-	STRIPE_CUSTOMER: 1,
-	STRIPE_ACCOUNT: 2,
+	BRAINTREE: "braintree",
+	STRIPE_CUSTOMER: "stripe_customer",
+	STRIPE_ACCOUNT: "stripe_account",
 };
 
 exports.USER_STATES = {
-	ONLINE: 0,
-	OFFLINE: 1,
+	ONLINE: "online",
+	OFFLINE: "offline",
 };
 
 exports.USER_STATUSES = {
-	ACTIVE: 0,
-	DELETED: 1,
+	ACTIVE: "active",
+	DELETED: "deleted",
 };
 
 exports.USER_TYPES = {
-	USER: 0,
-	ADMIN: 1,
+	USER: "user",
+	ADMIN: "admin",
 };

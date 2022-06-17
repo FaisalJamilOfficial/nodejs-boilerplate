@@ -10,60 +10,223 @@ const {
 	verifyAdmin,
 	alterLogin,
 	verifyUserToken,
-} = require("../middlewares/public/authenticator");
-const { sendOtp, verifyOtp } = require("../middlewares/public/otpManager");
-const { upload, uploadTemporary } = require("../middlewares/public/uploader");
-const { resizeProfilePicture } = require("../middlewares/private/imageResizer");
+} = require("../middlewares/authenticator");
+const { sendOtp, verifyOtp } = require("../middlewares/otpManager");
+const { uploadTemporary } = require("../middlewares/uploader");
+const { resizeProfilePicture } = require("../middlewares/imageResizer");
 
 router
 	.route("/")
-	.post(usersController.signup)
+	.post(async (req, res, next) => {
+		try {
+			const { username, email, password, phone, type } = req.body;
+			const arguments = { username, email, password, phone, type };
+			const response = await usersController.signup(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	})
 	.put(
 		verifyToken,
 		verifyUser,
 		uploadTemporary.fields([{ name: "picture", maxCount: 1 }]),
 		resizeProfilePicture,
-		usersController.editUserProfile
+		async (req, res, next) => {
+			try {
+				const { _id } = req.user;
+				const { picture } = req.files || {};
+				const {
+					user,
+					phone,
+					status,
+					fcm,
+					device,
+					email,
+					newPassword,
+					firstname,
+					lastname,
+					birthdate,
+					longitude,
+					latitude,
+					address,
+					removePicture,
+				} = req.body;
+				const arguments = {
+					user: user ?? _id,
+					phone,
+					status,
+					fcm,
+					device,
+					email,
+					newPassword,
+					firstname,
+					lastname,
+					birthdate,
+					longitude,
+					latitude,
+					address,
+					removePicture,
+					picture,
+					isAdminAction: user ? true : false,
+				};
+				const response = await usersController.editUserProfile(arguments);
+				res.json(response);
+			} catch (error) {
+				next(error);
+			}
+		}
 	)
-	.get(verifyToken, verifyAdmin, usersController.getAllUsers);
+	.get(verifyToken, verifyAdmin, async (req, res, next) => {
+		try {
+			const { _id: user } = req.user;
+			const { q, page, limit, status, type } = req.query;
+			const arguments = { user, q, page, limit, status, type };
+			const response = await usersController.getAllUsers(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	});
 
 router
 	.route("/login")
-	.post(alterLogin, passport.authenticate("local"), usersController.login)
+	.post(alterLogin, passport.authenticate("local"), async (req, res, next) => {
+		try {
+			const { _id: user, phone } = req.user;
+			const arguments = { user, phone };
+			const response = await usersController.login(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	})
 	.put(
 		verifyToken,
 		verifyOtp,
 		usersController.checkUserPhoneExists,
-		usersController.login
+		async (req, res, next) => {
+			try {
+				const { _id: user, phone } = req.user;
+				const arguments = { user, phone };
+				const response = await usersController.login(arguments);
+				res.json(response);
+			} catch (error) {
+				next(error);
+			}
+		}
 	);
 router.put(
 	"/phone",
 	verifyToken,
 	verifyOtp,
 	verifyUserToken,
-	usersController.editUserProfile
+	async (req, res, next) => {
+		try {
+			const { _id: user } = req.user;
+			const { phone } = req.body;
+			const arguments = { user, phone };
+			const response = await usersController.editUserProfile(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	}
 );
 router.put(
 	"/password",
 	alterLogin,
 	passport.authenticate("local"),
-	usersController.editUserProfile
+	async (req, res, next) => {
+		try {
+			const { _id: user } = req.user;
+			const { newPassword } = req.body;
+			const arguments = { user, newPassword };
+			const response = await usersController.editUserProfile(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	}
 );
 
-router.route("/otp").post(verifyToken, verifyUser, sendOtp).put(sendOtp);
+router
+	.route("/otp")
+	.post(verifyToken, verifyUser, async (req, res, next) => {
+		try {
+			const { _id: user } = req.user;
+			const { phone } = req.body;
+			const arguments = { phone, user };
+			const response = await sendOtp(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	})
+	.put(async (req, res, next) => {
+		try {
+			const { phone } = req.body;
+			const arguments = { phone };
+			const response = await sendOtp(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	});
 
 router
 	.route("/password/email")
-	.post(usersController.emailResetPassword)
-	.put(usersController.resetPassword);
+	.post(async (req, res, next) => {
+		try {
+			const { email } = req.body;
+			const arguments = { email };
+			const response = await usersController.emailResetPassword(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	})
+	.put(async (req, res, next) => {
+		try {
+			const { password, user, token } = req.body;
+			const arguments = { password, user, token };
+			const response = await usersController.resetPassword(arguments);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	});
 
 router.get(
 	"/notifications",
 	verifyToken,
 	verifyUser,
-	notificationsController.getAllNotifications
+	async (req, res, next) => {
+		try {
+			const { _id: user, type } = req.user;
+			let { q, page, limit } = req.query;
+			const arguments = { user, type, q, page, limit };
+			const response = await notificationsController.getAllNotifications(
+				arguments
+			);
+			res.json(response);
+		} catch (error) {
+			next(error);
+		}
+	}
 );
 
-router.get("/:user", verifyToken, verifyUser, usersController.getUser);
+router.get("/:user", verifyToken, verifyUser, async (req, res, next) => {
+	try {
+		const { _id } = req.user;
+		const { user } = req.params;
+		const { isMe } = req.query;
+		const arguments = { user: isMe ? _id : user, isMe };
+		const response = await usersController.getUser(arguments);
+		res.json(response);
+	} catch (error) {
+		next(error);
+	}
+});
 
 module.exports = router;

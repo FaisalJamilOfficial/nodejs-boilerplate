@@ -1,4 +1,4 @@
-const { ErrorResponder } = require("../../utils/errorResponder");
+const ErrorResponder = require("../utils/ErrorResponder");
 
 const error = (err, req, res, next) => {
 	let error = { ...err };

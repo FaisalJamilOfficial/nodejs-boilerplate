@@ -44,7 +44,7 @@ const messages = new Schema(
 		},
 		attachments: [attachment],
 		status: {
-			type: Number,
+			type: String,
 			enum: [UNREAD, READ, DELETED],
 			default: UNREAD,
 			required: true,

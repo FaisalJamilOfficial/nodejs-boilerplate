@@ -1,38 +1,27 @@
 require("dotenv").config();
+const { MONGO_URL } = process.env;
+
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-var passport = require("passport");
-
-const logger = require("morgan");
+const passport = require("passport");
 const cors = require("cors");
-const json = require("morgan-json");
-
 const socketio = require("socket.io");
 const mongoose = require("mongoose");
-const fs = require("fs");
 
+const indexRouter = require("./routes/index");
 const { setState } = require("./controllers/users");
-
+const errorHandler = require("./middlewares/errorHandler");
 const { USER_STATES } = require("./configs/enums");
 const { OFFLINE, ONLINE } = USER_STATES;
 
-const accessLogStream = fs.createWriteStream(
-	path.join(__dirname, "access.log"),
-	{
-		flags: "a",
-	}
-);
-const indexRouter = require("./routes/index");
-const { MONGO_URL } = process.env;
-const errorHandler = require("./middlewares/public/errorHandler");
-
 const serverFunction = async () => {
-	console.log("Server Function Executed!");
+	console.log("***Server Execution Started!***");
 	try {
 		const app = express();
 		const server = require("http").createServer(app);
+		app.use(cors());
 
 		const io = socketio(server);
 		io.on("connection", (socket) => {
@@ -74,26 +63,14 @@ const serverFunction = async () => {
 
 		connect.then(
 			(db) => {
-				console.log("***DB Connected!***");
+				console.log("***Database Connected!***");
 			},
 			(err) => {
 				console.log(err);
 			}
 		);
 
-		app.use(cors());
-		const format = json({
-			url: ":url",
-			address: ":remote-addr",
-			user: ":remote-user",
-			time: ":date[clf]",
-			method: ":method",
-			status: ":status",
-		});
-
 		app.use(passport.initialize());
-		app.use(logger(format, { stream: accessLogStream }));
-		app.use(logger("dev"));
 		app.use(express.json());
 		app.use(express.urlencoded({ extended: false }));
 		app.use(cookieParser());
@@ -101,9 +78,9 @@ const serverFunction = async () => {
 
 		app.use("/api/v1", indexRouter);
 
-		app.use(express.static(path.join("client/build")));
-		app.get("/forgot-password", (req, res, next) => {
-			res.sendFile(path.resolve("client/build/index.html"));
+		app.use(express.static(path.join(__dirname, "client/build")));
+		app.get("/forgot-password/*", (req, res, next) => {
+			res.sendFile(path.resolve(__dirname, "client/build/index.html"));
 		});
 
 		app.get("/*", (req, res, next) => {
@@ -127,4 +104,3 @@ const serverFunction = async () => {
 	}
 };
 serverFunction();
-// module.exports = { app, server };

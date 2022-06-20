@@ -97,11 +97,11 @@ class StripeManager {
 		if (cardHolderName) {
 		} else throw new Error("Please enter cardHolderName!");
 
-		const existsPaymentAccount = await paymentAccountsModel.exists({ user });
+		const paymentAccountExists = await paymentAccountsModel.exists({ user });
 		let userStripeID;
 
-		if (existsPaymentAccount)
-			userStripeID = existsPaymentAccount.account.stripeID;
+		if (paymentAccountExists)
+			userStripeID = paymentAccountExists.account.stripeID;
 		else {
 			const customerObj = {};
 			if (email) customerObj.email = email;
@@ -136,11 +136,11 @@ class StripeManager {
 	 */
 	async createAccountWithCheck(parameters) {
 		const { user, email } = parameters;
-		const existsPaymentAccount = await paymentAccountsModel.exists({
+		const paymentAccountExists = await paymentAccountsModel.exists({
 			user,
 		});
 
-		if (existsPaymentAccount) return existsPaymentAccount;
+		if (paymentAccountExists) return paymentAccountExists;
 		else {
 			const account = await stripe.accounts.create({
 				email,
@@ -213,15 +213,15 @@ class StripeManager {
 	 */
 	async createTransfer(parameters) {
 		const { user, amount, currency, destination, description } = parameters;
-		const existsPaymentAccount = await paymentAccountsModel.findOne({ user });
+		const paymentAccountExists = await paymentAccountsModel.findOne({ user });
 		const transferObj = {
 			amount,
 			currency,
 			destination,
 			description,
 		};
-		if (existsPaymentAccount)
-			transferObj.destination = existsPaymentAccount.account.id;
+		if (paymentAccountExists)
+			transferObj.destination = paymentAccountExists.account.id;
 
 		return await stripe.transfers.create(transferObj);
 	}
@@ -242,11 +242,11 @@ class StripeManager {
 		);
 
 		if (event.type == "account.external_account.created") {
-			const existsPaymentAccount = await paymentAccountsModel.findOne({
+			const paymentAccountExists = await paymentAccountsModel.findOne({
 				"account.id": req.body.account,
 			});
 			await usersModel.updateOne(
-				{ _id: existsPaymentAccount.user },
+				{ _id: paymentAccountExists.user },
 				{ isStripeConnected: true }
 			);
 		}
@@ -278,11 +278,11 @@ exports.constructWebhooksEvent = async (req, res, next) => {
 
 		console.log("EVENT TYPE: ", JSON.stringify(event.type));
 		if (event.type == "account.external_account.created") {
-			const existsPaymentAccount = await paymentAccountsModel.findOne({
+			const paymentAccountExists = await paymentAccountsModel.findOne({
 				"account.id": req.body.account,
 			});
 			await usersModel.updateOne(
-				{ _id: existsPaymentAccount.user },
+				{ _id: paymentAccountExists.user },
 				{ isStripeAccountCreated: true }
 			);
 		}

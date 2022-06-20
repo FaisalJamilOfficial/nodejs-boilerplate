@@ -86,7 +86,7 @@ const serverFunction = async () => {
 		});
 
 		app.get("/*", (req, res, next) => {
-			res.sendFile(path.join(__dirname, "/public/images/3909236.png"));
+			res.sendFile(path.join(__dirname, "/public/images/image.png"));
 		});
 
 		// catch 404 and forward to error handler

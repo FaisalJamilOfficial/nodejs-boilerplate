@@ -18,7 +18,7 @@ exports.getAllNotifications = async (parameters) => {
 	const notifications = await notificationsModel
 		.find(query)
 		.populate("")
-		.sort("-createdAt")
+		.sort({ createdAt: -1 })
 		.skip((page - 1) * limit)
 		.limit(limit);
 	const totalPages = Math.ceil(totalCount / limit);

@@ -267,7 +267,8 @@ exports.resetPassword = async (parameters) => {
  * @returns {[object]} array of users
  */
 exports.getAllUsers = async (parameters) => {
-	const { user, q, page, limit, status, type } = parameters;
+	const { user, q, status, type } = parameters;
+	let { page, limit } = parameters;
 	const query = {};
 	page = Number(page);
 	limit = Number(limit);
@@ -280,14 +281,28 @@ exports.getAllUsers = async (parameters) => {
 		var wildcard = [
 			{
 				$regexMatch: {
-					input: "$firstname",
+					input: "$profile.firstname",
 					regex: q,
 					options: "i",
 				},
 			},
 			{
 				$regexMatch: {
-					input: "$lastname",
+					input: "$profile.lastname",
+					regex: q,
+					options: "i",
+				},
+			},
+			{
+				$regexMatch: {
+					input: "$phone",
+					regex: q,
+					options: "i",
+				},
+			},
+			{
+				$regexMatch: {
+					input: "$email",
 					regex: q,
 					options: "i",
 				},
@@ -296,7 +311,7 @@ exports.getAllUsers = async (parameters) => {
 	}
 	const aggregation = [
 		{ $match: query },
-		{ $project: { profile: 1 } },
+		{ $project: { hash: 0, salt: 0, type: 0 } },
 		{
 			$lookup: {
 				from: "profiles",
@@ -309,9 +324,6 @@ exports.getAllUsers = async (parameters) => {
 									{
 										$and: [{ $eq: ["$$profile", "$_id"] }],
 									},
-									{
-										$or: wildcard ?? {},
-									},
 								],
 							},
 						},
@@ -321,13 +333,23 @@ exports.getAllUsers = async (parameters) => {
 			},
 		},
 		{ $unwind: { path: "$profile" } },
+		{
+			$match: {
+				$expr: {
+					$and: [
+						{
+							$or: wildcard ?? {},
+						},
+					],
+				},
+			},
+		},
 	];
-
 	const users = await usersModel
 		.aggregate(aggregation)
+		.sort({ createdAt: -1 })
 		.skip((page - 1) * limit)
-		.limit(limit)
-		.sort({ createdAt: -1 });
+		.limit(limit);
 
 	aggregation.push(
 		...[{ $group: { _id: null, count: { $sum: 1 } } }, { $project: { _id: 0 } }]
@@ -337,6 +359,7 @@ exports.getAllUsers = async (parameters) => {
 
 	return {
 		success: true,
+		totalCount: totalCount[0]?.count ?? 0,
 		totalPages: Math.ceil((totalCount[0]?.count ?? 0) / limit),
 		users,
 	};

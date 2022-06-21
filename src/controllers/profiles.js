@@ -1,7 +1,7 @@
 const dayjs = require("dayjs");
 
 const { usersModel, profilesModel } = require("../models");
-const { deleteProfilePicture } = require("../utils/FilesDeleter");
+const FilesDeleter = require("../utils/FilesDeleter");
 
 /**
  * Update user profile data
@@ -41,11 +41,15 @@ exports.updateProfile = async (parameters) => {
 		};
 	if (picture && picture[0].path) {
 		if (req.user.profile.picture)
-			deleteProfilePicture(req.user.profile.picture);
+			new FilesDeleter().deleteProfilePicture({
+				profilePicture: req.user.profile.picture,
+			});
 		profileObj.picture = picture[0].path;
 	}
 	if (removePicture === "true") {
-		deleteProfilePicture(req.user.profile.picture);
+		new FilesDeleter().deleteProfilePicture({
+			profilePicture: req.user.profile.picture,
+		});
 		profileObj.picture = "";
 	}
 	const response = await profilesModel.updateOne(

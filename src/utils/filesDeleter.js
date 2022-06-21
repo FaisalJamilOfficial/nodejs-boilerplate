@@ -18,7 +18,7 @@ class FilesDeleter {
 		const PATH = PROFILE_PICTURES_DIRECTORY;
 		array.push({ path: PATH + profilePicture });
 		array.push({ path: PATH + "thumbnails/" + profilePicture });
-		this.deleteFiles(array);
+		this.deleteFiles({ files: array });
 		return;
 	}
 

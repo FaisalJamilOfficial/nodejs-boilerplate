@@ -11,7 +11,8 @@ const firebaseManager = require("../utils/FirebaseManager");
 exports.getAllNotifications = async (parameters) => {
 	const { user } = parameters;
 	let { page, limit } = parameters;
-	const query = { user };
+	const query = {};
+	if (user) query.user = user;
 	if (!limit) limit = 10;
 	if (!page) page = 1;
 	const totalCount = await notificationsModel.find(query).count();

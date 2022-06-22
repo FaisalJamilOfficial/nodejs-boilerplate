@@ -260,7 +260,8 @@ class StripeManager {
 	 */
 	async getAllAccounts(parameters) {
 		const { user } = parameters;
-		const query = { user };
+		const query = {};
+		if (user) query.user = user;
 		return await paymentAccountsModel.find(query);
 	}
 }

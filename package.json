@@ -19,6 +19,7 @@
 	},
 	"homepage": "https://github.com/FaisalJamilOfficial/backend-boilerplate#readme",
 	"dependencies": {
+		"braintree": "^3.11.0",
 		"cookie-parser": "^1.4.6",
 		"cors": "^2.8.5",
 		"dayjs": "^1.10.8",

@@ -93,17 +93,17 @@ exports.chat = async (parameters) => {
 	if (!limit) limit = 10;
 	if (!page) page = 0;
 	if (page) page = page - 1;
-	if (conversation) {
-		const query = { conversation };
-		const messages = await messagesModel
-			.find(query)
-			.sort({ createdAt: -1 })
-			.skip(page * limit)
-			.limit(limit);
-		const totalCount = await messagesModel.find(query).count();
-		const totalPages = Math.ceil(totalCount / limit);
-		return { success: true, totalCount, totalPages, messages };
-	} else throw new Error("Please enter conversation id!");
+	const query = {};
+	if (conversation) query = { conversation };
+	else throw new Error("Please enter conversation id!");
+	const messages = await messagesModel
+		.find(query)
+		.sort({ createdAt: -1 })
+		.skip(page * limit)
+		.limit(limit);
+	const totalCount = await messagesModel.find(query).count();
+	const totalPages = Math.ceil(totalCount / limit);
+	return { success: true, totalCount, totalPages, messages };
 };
 
 /**
@@ -148,9 +148,8 @@ exports.getChatters = async (parameters) => {
 	if (!limit) limit = 10;
 	if (!page) page = 0;
 	if (page) page = page - 1;
-	const query = {
-		$or: [{ userTo: user }, { userFrom: user }],
-	};
+	const query = {};
+	if (user) query.$or = { $or: [{ userTo: user }, { userFrom: user }] };
 	const chatters = await conversationsModel
 		.find(query)
 		.sort({ createdAt: -1 })
@@ -159,6 +158,7 @@ exports.getChatters = async (parameters) => {
 	const totalCount = await conversationsModel.find(query).count();
 	return {
 		success: true,
+		totalCount,
 		totalPages: Math.ceil(totalCount / limit),
 		chatters,
 	};

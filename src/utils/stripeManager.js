@@ -116,7 +116,7 @@ class StripeManager {
 		if (card) {
 			card.cardHolderName = cardHolderName;
 			const paymentAccountObj = {
-				user: req.user._id,
+				user: req?.user?._id,
 				type: STRIPE_CUSTOMER,
 				account: card,
 			};
@@ -156,7 +156,7 @@ class StripeManager {
 			});
 			if (account) {
 				const paymentAccountObj = {
-					user: req.user._id,
+					user: req?.user?._id,
 					type: STRIPE_ACCOUNT,
 					account,
 				};

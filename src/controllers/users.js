@@ -73,6 +73,7 @@ exports.login = async (parameters) => {
  * @param {string} device OPTIONAL user device id
  * @param {string} email OPTIONAL user email address
  * @param {string} newPassword OPTIONAL user new password
+ * @param {string} name OPTIONAL user name
  * @param {string} firstname OPTIONAL user first name
  * @param {string} lastname OPTIONAL user last name
  * @param {date} birthdate OPTIONAL user birthdate
@@ -81,7 +82,6 @@ exports.login = async (parameters) => {
  * @param {string} address OPTIONAL user address
  * @param {boolean} removePicture OPTIONAL user profile picture removal option
  * @param {[object]} picture OPTIONAL user profile picture
- * @param {boolean} isAdminAction OPTIONAL users profile updation option
  * @returns {object} user data
  */
 exports.editUserProfile = async (parameters) => {
@@ -93,24 +93,23 @@ exports.editUserProfile = async (parameters) => {
 		device,
 		email,
 		newPassword,
+		name,
 		firstname,
 		lastname,
 		birthdate,
 		longitude,
 		latitude,
 		address,
+		profilePicture,
 		removePicture,
 		picture,
-		isAdminAction,
 	} = parameters;
-	if (isAdminAction) {
-		if (req.user.type === "admin")
-			if (isValidObjectId(user))
-				if (await usersModel.exists({ _id: user })) {
-				} else return next(new Error("User not found!"));
-			else return next(new Error("Please enter valid user id!"));
-		else return next(new Error("Unauthorized as ADMIN!"));
-	}
+	if (user) {
+		if (isValidObjectId(user))
+			if (await usersModel.exists({ _id: user })) {
+			} else throw new Error("User not found!");
+		else throw new Error("Please enter valid user id!");
+	} else throw new Error("Please enter user id!");
 	const updateUserObj = {
 		user,
 		phone,
@@ -122,12 +121,14 @@ exports.editUserProfile = async (parameters) => {
 	};
 	const updateProfileObj = {
 		user,
+		name,
 		firstname,
 		lastname,
 		birthdate,
 		longitude,
 		latitude,
 		address,
+		profilePicture,
 		removePicture,
 		picture,
 	};

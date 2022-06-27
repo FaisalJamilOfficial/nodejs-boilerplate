@@ -47,7 +47,7 @@ exports.verifyToken = passport.authenticate("jwt", { session: false });
 
 exports.verifyOTP = async (req, res, next) => {
 	try {
-		const { otp, phone } = req.user;
+		const { otp, phone } = req?.user;
 		const { code } = req.body;
 		if (Number(code) === Number(otp)) {
 			if (phone) req.body.phone = phone;
@@ -63,7 +63,7 @@ exports.verifyOTP = async (req, res, next) => {
 };
 
 exports.verifyAdmin = (req, res, next) => {
-	if (req.user.type === ADMIN && req.user.status === ACTIVE) {
+	if (req?.user?.type === ADMIN && req?.user?.status === ACTIVE) {
 		next();
 	} else {
 		const error = new Error("You are not authorized as admin!");
@@ -73,7 +73,7 @@ exports.verifyAdmin = (req, res, next) => {
 };
 
 exports.verifyUser = (req, res, next) => {
-	if (req.user && req.user.status === ACTIVE) {
+	if (req?.user && req?.user?.status === ACTIVE) {
 		next();
 	} else {
 		const error = new Error("You are not authorized as user!");
@@ -90,7 +90,7 @@ exports.alterLogin = (req, res, next) => {
 
 exports.verifyUserToken = async (req, res, next) => {
 	try {
-		if (req.user._id) {
+		if (req?.user?._id) {
 			next();
 		} else {
 			const error = new Error("You are not authorized as existing user!");

@@ -17,10 +17,11 @@ router
 		]),
 		async (req, res, next) => {
 			try {
-				const { _id: user } = req.user;
+				const { _id } = req?.user;
 				const { userTo, text } = req.body;
+				const user_id = req?.user?.type === "admin" ? user : _id;
 				const { attachments } = req.files || {};
-				const arguments = { user, userTo, text, attachments };
+				const arguments = { user: user_id, userTo, text, attachments };
 				const response = await messagesController.send(arguments);
 				res.json(response);
 			} catch (error) {
@@ -44,8 +45,10 @@ router
 	})
 	.put(verifyToken, verifyUser, async (req, res, next) => {
 		try {
-			const { message, text, status } = req.body;
-			const arguments = { message, text, status };
+			const { _id } = req?.user;
+			const { user, message, text, status } = req.body;
+			const user_id = req?.user?.type === "admin" ? user : _id;
+			const arguments = { user: user_id, message, text, status };
 			const response = await messagesController.updateMessage(arguments);
 			res.json(response);
 		} catch (error) {
@@ -54,9 +57,14 @@ router
 	});
 router.get("/chatters", verifyToken, verifyUser, async (req, res, next) => {
 	try {
-		const { _id: user } = req.user;
+		const { _id } = req?.user;
 		const { limit, page } = req.query;
-		const arguments = { user, limit: Number(limit), page: Number(page) };
+		const user_id = req?.user?.type === "admin" ? user : _id;
+		const arguments = {
+			user: user_id,
+			limit: Number(limit),
+			page: Number(page),
+		};
 		const response = await messagesController.getChatters(arguments);
 		res.json(response);
 	} catch (error) {

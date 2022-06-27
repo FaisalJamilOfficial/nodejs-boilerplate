@@ -6,6 +6,7 @@ const FilesDeleter = require("../utils/FilesDeleter");
 /**
  * Update user profile data
  * @param {string} user user id
+ * @param {string} name OPTIONAL user name
  * @param {string} firstname OPTIONAL user first name
  * @param {string} lastname OPTIONAL user last name
  * @param {date} birthdate OPTIONAL user birthdate
@@ -19,6 +20,7 @@ const FilesDeleter = require("../utils/FilesDeleter");
 exports.updateProfile = async (parameters) => {
 	const {
 		user,
+		name,
 		firstname,
 		lastname,
 		birthdate,
@@ -26,10 +28,12 @@ exports.updateProfile = async (parameters) => {
 		latitude,
 		address,
 		removePicture,
+		profilePicture,
 		picture,
 	} = parameters;
 	const profileObj = {};
 
+	if (name) profileObj.name = name;
 	if (firstname) profileObj.firstname = firstname;
 	if (lastname) profileObj.lastname = lastname;
 	if (birthdate && dayjs().isValid(birthdate)) profileObj.birthdate = birthdate;
@@ -40,27 +44,19 @@ exports.updateProfile = async (parameters) => {
 			coordinates: [Number(longitude), Number(latitude)],
 		};
 	if (picture && picture[0].path) {
-		if (req.user.profile.picture)
-			new FilesDeleter().deleteProfilePicture({
-				profilePicture: req.user.profile.picture,
-			});
+		if (profilePicture)
+			new FilesDeleter().deleteProfilePicture({ profilePicture });
 		profileObj.picture = picture[0].path;
 	}
 	if (removePicture === "true") {
-		new FilesDeleter().deleteProfilePicture({
-			profilePicture: req.user.profile.picture,
-		});
+		new FilesDeleter().deleteProfilePicture({ profilePicture });
 		profileObj.picture = "";
 	}
-	const response = await profilesModel.updateOne(
-		{ user: user ?? req.user._id },
-		profileObj,
-		{
-			useFindAndModify: false,
-			new: true,
-			runValidators: true,
-		}
-	);
+	const response = await profilesModel.updateOne({ user }, profileObj, {
+		useFindAndModify: false,
+		new: true,
+		runValidators: true,
+	});
 	return response.modifiedCount === 0 ? false : true;
 };
 

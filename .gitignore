@@ -77,3 +77,5 @@ typings/
 
 # Enviornment variables
 .env 
+.env.development
+.env.production

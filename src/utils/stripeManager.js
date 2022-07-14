@@ -1,6 +1,12 @@
-const { STRIPE_SECRET_KEY } = process.env;
+const { STRIPE_SECRET_KEY, STRIPE_ENDPOINT_SECRET } = process.env;
 
 const stripe = require("stripe")(STRIPE_SECRET_KEY);
+const CURRENCY = "usd";
+
+const { paymentAccountsModel, profilesModel } = require("../models");
+
+const { PAYMENT_ACCOUNT_TYPES } = require("../configs/enums");
+const { STRIPE_ACCOUNT } = PAYMENT_ACCOUNT_TYPES;
 
 class StripeManager {
 	constructor() {
@@ -68,11 +74,11 @@ class StripeManager {
 	 */
 	async createCharge(parameters) {
 		const { customer, amount, currency, source, description } = parameters;
-		const chargeObj = {};
+		const chargeObj = { currency: CURRENCY };
 		if (amount) chargeObj.amount = amount;
 		else throw new Error("Please enter amount!");
-		if (currency) chargeObj.currency = currency;
-		else throw new Error("Please enter currency!");
+		// if (currency) chargeObj.currency = currency;
+		// else throw new Error("Please enter currency!");
 		if (source) chargeObj.source = source;
 		else throw new Error("Please enter source token!");
 		if (customer) chargeObj.customer = customer;
@@ -136,7 +142,7 @@ class StripeManager {
 	 */
 	async createAccountWithCheck(parameters) {
 		const { user, email } = parameters;
-		const paymentAccountExists = await paymentAccountsModel.exists({
+		const paymentAccountExists = await paymentAccountsModel.findOne({
 			user,
 		});
 
@@ -156,11 +162,20 @@ class StripeManager {
 			});
 			if (account) {
 				const paymentAccountObj = {
-					user: req?.user?._id,
+					user,
 					type: STRIPE_ACCOUNT,
 					account,
 				};
-				return await paymentAccountsModel.create(paymentAccountObj);
+				const paymentAccount = await paymentAccountsModel.create(
+					paymentAccountObj
+				);
+				// ADD THIS CODE INTO WEBHOOK AFTER TESTING
+				console.log("ADD THIS CODE INTO WEBHOOK AFTER TESTING");
+				await profilesModel.updateOne(
+					{ user },
+					{ paymentAccount, isStripeConnected: true }
+				);
+				return paymentAccount;
 			} else throw new Error("Stripe account creation failed!");
 		}
 	}
@@ -195,7 +210,7 @@ class StripeManager {
 		const { amount, currency, description, statement_descriptor } = parameters;
 		const topupObj = {
 			amount,
-			currency,
+			currency: CURRENCY,
 			description,
 			statement_descriptor,
 		};
@@ -212,12 +227,12 @@ class StripeManager {
 	 * @returns {object} stripe transfer response
 	 */
 	async createTransfer(parameters) {
-		const { user, amount, currency, destination, description } = parameters;
+		const { user, amount, currency, description } = parameters;
 		const paymentAccountExists = await paymentAccountsModel.findOne({ user });
 		const transferObj = {
 			amount,
-			currency,
-			destination,
+			currency: CURRENCY,
+			destination: paymentAccountExists?.account?._id,
 			description,
 		};
 		if (paymentAccountExists)
@@ -234,11 +249,11 @@ class StripeManager {
 	 * @returns {object} stripe webhook event
 	 */
 	async constructWebhooksEvent(parameters) {
-		const { rawBody, signature, endpointSecret } = parameters;
+		const { rawBody, signature } = parameters;
 		const event = stripe.webhooks.constructEvent(
 			rawBody,
 			signature,
-			endpointSecret
+			STRIPE_ENDPOINT_SECRET
 		);
 
 		if (event.type == "account.external_account.created") {
@@ -268,8 +283,7 @@ class StripeManager {
 
 exports.constructWebhooksEvent = async (req, res, next) => {
 	try {
-		const endpointSecret =
-			"whsec_f32444a51e97a582230a21be6b34e0d1f34d1699c5b1131db31fdcf458067b5a";
+		const endpointSecret = STRIPE_ENDPOINT_SECRET;
 		const signature = req.headers["stripe-signature"];
 		console.log("SIGNATURE: ", JSON.stringify(signature));
 		console.log("RAW_BODY: ", JSON.stringify(req.body));
@@ -294,6 +308,7 @@ exports.constructWebhooksEvent = async (req, res, next) => {
 		});
 	} catch (error) {
 		console.log(JSON.stringify(error));
+		next(error);
 	}
 };
 

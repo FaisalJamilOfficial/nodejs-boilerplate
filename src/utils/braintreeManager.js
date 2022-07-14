@@ -74,6 +74,36 @@ class BraintreeManager {
 	}
 
 	/**
+	 * Hold a transaction
+	 * @param {string} transactionId braintree transaction id
+	 * @returns {object} transaction hold data
+	 */
+	async holdTransaction(parameters) {
+		const { transactionId } = parameters;
+		return await gateway.transaction.holdInEscrow(transactionId);
+	}
+
+	/**
+	 * Refund a transaction
+	 * @param {string} transactionId braintree transaction id
+	 * @returns {object} transaction refund data
+	 */
+	async refundTransaction(parameters) {
+		const { transactionId } = parameters;
+		return await gateway.transaction.refund(transactionId);
+	}
+
+	/**
+	 * Release a transaction
+	 * @param {string} transactionId braintree transaction id
+	 * @returns {object} transaction refund data
+	 */
+	async releaseTransaction(parameters) {
+		const { transactionId } = parameters;
+		return await gateway.transaction.releaseFromEscrow(transactionId);
+	}
+
+	/**
 	 * Get user payment accounts
 	 * @param {string} user user id
 	 * @returns {[object]} array of paymentAccount

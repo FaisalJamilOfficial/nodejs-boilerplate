@@ -1,6 +1,13 @@
-require("dotenv").config();
-const { MONGO_URL } = process.env;
+const dotenv = require("dotenv");
+dotenv.config();
+dotenv.config({
+	path:
+		process.env.NODE_ENV === "production"
+			? ".env.production"
+			: ".env.development",
+});
 
+const { MONGO_URL, NODE_ENV } = process.env;
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
@@ -8,7 +15,7 @@ const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const logger = require("morgan");
 const cors = require("cors");
-const socketio = require("socket.io");
+const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 
 const indexRouter = require("./routes/index");
@@ -24,13 +31,18 @@ const serverFunction = async () => {
 		const server = require("http").createServer(app);
 		app.use(cors());
 
-		const io = socketio(server);
+		const io = new Server(server, {
+			cors: {
+				origin: "*",
+			},
+		});
 		io.on("connection", (socket) => {
 			socket.on("join", (data) => {
 				console.log(data);
 				console.log("---------entered------------");
 				try {
-					setState(data, ONLINE);
+					const arguments = { user: data, state: ONLINE };
+					setState(arguments);
 				} catch (error) {
 					next(error);
 				}
@@ -41,7 +53,8 @@ const serverFunction = async () => {
 				console.log(data);
 				console.log("---------exit------------");
 				try {
-					setState(data, OFFLINE);
+					const arguments = { user: data, state: OFFLINE };
+					setState(arguments);
 				} catch (error) {
 					next(error);
 				}
@@ -76,7 +89,7 @@ const serverFunction = async () => {
 		app.use(express.json());
 		app.use(express.urlencoded({ extended: false }));
 		app.use(cookieParser());
-		app.use("/public/", express.static(path.join("public/")));
+		app.use("/public/", express.static(path.join(__dirname, "public/")));
 
 		app.use("/api/v1", indexRouter);
 
@@ -98,7 +111,7 @@ const serverFunction = async () => {
 		app.use(errorHandler);
 
 		const port = process.env.PORT || "5002";
-		app.listen(port, (err) => {
+		server.listen(port, (err) => {
 			console.log(`***App is running at port: ${port}***`);
 		});
 	} catch (error) {
@@ -106,3 +119,4 @@ const serverFunction = async () => {
 	}
 };
 serverFunction();
+console.log(NODE_ENV.toUpperCase());

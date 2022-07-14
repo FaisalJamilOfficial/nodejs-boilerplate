@@ -271,8 +271,6 @@ exports.getAllUsers = async (parameters) => {
 	const { user, q, status, type } = parameters;
 	let { page, limit } = parameters;
 	const query = {};
-	page = Number(page);
-	limit = Number(limit);
 	if (!limit) limit = 10;
 	if (!page) page = 1;
 	query._id = { $ne: user };

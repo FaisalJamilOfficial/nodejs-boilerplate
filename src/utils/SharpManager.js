@@ -18,11 +18,12 @@ class SharpManager {
 		if (images) {
 			for (let i = 0; i < images.length; i++) {
 				const buffer = images[i].buffer;
-				const id = uuid.v4() + ".jpeg";
+				const id = uuid.v4() + ".png";
 
 				await sharp(buffer)
-					.jpeg({
-						mozjpeg: true,
+					.png({
+						// mozjpeg: true,
+						palette: true,
 						quality:
 							images[i].size > 6000000
 								? 25
@@ -56,18 +57,21 @@ class SharpManager {
 		if (images) {
 			for (let i = 0; i < images.length; i++) {
 				const buffer = images[i].buffer;
-				const id = uuid.v4() + ".jpeg";
+				// const fileExtension = mime.extension(images[i].mimetype);
+				const id = uuid.v4() + ".png";
 				await sharp(buffer)
 					.resize({
 						width: 200,
 						fit: "contain",
-						background: "white",
+						// background: "white",
 					})
-					.jpeg({ mozjpeg: true })
+					// .jpeg({ mozjpeg: true })
+					.png({ palette: true })
 					.toFile(path + "thumbnails/" + id);
 				await sharp(buffer)
-					.jpeg({
-						mozjpeg: true,
+					.png({
+						// mozjpeg: true,
+						palette: true,
 						quality:
 							images[i].size > 6000000
 								? 25
@@ -76,9 +80,10 @@ class SharpManager {
 								: images[i].size > 2000000
 								? 45
 								: 65,
-						background: "white",
+						// background: "white",
 					})
 					.toFile(path + id);
+
 				array.push({
 					...images[i],
 					path: id,

@@ -11,19 +11,23 @@ exports.MESSAGE_STATUSES = {
 };
 
 exports.NOTIFICATION_TYPES = {
-	NEW_MESSAGE: "new_message",
-	NEW_CONVERSATION: "new_conversation",
+	NEW_MESSAGE: "new-message",
+	NEW_CONVERSATION: "new-conversation",
 };
 
 exports.PAYMENT_ACCOUNT_TYPES = {
 	BRAINTREE: "braintree",
-	STRIPE_CUSTOMER: "stripe_customer",
-	STRIPE_ACCOUNT: "stripe_account",
+	STRIPE_CUSTOMER: "stripe-customer",
+	STRIPE_ACCOUNT: "stripe-account",
 };
 
-exports.USER_STATES = {
-	ONLINE: "online",
-	OFFLINE: "offline",
+exports.GEO_JSON_TYPES = {
+	POINT: "Point",
+	LINESTRING: "LineString",
+	POLYGON: "Polygon",
+	MULTIPOINT: "MultiPoint",
+	MULTILINESTRING: "MultiLineString",
+	MULTIPOLYGON: "MultiPolygon",
 };
 
 exports.USER_STATUSES = {
@@ -32,6 +36,15 @@ exports.USER_STATUSES = {
 };
 
 exports.USER_TYPES = {
-	USER: "user",
+	TENANT: "tenant",
+	MANAGER: "manager",
 	ADMIN: "admin",
+	SUPER_ADMIN: "super-admin",
+	MULTI: "multi",
+};
+
+exports.OTP_TYPES = {
+	LOGIN: "login",
+	SIGN_UP: "sign-up",
+	OTHER: "other",
 };

@@ -1,17 +1,25 @@
-const { BRAINTREE_MERCHANT_ID, BRAINTREE_PUBLIC_KEY, BRAINTREE_PRIVATE_KEY } =
-	process.env;
+const { NODE_ENV } = process.env;
 
-const braintree = require("braintree");
+import braintree from "braintree";
 
-const { PAYMENT_ACCOUNT_TYPES } = require("../configs/enums");
-const { BRAINTREE } = PAYMENT_ACCOUNT_TYPES;
+const productionGateway = {
+	environment: braintree.Environment.Production,
+	merchantId: "37d84f7x8np77x9q",
+	publicKey: "nt56w7rcpcfjrkmm",
+	privateKey: "6394cbe67f5c109b994ef8d4efe2bce5",
+};
 
-const gateway = new braintree.BraintreeGateway({
+const sandboxGateway = {
 	environment: braintree.Environment.Sandbox,
-	merchantId: BRAINTREE_MERCHANT_ID,
-	publicKey: BRAINTREE_PUBLIC_KEY,
-	privateKey: BRAINTREE_PRIVATE_KEY,
-});
+	merchantId: "kc6ts5mqdvkqgfgd",
+	publicKey: "dfppgvm93g3zgxn2",
+	privateKey: "f4558961135ce218902f706788d54214",
+};
+
+const gateway = new braintree.BraintreeGateway(
+	NODE_ENV === "development" ? sandboxGateway : productionGateway
+	// NODE_ENV === "production" ? sandboxGateway : productionGateway
+);
 
 class BraintreeManager {
 	constructor() {
@@ -31,24 +39,74 @@ class BraintreeManager {
 
 	/**
 	 * Create a braintree customer account
-	 * @param {string} user user id
+	 * @param {string} firstName first name
+	 * @param {string} lastName last name
+	 * @param {string} email email address
+	 * @param {string} phone phone number
+	 * @param {object} creditCard credit card data
 	 * @param {string} paymentMethodNonce nonce token
 	 * @returns {object} paymentAccount
 	 */
 	async createCustomer(parameters) {
-		const { user, paymentMethodNonce } = parameters;
+		const {
+			firstName,
+			lastName,
+			email,
+			phone,
+			creditCard,
+			paymentMethodNonce,
+		} = parameters;
 		const customerObj = {};
 		if (paymentMethodNonce) customerObj.paymentMethodNonce = paymentMethodNonce;
 		else throw new Error("Please enter paymentMethodNonce!");
+		if (firstName) customerObj.firstName = firstName;
+		if (lastName) customerObj.lastName = lastName;
+		if (email) customerObj.email = email;
+		if (phone) customerObj.phone = phone;
+		if (creditCard) customerObj.creditCard = creditCard;
 		const response = await gateway.customer.create(customerObj);
 		if (response.success) {
-			const paymentAccountObj = {
-				user,
-				type: BRAINTREE,
-				account: response.customer,
-			};
-			return await paymentAccountsModel.create(paymentAccountObj);
+			return response;
 		} else throw new Error(response?.message);
+	}
+
+	/**
+	 * Delete a customer
+	 * @param {string} customerId braintree customer id
+	 * @returns {object} customer data
+	 */
+	async deleteCustomer(parameters) {
+		const { customerId } = parameters;
+		return await gateway.customer.delete(customerId);
+	}
+
+	/**
+	 * Create a braintree payment method
+	 * @param {object} customerId braintree customer id
+	 * @param {string} paymentMethodNonce nonce token
+	 * @returns {object} paymentMethod
+	 */
+	async createPaymentMethod(parameters) {
+		const { customerId, paymentMethodNonce } = parameters;
+		const paymentMethodObj = {};
+		if (paymentMethodNonce)
+			paymentMethodObj.paymentMethodNonce = paymentMethodNonce;
+		else throw new Error("Please enter paymentMethodNonce!");
+		if (customerId) paymentMethodObj.customerId = customerId;
+		const response = await gateway.paymentMethod.create(paymentMethodObj);
+		if (response.success) {
+			return response;
+		} else throw new Error(response?.message);
+	}
+
+	/**
+	 * Remove a payment method
+	 * @param {string} token payment method token
+	 * @returns {object} payment method data
+	 */
+	async removePaymentMethod(parameters) {
+		const { token } = parameters;
+		return await gateway.paymentMethod.delete(token);
 	}
 
 	/**
@@ -56,21 +114,63 @@ class BraintreeManager {
 	 * @param {number} amount transaction amount in smaller units of currency
 	 * @param {string} customerId braintree customer id
 	 * @param {string} paymentMethodNonce nonce token
-	 * @param {string} deviceData OPTIONAL
+	 * @param {string} paymentMethodToken method token
+	 * @param {string} deviceData OPTIONAL device data
 	 * @returns {object} transaction
 	 */
 	async saleTransaction(parameters) {
-		const { amount, customerId, paymentMethodNonce, deviceData } = parameters;
-		const transactionObj = {
+		const {
 			amount,
 			customerId,
 			paymentMethodNonce,
+			paymentMethodToken,
+			deviceData,
+		} = parameters;
+
+		const transactionObj = {
+			amount: Number(amount).toFixed(2),
+			customerId,
+			paymentMethodToken,
+			paymentMethodNonce,
 			deviceData,
 			options: {
-				submitForSettlement: true,
+				submitForSettlement: false,
 			},
 		};
 		return await gateway.transaction.sale(transactionObj);
+	}
+
+	/**
+	 * Submit transaction for settlement
+	 * @param {string} transactionId braintree transaction id
+	 * @param {number} amount transaction amount in smaller units of currency
+	 * @returns {object} transaction
+	 */
+	async adjustTransaction(parameters) {
+		const { transactionId, amount } = parameters;
+		return await gateway.transaction.adjustAuthorization(transactionId, {
+			amount,
+		});
+	}
+
+	/**
+	 * Adjust authorized transaction
+	 * @param {string} transactionId braintree transaction id
+	 * @returns {object} transaction
+	 */
+	async submitTransaction(parameters) {
+		const { transactionId } = parameters;
+		return await gateway.transaction.submitForSettlement(transactionId);
+	}
+
+	/**
+	 * Void a transaction
+	 * @param {string} transactionId braintree transaction id
+	 * @returns {object} transaction
+	 */
+	async voidTransaction(parameters) {
+		const { transactionId } = parameters;
+		return await gateway.transaction.void(transactionId);
 	}
 
 	/**
@@ -80,7 +180,8 @@ class BraintreeManager {
 	 */
 	async holdTransaction(parameters) {
 		const { transactionId } = parameters;
-		return await gateway.transaction.holdInEscrow(transactionId);
+		const hold = await gateway.transaction.holdInEscrow(transactionId);
+		return hold;
 	}
 
 	/**
@@ -116,4 +217,4 @@ class BraintreeManager {
 	}
 }
 
-module.exports = BraintreeManager;
+export default BraintreeManager;

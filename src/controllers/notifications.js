@@ -1,5 +1,8 @@
 const { messagesModel, notificationsModel } = require("../models");
-const firebaseManager = require("../utils/FirebaseManager");
+const FirebaseManager = require("../utils/FirebaseManager");
+
+const { NOTIFICATION_TYPES } = require("../configs/enums");
+const { NEW_MESSAGE } = NOTIFICATION_TYPES;
 
 /**
  * Get user notifications
@@ -27,7 +30,7 @@ exports.getAllNotifications = async (parameters) => {
 };
 
 /**
- * Send new message notification
+ * New message notification
  * @param {string} message message id
  * @returns {null}
  */
@@ -36,49 +39,30 @@ exports.newMessageNotification = async (parameters) => {
 	const messageExists = await messagesModel.findOne({ _id: message }).populate([
 		{
 			path: "userTo",
-			populate: { path: "profile", model: "profiles" },
+			// populate: { path: "profile", model: "profiles" },
 		},
 		{
 			path: "userFrom",
-			populate: { path: "profile", model: "profiles" },
+			// populate: { path: "profile", model: "profiles" },
 		},
 	]);
-	if (messageExists) {
-		const title = "New Message";
-		let body = `New message from {"user":"${messageExists.userFrom._id}"} !`;
-		await notificationsModel.create({
-			type: "new-message",
-			text: body,
-			message: messageExists._id,
-			messenger: messageExists.userFrom,
-			user: messageExists.userTo,
-		});
-		body = `New message from ${messageExists.userFrom.profile.firstname}!`;
-		await messageExists.userTo.fcms.forEach(async (element) => {
-			await firebaseManager.sendNotification(element.fcm, title, body);
-		});
-		return;
-		console.log(searchObjectsInArray(body, ["user"]));
-	} else throw new Error("Message not found!");
-};
+	if (messageExists);
+	else throw new Error("Message not found!");
 
-/**
- * Send new message notification
- * @param {string} string text containing objects e.g '{"name":"dev"}'
- * @param {[string]} keysArray array of keys of objects in string e.g ["name"]
- * @returns {object} object of key-value pairs from string
- */
-function searchObjectsInArray(parameters) {
-	const { string, keysArray } = parameters;
-	const strArray = string.split(" ");
-	let object = {};
-	keysArray.forEach((element) => {
-		const obj = JSON.parse(
-			strArray.find(function (str) {
-				return str.includes(element);
-			})
-		);
-		object = { ...object, ...obj };
+	const title = "New Message";
+	let body = `New message from {"user":"${messageExists.userFrom._id}"} !`;
+	await notificationsModel.create({
+		type: NEW_MESSAGE,
+		text: body,
+		message: messageExists._id,
+		messenger: messageExists.userFrom,
+		user: messageExists.userTo,
 	});
-	return object;
-}
+	body = `New message from ${messageExists.userFrom.name}!`;
+	const fcms = [];
+	messageExists.userTo.fcms.forEach(async (element) => {
+		fcms.push(element.token);
+	});
+	await new FirebaseManager().sendNotification({ fcms, title, body });
+	return;
+};

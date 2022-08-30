@@ -1,61 +1,77 @@
 const jwt = require("jsonwebtoken");
-const passport = require("passport");
-const localstrategy = require("passport-local");
-var ExtractJwt = require("passport-jwt").ExtractJwt;
-var jwtStrategy = require("passport-jwt").Strategy;
-const { SECRET_KEY } = process.env;
+const { JWT_SECRET } = process.env;
 
 const { usersModel } = require("../models");
 
-const { USER_STATUSES } = require("../configs/enums");
+const { USER_STATUSES, USER_TYPES } = require("../configs/enums");
 const { ACTIVE, DELETED } = USER_STATUSES;
-const { ADMIN } = USER_STATUSES;
+const { TENANT, MANAGER, ADMIN, SUPER_ADMIN } = USER_TYPES;
 
-exports.local = passport.use(new localstrategy(usersModel.authenticate()));
-passport.serializeUser(usersModel.serializeUser());
-passport.deserializeUser(usersModel.deserializeUser());
-
-exports.getToken = function (user) {
-	return jwt.sign(user, SECRET_KEY);
+/**
+ * Get JWT token
+ * @param {string} _id user id
+ * @param {string} phone user phone number
+ * @param {string} otp OTP code
+ * @param {string} shouldValidateOTP OTP validation check
+ * @param {string | boolean } variable any variable
+ * @returns {object} JWT token
+ */
+exports.getToken = function (parameters) {
+	return jwt.sign(parameters, process.env.JWT_SECRET);
 };
 
-const opts = {};
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = SECRET_KEY;
+exports.verifyToken = async (
+	req,
+	res,
+	next,
+	shouldReturnUserOnFailure = false
+) => {
+	try {
+		const token =
+			(req.headers.authorization &&
+				req.headers.authorization.split("Bearer")[1]) ||
+			(req.signedCookies && req.signedCookies.jwt) ||
+			(req.cookies && req.cookies.jwt);
+		if (token) {
+			let verificationObject;
+			verificationObject = jwt.verify(token.trim(), JWT_SECRET);
 
-exports.jwtpassport = passport.use(
-	new jwtStrategy(opts, (jwt_payload, done) => {
-		if (jwt_payload.otpValidation) {
-			return done(null, jwt_payload);
-		} else
-			usersModel.findOne({ _id: jwt_payload._id }, (err, user) => {
-				if (err) {
-					return done(err, false);
-				} else if (user?.status === DELETED) {
-					err = new Error("Account deleted!");
-					return done(err, false);
-				} else if (user) {
-					return done(null, user);
-				} else {
-					return done(null, false);
-				}
-			});
-	})
-);
-
-exports.verifyToken = passport.authenticate("jwt", { session: false });
+			if (verificationObject.shouldValidateOTP) {
+				req.user = verificationObject;
+				return next();
+			}
+			let user = await usersModel.findOne({ _id: verificationObject._id });
+			if (user) {
+				if (user.status === DELETED)
+					return res.status(401).send("User account deleted!");
+				req.user = user;
+				return next();
+			}
+		}
+		if (shouldReturnUserOnFailure) {
+			req.user = null;
+			return next();
+		}
+		return res.status(401).send("Unauthorized!");
+	} catch (error) {
+		if (shouldReturnUserOnFailure) {
+			req.user = null;
+			return next();
+		}
+		return res.status(401).send("Unauthorized!");
+	}
+};
 
 exports.verifyOTP = async (req, res, next) => {
 	try {
-		const { otp, phone } = req?.user;
+		const { otp } = req?.user;
 		const { code } = req.body;
 		if (Number(code) === Number(otp)) {
-			if (phone) req.body.phone = phone;
 			next();
 		} else {
-			err = new Error("Invalid Code!");
-			err.status = 400;
-			return next(err);
+			const error = new Error("Invalid Code!");
+			error.status = 400;
+			return next(error);
 		}
 	} catch (error) {
 		return next(error);
@@ -63,10 +79,43 @@ exports.verifyOTP = async (req, res, next) => {
 };
 
 exports.verifyAdmin = (req, res, next) => {
-	if (req?.user?.type === ADMIN && req?.user?.status === ACTIVE) {
+	if (
+		(req?.user?.type === ADMIN || req?.user?.type === SUPER_ADMIN) &&
+		req?.user?.status === ACTIVE
+	) {
 		next();
 	} else {
 		const error = new Error("You are not authorized as admin!");
+		error.status = 403;
+		return next(error);
+	}
+};
+
+exports.verifySuperAdmin = (req, res, next) => {
+	if (req?.user?.type === SUPER_ADMIN && req?.user?.status === ACTIVE) {
+		next();
+	} else {
+		const error = new Error("You are not authorized as admin!");
+		error.status = 403;
+		return next(error);
+	}
+};
+
+exports.verifyTenant = (req, res, next) => {
+	if (req?.user?.type === TENANT && req?.user?.status === ACTIVE) {
+		next();
+	} else {
+		const error = new Error("You are not authorized as tenant!");
+		error.status = 403;
+		return next(error);
+	}
+};
+
+exports.verifyManager = (req, res, next) => {
+	if (req?.user?.type === MANAGER && req?.user?.status === ACTIVE) {
+		next();
+	} else {
+		const error = new Error("You are not authorized as tenant!");
 		error.status = 403;
 		return next(error);
 	}
@@ -80,12 +129,6 @@ exports.verifyUser = (req, res, next) => {
 		error.status = 403;
 		return next(error);
 	}
-};
-
-exports.alterLogin = (req, res, next) => {
-	const { email } = req.body;
-	if (email) req.body.username = email;
-	next();
 };
 
 exports.verifyUserToken = async (req, res, next) => {

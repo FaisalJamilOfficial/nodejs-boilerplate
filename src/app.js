@@ -19,10 +19,8 @@ const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 
 const indexRouter = require("./routes/index");
-const { setState } = require("./controllers/users");
+const { updateUser } = require("./controllers/users");
 const errorHandler = require("./utils/ErrorHandler");
-const { USER_STATES } = require("./configs/enums");
-const { OFFLINE, ONLINE } = USER_STATES;
 
 const serverFunction = async () => {
 	console.log("***Server Execution Started!***");
@@ -41,8 +39,8 @@ const serverFunction = async () => {
 				console.log(data);
 				console.log("---------entered------------");
 				try {
-					const arguments = { user: data, state: ONLINE };
-					setState(arguments);
+					const arguments = { user: data, isOnline: true };
+					updateUser(arguments);
 				} catch (error) {
 					next(error);
 				}
@@ -53,8 +51,8 @@ const serverFunction = async () => {
 				console.log(data);
 				console.log("---------exit------------");
 				try {
-					const arguments = { user: data, state: OFFLINE };
-					setState(arguments);
+					const arguments = { user: data, isOnline: false };
+					updateUser(arguments);
 				} catch (error) {
 					next(error);
 				}
@@ -99,7 +97,7 @@ const serverFunction = async () => {
 		});
 
 		app.get("/*", (req, res, next) => {
-			res.sendFile(path.join(__dirname, "/public/images/image.png"));
+			res.sendFile(path.join(__dirname, "/public/image.png"));
 		});
 
 		// catch 404 and forward to error handler

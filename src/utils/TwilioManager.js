@@ -1,6 +1,7 @@
 const otpGenerator = require("otp-generator");
 
 const { getToken } = require("../middlewares/authenticator");
+const { usersModel } = require("../models");
 const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = process.env;
 
 const client = require("twilio")(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
@@ -19,8 +20,9 @@ class TwilioManager {
 	async sendOTP(parameters) {
 		const { user, phone } = parameters;
 
-		if (phone) {
-		} else return next(new Error("Please enter phone number!"));
+		let userExists;
+		if (phone) userExists = await usersModel.findOne({ phone });
+		else return next(new Error("Please enter phone number!"));
 
 		const otp = otpGenerator.generate(6, {
 			alphabets: false,
@@ -35,7 +37,12 @@ class TwilioManager {
 		// 	to: phone,
 		// });
 
-		const token = getToken({ _id: user, phone, otp, otpValidation: true });
+		const token = getToken({
+			_id: user,
+			phone,
+			otp,
+			shouldValidateOTP: true,
+		});
 		return {
 			success: true,
 			token,

@@ -1,19 +1,18 @@
 const SharpManager = require("../utils/SharpManager");
 
-const { PROFILE_PICTURES_DIRECTORY } = require("../configs/directories");
+const { IMAGES_DIRECTORY } = require("../configs/directories");
 
-exports.resizeProfilePicture = async (req, res, next) => {
+exports.resizeImages = async (req, res, next) => {
 	try {
-		const { picture } = req.files || {};
+		const { images } = req.files || {};
 
-		if (picture) {
-			const path = PROFILE_PICTURES_DIRECTORY;
-			const images = picture;
+		if (images) {
+			const path = IMAGES_DIRECTORY;
 
 			// imagesData contains 1.image_name 2.image_path
 			const imagesData = { images, path };
 
-			req.files.picture = await new SharpManager().resizeImagesWithThumbnails(
+			req.files.images = await new SharpManager().resizeImagesWithThumbnails(
 				imagesData
 			);
 			next();

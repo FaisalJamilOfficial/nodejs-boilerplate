@@ -1,6 +1,9 @@
 const fs = require("fs");
 
-const { PROFILE_PICTURES_DIRECTORY } = require("../configs/directories");
+const {
+	IMAGES_DIRECTORY,
+	ATTACHMENTS_DIRECTORY,
+} = require("../configs/directories");
 
 class FilesDeleter {
 	constructor() {
@@ -8,16 +11,30 @@ class FilesDeleter {
 	}
 
 	/**
-	 * Delete profile picture file
-	 * @param {string} profilePicture profile picture file name
+	 * Delete image file
+	 * @param {string} image image file name
 	 * @returns {null}
 	 */
-	async deleteProfilePicture(parameters) {
-		const { profilePicture } = parameters;
+	async deleteImage(parameters) {
+		const { image } = parameters;
 		const array = [];
-		const PATH = PROFILE_PICTURES_DIRECTORY;
-		array.push({ path: PATH + profilePicture });
-		array.push({ path: PATH + "thumbnails/" + profilePicture });
+		const PATH = IMAGES_DIRECTORY;
+		array.push({ path: PATH + image });
+		array.push({ path: PATH + "thumbnails/" + image });
+		this.deleteFiles({ files: array });
+		return;
+	}
+
+	/**
+	 * Delete attachment file
+	 * @param {string} attachment attachment file name
+	 * @returns {null}
+	 */
+	async deleteAttachment(parameters) {
+		const { attachment } = parameters;
+		const array = [];
+		const PATH = ATTACHMENTS_DIRECTORY;
+		array.push({ path: PATH + attachment });
 		this.deleteFiles({ files: array });
 		return;
 	}

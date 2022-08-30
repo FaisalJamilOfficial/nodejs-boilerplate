@@ -13,15 +13,17 @@ class FirebaseManager {
 
 	/**
 	 * Send firebase notification
-	 * @param {string} fcm firebase cloud messaging user token
+	 * @param {[string]} fcms firebase cloud messaging user tokens array
 	 * @param {string} title notification title
 	 * @param {string} body notification body
 	 * @param {object} data notification data
 	 * @returns {null}
 	 */
 	async sendNotification(parameters) {
-		const { fcm, title, body, data } = parameters;
+		const { title, body } = parameters;
+		let { data, fcms } = parameters;
 		data = data ?? {};
+		fcms = fcms.length > 0 ? fcms : "null";
 		const payload = {
 			notification: {
 				title,
@@ -32,7 +34,7 @@ class FirebaseManager {
 		};
 		connection
 			.messaging()
-			.sendToDevice([fcm], payload)
+			.sendToDevice(fcms, payload)
 			.then((res) => console.log(res))
 			.catch((error) => console.error(error));
 		return;

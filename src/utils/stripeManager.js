@@ -24,18 +24,18 @@ class StripeManager {
 	 */
 	async createToken(parameters) {
 		const { number, exp_month, exp_year, cvc, name } = parameters;
-		const tokenObj = {};
-		if (number) tokenObj.number = number;
+		const card = {};
+		if (number) card.number = number;
 		else throw new Error("Please enter number!");
-		if (typeof exp_month === "number") tokenObj.exp_month = exp_month;
+		if (typeof exp_month === "number") card.exp_month = exp_month;
 		else throw new Error("Please enter exp_month!");
-		if (typeof exp_year === "number") tokenObj.exp_year = exp_year;
+		if (typeof exp_year === "number") card.exp_year = exp_year;
 		else throw new Error("Please enter exp_year!");
-		if (cvc) tokenObj.cvc = cvc;
+		if (cvc) card.cvc = cvc;
 		else throw new Error("Please enter cvc!");
-		if (name) tokenObj.name = name;
+		if (name) card.name = name;
 		else throw new Error("Please enter name!");
-		return await stripe.tokens.create(tokenObj);
+		return await stripe.tokens.create({ card });
 	}
 
 	/**
@@ -96,7 +96,7 @@ class StripeManager {
 	 * @returns {object} paymentAccount
 	 */
 	async createCustomerSourceWithCheck(parameters) {
-		const { source, cardHolderName, user, email } = parameters;
+		const { source, cardHolderName, user, email, phone } = parameters;
 		if (source) {
 		} else throw new Error("Please enter source token!");
 
@@ -111,6 +111,7 @@ class StripeManager {
 		else {
 			const customerObj = {};
 			if (email) customerObj.email = email;
+			if (phone) customerObj.phone = phone;
 			const customer = await stripe.customers.create(customerObj);
 			if (customer) userStripeID = customer.id;
 			else throw new Error("Stripe customer creation failed!");

@@ -8,6 +8,6 @@ router.use("/messages", messages);
 router.use("/users", users);
 
 router.use("/docs", (req, res, next) =>
-	res.redirect("https://documenter.getpostman.com/view/14185057/UVkqruXK")
+	res.redirect("https://documenter.getpostman.com/view/14185057/VUxLxoyc")
 );
 module.exports = router;

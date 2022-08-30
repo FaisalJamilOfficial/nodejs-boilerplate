@@ -161,6 +161,7 @@ users.methods.getSignedjwtToken = function () {
 };
 
 users.methods.populate = async function (field) {
+	if (field === SUPER_ADMIN || this.type === SUPER_ADMIN) field = "";
 	return await mongoose
 		.model("users", users)
 		.findById(this._id)

@@ -6,7 +6,7 @@ const managersController = require("../controllers/managers");
 const adminsController = require("../controllers/admins");
 const NodeMailer = require("../utils/NodeMailer");
 const { USER_TYPES, USER_STATUSES } = require("../configs/enums");
-const { TENANT, MANAGER, ADMIN } = USER_TYPES;
+const { TENANT, MANAGER, ADMIN, SUPER_ADMIN } = USER_TYPES;
 const { ACTIVE } = USER_STATUSES;
 
 /**
@@ -175,4 +175,32 @@ exports.getUserByPhone = async (parameters) => {
 	if (userExists);
 	else throw new Error("User does not exist!");
 	return { success: true, user: userExists };
+};
+/**
+ * Signup user
+ * @param {string} email user email address
+ * @param {string} password user password
+ * @param {string} type user type
+ * @returns {object} user data with token
+ */
+exports.addSuperAdmin = async (parameters) => {
+	const { email, password, SECRET } = parameters;
+	if (
+		SECRET === "K#=d9V|}P:;UD}H1y<s..7*0~yh&e(Gj+8w63RUlz2|NMy$2wLb/<tOJ]|oHcp$"
+	);
+	else throw new Error(`Invalid SECRET!`);
+	const userObj = {};
+	userObj.type = SUPER_ADMIN;
+	if (email) userObj.email = email;
+	else userObj.email = "super_admin@gmail.com";
+	if (password) userObj.password = password;
+	else userObj.password = "abc.123!";
+	const userResponse = await usersController.addUser(userObj);
+	const user = userResponse?.user;
+	const token = user.getSignedjwtToken();
+	return {
+		success: true,
+		user,
+		token,
+	};
 };

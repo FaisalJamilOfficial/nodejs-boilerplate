@@ -218,6 +218,18 @@ router.get(
 	}
 );
 
+router.post("/super-admin", async (req, res, next) => {
+	try {
+		const arguments = {
+			...req.body,
+		};
+		const response = await authController.addSuperAdmin(arguments);
+		res.json(response);
+	} catch (error) {
+		next(error);
+	}
+});
+
 router.get("/:user", verifyToken, verifyUser, async (req, res, next) => {
 	try {
 		const { _id } = req?.user;

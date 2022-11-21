@@ -36,8 +36,7 @@ exports.USER_STATUSES = {
 };
 
 exports.USER_TYPES = {
-	TENANT: "tenant",
-	MANAGER: "manager",
+	CUSTOMER: "customer",
 	ADMIN: "admin",
 	SUPER_ADMIN: "super-admin",
 	MULTI: "multi",

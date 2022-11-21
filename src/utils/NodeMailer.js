@@ -1,4 +1,5 @@
-const { EMAIL_USER, CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN } = process.env;
+const { EMAIL_USER, PASS_APP, CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN } =
+	process.env;
 
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
@@ -31,7 +32,15 @@ const transporter = nodemailer.createTransport({
 		rejectUnauthorized: false,
 	},
 });
-
+// const transporter = nodemailer.createTransport({
+// 	host: "smtp.gmail.com",
+// 	port: 587,
+// 	secure: false, // true for 465, false for other ports
+// 	auth: {
+// 		user: EMAIL_USER,
+// 		pass: PASS_APP,
+// 	},
+// });
 class NodeMailer {
 	constructor() {
 		this.transporter = transporter;

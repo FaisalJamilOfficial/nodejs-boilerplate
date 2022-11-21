@@ -56,10 +56,12 @@ const ResetPassword = () => {
 	const handleReset = async (values, setSubmitting) => {
 		console.log(values);
 		axios
-			.post(
-				`https://app-backend-boilerplate.herokuapp.com/api/v1/users/password-reset/${queryParams.user}/${queryParams.token}`,
+			.put(
+				`https://app-backend-boilerplate.herokuapp.com/api/v1/users/password/email/`,
 				{
+					user: queryParams.user,
 					password: values.newPassword,
+					token: queryParams.token,
 				}
 			)
 			.then((response) => {

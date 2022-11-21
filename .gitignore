@@ -76,6 +76,6 @@ typings/
 .fusebox/
 
 # Enviornment variables
-.env 
-.env.development
-.env.production
+# .env 
+# .env.development
+# .env.production

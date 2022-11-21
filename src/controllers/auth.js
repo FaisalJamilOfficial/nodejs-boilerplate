@@ -91,6 +91,11 @@ exports.login = async (parameters) => {
 	if (userExists.status === ACTIVE);
 	else throw new Error(`User ${userExists.status}!`);
 
+	await usersModel.updateOne(
+		{ _id: userExists._id },
+		{ lastLogin: new Date() }
+	);
+
 	const token = userExists.getSignedjwtToken();
 	return {
 		success: true,

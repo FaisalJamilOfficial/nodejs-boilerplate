@@ -1,0 +1,25 @@
+name: Node.js CI Dev server
+
+on:
+  push:
+    branches: [development]
+
+jobs:
+  install:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: npm install and restart server
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - run: git pull origin development
+      - run: npm install
+      - run: pm2 restart 0

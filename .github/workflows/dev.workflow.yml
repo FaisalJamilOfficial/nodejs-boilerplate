@@ -1,4 +1,4 @@
-name: Node.js CI Dev server
+name: Node.js CI Development Server Action Runner
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   install:
-    runs-on: self-hosted
+    runs-on: development-server
 
     strategy:
       matrix:
@@ -14,12 +14,11 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: npm install and restart server
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-      - run: git pull origin development
       - run: npm install
-      - run: pm2 restart 0
+      - run: pm2 restart app-backend

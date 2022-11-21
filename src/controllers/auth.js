@@ -1,12 +1,11 @@
 const { isValidObjectId } = require("mongoose");
-const { usersModel, passwordTokensModel } = require("../models");
+const { usersModel, userTokensModel } = require("../models");
 const usersController = require("../controllers/users");
-const tenantsController = require("../controllers/tenants");
-const managersController = require("../controllers/managers");
+const customersController = require("./customers");
 const adminsController = require("../controllers/admins");
 const NodeMailer = require("../utils/NodeMailer");
 const { USER_TYPES, USER_STATUSES } = require("../configs/enums");
-const { TENANT, MANAGER, ADMIN, SUPER_ADMIN } = USER_TYPES;
+const { CUSTOMER, ADMIN, SUPER_ADMIN } = USER_TYPES;
 const { ACTIVE } = USER_STATUSES;
 
 /**
@@ -20,7 +19,7 @@ const { ACTIVE } = USER_STATUSES;
 exports.signup = async (parameters) => {
 	try {
 		var user;
-		var profile;
+		// var profile;
 		const { type } = parameters;
 		const userResponse = await usersController.addUser({ ...parameters });
 		if (userResponse?.success) user = userResponse?.user;
@@ -30,22 +29,16 @@ exports.signup = async (parameters) => {
 		let profileResponse;
 		const userObj = {};
 		userObj.user = user._id;
+		userObj.type = type;
 
-		if (type === TENANT) {
-			profileResponse = await tenantsController.addTenant(profileObj);
-			userObj.type = TENANT;
-			userObj.tenant = profileResponse?.tenant._id;
-			profile = profileResponse?.tenant;
-		} else if (type === MANAGER) {
-			profileResponse = await managersController.addManager(profileObj);
-			userObj.type = MANAGER;
-			userObj.manager = profileResponse?.manager._id;
-			profile = profileResponse?.manager;
+		if (type === CUSTOMER) {
+			profileResponse = await customersController.addCustomer(profileObj);
+			userObj.customer = profileResponse?.customer._id;
+			// profile = profileResponse?.customer;
 		} else if (type === ADMIN) {
 			profileResponse = await adminsController.addAdmin(profileObj);
-			userObj.type = ADMIN;
 			userObj.admin = profileResponse?.admin._id;
-			profile = profileResponse?.admin;
+			// profile = profileResponse?.admin;
 		}
 		if (profileResponse?.success) await usersController.updateUser(userObj);
 		else throw new Error("Profile creation failed!");
@@ -58,7 +51,7 @@ exports.signup = async (parameters) => {
 		};
 	} catch (error) {
 		if (user) await user.remove();
-		if (profile) await profile.remove();
+		// if (profile) await profile.remove();
 		throw error;
 	}
 };
@@ -111,39 +104,94 @@ exports.login = async (parameters) => {
  */
 exports.emailResetPassword = async (parameters) => {
 	const { email } = parameters;
-	const userExists = await usersModel.findOne({ email });
-	if (userExists);
-	else throw new Error("User with given email doesn't exist!");
-
-	let passwordTokenExists = await passwordTokensModel.findOne({
-		user: userExists._id,
+	const tokenExpirationTime = new Date();
+	tokenExpirationTime.setMinutes(tokenExpirationTime.getMinutes() + 10);
+	const emailTokenResponse = await this.generateEmailToken({
+		email,
+		tokenExpirationTime,
 	});
-	if (passwordTokenExists);
-	else {
-		const passwordTokenObj = {};
-		passwordTokenObj.user = userExists._id;
-		passwordTokenObj.token = userExists.getSignedjwtToken();
-		passwordTokenExists = await new passwordTokensModel(
-			passwordTokenObj
-		).save();
-	}
+	const userEmailToken = emailTokenResponse.userToken;
 
-	const link = `${process.env.BASE_URL}forgot-password/reset?user=${userExists._id}&token=${passwordTokenExists.token}`;
+	const link = `${process.env.BASE_URL}forgot-password/reset?user=${userEmailToken.user}&token=${userEmailToken.token}`;
 	const body = `
 To reset your password, click on this link 
 ${link}
 Link will expire in 10 minutes.
 
 If you didn't do this, click here backendboilerplate@gmail.com`;
+
 	const arguments = {};
-	arguments.to = userExists.email;
+	arguments.to = email;
 	arguments.subject = "Password reset";
-	arguments.body = body;
+	arguments.text = body;
 	await new NodeMailer().sendEmail(arguments);
 
 	return {
 		success: true,
 		message: "Password reset link sent to your email address!",
+	};
+};
+
+/**
+ * Send email verification email
+ * @param {string} email user email address
+ * @returns {object} user email verification result
+ */
+exports.emailVerifyEmail = async (parameters) => {
+	const { email } = parameters;
+	const tokenExpirationTime = new Date();
+	tokenExpirationTime.setMinutes(tokenExpirationTime.getMinutes() + 10);
+	const emailTokenResponse = await this.generateEmailToken({
+		email,
+		tokenExpirationTime,
+	});
+	const userEmailToken = emailTokenResponse.userToken;
+
+	const link = `${process.env.BASE_URL}api/v1/users/emails?user=${userEmailToken.user}&token=${userEmailToken.token}`;
+	const body = `
+To verify your email address, click on this link 
+${link}
+Link will expire in 10 minutes.
+
+If you didn't do this, click here backendboilerplate@gmail.com`;
+
+	const arguments = {};
+	arguments.to = email;
+	arguments.subject = "Email verification";
+	arguments.text = body;
+	await new NodeMailer().sendEmail(arguments);
+
+	return {
+		success: true,
+		message: "Email verification link sent to your email address!",
+	};
+};
+
+/**
+ * Generate user email token
+ * @param {string} email user email address
+ * @param {Date} tokenExpirationTime email token expiration time
+ * @returns {object} user email token
+ */
+exports.generateEmailToken = async (parameters) => {
+	const { email, tokenExpirationTime } = parameters;
+	const userExists = await usersModel.findOne({ email: email });
+	if (userExists);
+	else throw new Error("User with given email doesn't exist!");
+	let userTokenExists = await userTokensModel.findOne({
+		user: userExists._id,
+	});
+	if (userTokenExists);
+	else {
+		const userTokenObj = {};
+		userTokenObj.user = userExists._id;
+		userTokenObj.token = userExists.getSignedjwtToken();
+		userTokenObj.expireAt = tokenExpirationTime;
+		userTokenExists = await new userTokensModel(userTokenObj).save();
+	}
+	return {
+		success: true,
+		userToken: userTokenExists,
 	};
 };
 
@@ -161,17 +209,44 @@ exports.resetPassword = async (parameters) => {
 	if (userExists);
 	else throw new Error("Invalid link!");
 
-	const passwordTokenExists = await passwordTokensModel.findOne({
+	const userTokenExists = await userTokensModel.findOne({
 		user,
 		token,
 	});
-	if (passwordTokenExists);
+	if (userTokenExists);
 	else throw new Error("Invalid or expired link !");
 
 	await userExists.setPassword(password);
-	await passwordTokenExists.delete();
+	await userTokenExists.delete();
 
 	return { success: true, message: "Password reset sucessfully!" };
+};
+
+/**
+ * Email user email
+ * @param {string} user user id
+ * @param {string} token user email token
+ * @returns {object} user email verification result
+ */
+exports.verifyUserEmail = async (parameters) => {
+	const { user, token } = parameters;
+
+	const userExists = await usersModel.findById(user);
+	if (userExists);
+	else throw new Error("Invalid link!");
+
+	const userTokenExists = await userTokensModel.findOne({
+		user,
+		token,
+	});
+	if (userTokenExists);
+	else throw new Error("Invalid or expired link !");
+
+	userExists.isEmailVerified = true;
+	await userExists.save();
+	await userTokenExists.delete();
+
+	return { success: true, message: "Email verified sucessfully!" };
 };
 
 exports.getUserByPhone = async (parameters) => {

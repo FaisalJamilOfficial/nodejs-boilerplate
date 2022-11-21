@@ -27,7 +27,7 @@ exports.addAdmin = async (parameters) => {
  * @returns {object} admin data
  */
 exports.updateAdmin = async (parameters) => {
-	const { admin } = parameters;
+	const { user } = parameters;
 	const adminObj = {};
 	if (admin);
 	else throw new Error("Please enter admin id!");
@@ -36,7 +36,7 @@ exports.updateAdmin = async (parameters) => {
 
 	return {
 		success: true,
-		admin: await adminsModel.findByIdAndUpdate({ _id: admin }, adminObj, {
+		admin: await adminsModel.findByIdAndUpdate({ user }, adminObj, {
 			new: true,
 		}),
 	};

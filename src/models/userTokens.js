@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const passwordTokens = new Schema({
+const userTokens = new Schema({
 	user: {
 		type: Schema.Types.ObjectId,
 		required: true,
@@ -12,11 +12,10 @@ const passwordTokens = new Schema({
 		type: String,
 		required: true,
 	},
-	createdAt: {
+	expireAt: {
 		type: Date,
-		default: Date.now,
-		expires: 3600,
+		default: null,
 	},
 });
-
-module.exports = mongoose.model("passwordTokens", passwordTokens);
+userTokens.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
+module.exports = mongoose.model("userTokens", userTokens);

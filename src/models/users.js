@@ -10,7 +10,7 @@ const {
 	GEO_JSON_TYPES,
 } = require("../configs/enums");
 const { ACTIVE, DELETED } = USER_STATUSES;
-const { TENANT, MANAGER, ADMIN, SUPER_ADMIN, MULTI } = USER_TYPES;
+const { CUSTOMER, ADMIN, SUPER_ADMIN, MULTI } = USER_TYPES;
 const {
 	POINT,
 	LINESTRING,
@@ -92,7 +92,7 @@ const users = new Schema(
 		},
 		type: {
 			type: String,
-			enum: [TENANT, MANAGER, ADMIN, SUPER_ADMIN, MULTI],
+			enum: [CUSTOMER, ADMIN, SUPER_ADMIN, MULTI],
 			required: [true, "Please enter user type!"],
 			index: true,
 		},
@@ -117,15 +117,9 @@ const users = new Schema(
 			type: Date,
 			select: false,
 		},
-		tenant: {
+		customer: {
 			type: Schema.Types.ObjectId,
-			ref: "tenants",
-			select: false,
-			index: true,
-		},
-		manager: {
-			type: Schema.Types.ObjectId,
-			ref: "managers",
+			ref: "customers",
 			select: false,
 			index: true,
 		},
@@ -135,12 +129,7 @@ const users = new Schema(
 			select: false,
 			index: true,
 		},
-		isTenant: {
-			type: Boolean,
-			select: false,
-			default: false,
-		},
-		isManager: {
+		isCustomer: {
 			type: Boolean,
 			select: false,
 			default: false,

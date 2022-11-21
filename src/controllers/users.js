@@ -1,10 +1,5 @@
 const { isValidObjectId } = require("mongoose");
-const {
-	usersModel,
-	tenantsModel,
-	managersModel,
-	adminsModel,
-} = require("../models");
+const { usersModel, customersModel, adminsModel } = require("../models");
 const FilesDeleter = require("../utils/FilesDeleter");
 
 /**
@@ -16,20 +11,20 @@ const FilesDeleter = require("../utils/FilesDeleter");
  * @returns {object} user data
  */
 exports.addUser = async (parameters) => {
-	const { email, password, phone, type } = parameters;
-	const userObj = {};
+  const { email, password, phone, type } = parameters;
+  const userObj = {};
 
-	if (email) userObj.email = email;
-	if (password) userObj.password = password;
-	if (phone) userObj.phone = phone;
-	if (type) userObj.type = type;
-	const user = await usersModel.create(userObj);
-	await user.setPassword(password);
+  if (email) userObj.email = email;
+  if (password) userObj.password = password;
+  if (phone) userObj.phone = phone;
+  if (type) userObj.type = type;
+  const user = await usersModel.create(userObj);
+  await user.setPassword(password);
 
-	return {
-		success: true,
-		user,
-	};
+  return {
+    success: true,
+    user,
+  };
 };
 
 /**
@@ -46,95 +41,86 @@ exports.addUser = async (parameters) => {
  * @param {string} lastName user last name
  * @param {[object]} images user images array
  * @param {[number]} coordinates user location coordinates
- * @param {string} tenant tenant id
- * @param {string} manager manager id
+ * @param {string} customer customer id
  * @param {string} admin admin id
  * @returns {object} user data
  */
 exports.updateUser = async (parameters) => {
-	const {
-		user,
-		email,
-		phone,
-		password,
-		type,
-		status,
-		firstName,
-		lastName,
-		images,
-		tenant,
-		manager,
-		admin,
-	} = parameters;
-	let { isOnline, coordinates, fcm } = parameters;
+  const {
+    user,
+    email,
+    phone,
+    password,
+    type,
+    status,
+    firstName,
+    lastName,
+    images,
+    customer,
+    admin,
+  } = parameters;
+  let { isOnline, coordinates, fcm } = parameters;
 
-	if (user);
-	else throw new Error("Please enter user id!");
+  if (user);
+  else throw new Error("Please enter user id!");
 
-	const userExists = await usersModel.findById(user);
-	if (userExists);
-	else throw new Error("Please enter valid user id!");
+  const userExists = await usersModel.findById(user);
+  if (userExists);
+  else throw new Error("Please enter valid user id!");
 
-	if (email) userExists.email = email;
-	if (password) await userExists.setPassword(password);
-	if (phone) userExists.phone = phone;
-	if (type) userExists.type = type;
-	if (status) userExists.status = status;
-	if (fcm) {
-		fcm = JSON.parse(fcm);
-		// if (fcm?.token && fcm?.device) {
-		let alreadyExists = false;
-		userExists.fcms.forEach((element) => {
-			if (element.device === fcm.device) {
-				alreadyExists = true;
-				element.token = fcm.token;
-			}
-		});
-		if (alreadyExists);
-		else userExists.fcms.push({ device: fcm.device, token: fcm.token });
-		// } else throw new Error("Please enter FCM token and device both!");
-	}
-	if (isOnline) {
-		isOnline = JSON.parse(isOnline);
-		if (typeof isOnline === "boolean") userExists.isOnline = isOnline;
-	}
-	if (firstName) userExists.firstName = firstName;
-	if (lastName) userExists.lastName = lastName;
-	if (firstName || lastName)
-		userExists.name = userExists.firstName + " " + userExists.lastName;
-	if (images) {
-		if (userExists.image)
-			new FilesDeleter().deleteImage({ image: userExists.image });
-		userExists.image = images[0].path;
-	}
-	if (coordinates) {
-		coordinates = JSON.parse(coordinates);
-		if (coordinates?.length === 2)
-			userExists.location.coordinates = coordinates;
-		else throw new Error("Please enter location longitude and latitude both!");
-	}
+  if (email) userExists.email = email;
+  if (password) await userExists.setPassword(password);
+  if (phone) userExists.phone = phone;
+  if (type) userExists.type = type;
+  if (status) userExists.status = status;
+  if (fcm) {
+    if (fcm?.token && fcm?.device) {
+      let alreadyExists = false;
+      userExists.fcms.forEach((element) => {
+        if (element.device === fcm.device) {
+          alreadyExists = true;
+          element.token = fcm.token;
+        }
+      });
+      if (alreadyExists);
+      else userExists.fcms.push({ device: fcm.device, token: fcm.token });
+    } else throw new Error("Please enter FCM token and device both!");
+  }
+  if (isOnline) {
+    isOnline = JSON.parse(isOnline);
+    if (typeof isOnline === "boolean") userExists.isOnline = isOnline;
+  }
+  if (firstName) userExists.firstName = firstName;
+  if (lastName) userExists.lastName = lastName;
+  if (firstName || lastName)
+    userExists.name = userExists.firstName + " " + userExists.lastName;
+  if (images) {
+    if (userExists.image)
+      new FilesDeleter().deleteImage({ image: userExists.image });
+    userExists.image = images[0].path;
+  }
+  if (coordinates) {
+    if (coordinates?.length === 2)
+      userExists.location.coordinates = coordinates;
+    else throw new Error("Please enter location longitude and latitude both!");
+  }
 
-	if (tenant)
-		if (await tenantsModel.exists({ _id: tenant })) {
-			userExists.tenant = tenant;
-			userExists.isTenant = true;
-		} else throw new Error("Please enter valid tenant id!");
-	if (manager)
-		if (await managersModel.exists({ _id: manager })) {
-			userExists.manager = manager;
-			userExists.isManager = true;
-		} else throw new Error("Please enter valid manager id!");
-	if (admin)
-		if (await adminsModel.exists({ _id: admin })) {
-			userExists.admin = admin;
-			userExists.isAdmin = true;
-		} else throw new Error("Please enter valid admin id!");
+  if (customer)
+    if (await customersModel.exists({ _id: customer })) {
+      userExists.customer = customer;
+      userExists.isCustomer = true;
+    } else throw new Error("Please enter valid customer id!");
+  if (admin)
+    if (await adminsModel.exists({ _id: admin })) {
+      userExists.admin = admin;
+      userExists.isAdmin = true;
+    } else throw new Error("Please enter valid admin id!");
 
-	await usersModel.updateOne({ _id: userExists._id }, userExists);
-	return {
-		success: true,
-		user: userExists,
-	};
+  await usersModel.updateOne({ _id: userExists._id }, userExists);
+  return {
+    success: true,
+    user: userExists,
+  };
 };
 
 /**
@@ -143,16 +129,16 @@ exports.updateUser = async (parameters) => {
  * @returns {object} user data
  */
 exports.deleteUser = async (parameters) => {
-	const { user } = parameters;
-	if (user) {
-	} else throw new Error("Please enter user id!");
-	const userExists = await usersModel.findByIdAndDelete(user);
-	if (userExists);
-	else throw new Error("Please enter valid user id!");
-	return {
-		success: true,
-		user: userExists,
-	};
+  const { user } = parameters;
+  if (user) {
+  } else throw new Error("Please enter user id!");
+  const userExists = await usersModel.findByIdAndDelete(user);
+  if (userExists);
+  else throw new Error("Please enter valid user id!");
+  return {
+    success: true,
+    user: userExists,
+  };
 };
 
 /**
@@ -161,16 +147,16 @@ exports.deleteUser = async (parameters) => {
  * @returns {object} user data
  */
 exports.getUser = async (parameters) => {
-	const { user } = parameters;
-	if (user) {
-	} else throw new Error("Please enter user id!");
-	let userExists = await usersModel.findById(user);
-	if (userExists) userExists = await userExists.populate(userExists.type);
-	else throw new Error("Please enter valid user id!");
-	return {
-		success: true,
-		user: userExists,
-	};
+  const { user } = parameters;
+  if (user) {
+  } else throw new Error("Please enter user id!");
+  let userExists = await usersModel.findById(user);
+  if (userExists) userExists = await userExists.populate(userExists.type);
+  else throw new Error("Please enter valid user id!");
+  return {
+    success: true,
+    user: userExists,
+  };
 };
 
 /**
@@ -181,35 +167,35 @@ exports.getUser = async (parameters) => {
  * @returns {[object]} array of users
  */
 exports.getUsers = async (parameters) => {
-	const { q, type } = parameters;
-	let { page, limit } = parameters;
-	if (!limit) limit = 10;
-	if (!page) page = 0;
-	if (page) page = page - 1;
-	const query = {};
-	if (type) query.type = type;
-	if (q && q.trim() !== "") {
-		query.$or = [
-			{ email: { $regex: q, $options: "i" } },
-			{ phone: { $regex: q, $options: "i" } },
-			{ firstName: { $regex: q, $options: "i" } },
-			{ lastName: { $regex: q, $options: "i" } },
-			{ name: { $regex: q, $options: "i" } },
-		];
-	}
-	const users = await usersModel
-		.find(query)
-		.populate("tenant manager admin")
-		.sort({ createdAt: -1 })
-		.skip(page * limit)
-		.limit(limit);
-	const totalCount = await usersModel.find(query).count();
-	return {
-		success: true,
-		totalCount,
-		totalPages: Math.ceil(totalCount / limit),
-		users,
-	};
+  const { q, type } = parameters;
+  let { page, limit } = parameters;
+  if (!limit) limit = 10;
+  if (!page) page = 0;
+  if (page) page = page - 1;
+  const query = {};
+  if (type) query.type = type;
+  if (q && q.trim() !== "") {
+    query.$or = [
+      { email: { $regex: q, $options: "i" } },
+      { phone: { $regex: q, $options: "i" } },
+      { firstName: { $regex: q, $options: "i" } },
+      { lastName: { $regex: q, $options: "i" } },
+      { name: { $regex: q, $options: "i" } },
+    ];
+  }
+  const users = await usersModel
+    .find(query)
+    .populate("tenant manager admin")
+    .sort({ createdAt: -1 })
+    .skip(page * limit)
+    .limit(limit);
+  const totalCount = await usersModel.find(query).count();
+  return {
+    success: true,
+    totalCount,
+    totalPages: Math.ceil(totalCount / limit),
+    users,
+  };
 };
 
 // /**

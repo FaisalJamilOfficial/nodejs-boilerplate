@@ -17,8 +17,8 @@ class TwilioManager {
    * @param {string} phone user phone number in INTERNATIONAL format
    * @returns {object} token
    */
-  async sendOTP(parameters) {
-    const { user, phone } = parameters;
+  async sendOTP(params) {
+    const { user, phone } = params;
 
     let userExists;
     if (phone) userExists = await usersModel.findOne({ phone });
@@ -38,7 +38,7 @@ class TwilioManager {
     // });
 
     const token = getToken({
-      _id: user,
+      _id: user ?? userExists?._id,
       phone,
       otp,
       shouldValidateOTP: true,

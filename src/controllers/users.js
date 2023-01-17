@@ -1,4 +1,3 @@
-const { isValidObjectId } = require("mongoose");
 const { usersModel, customersModel, adminsModel } = require("../models");
 const FilesDeleter = require("../utils/FilesDeleter");
 
@@ -10,8 +9,8 @@ const FilesDeleter = require("../utils/FilesDeleter");
  * @param {string} type user type
  * @returns {object} user data
  */
-exports.addUser = async (parameters) => {
-  const { email, password, phone, type } = parameters;
+exports.addUser = async (params) => {
+  const { email, password, phone, type } = params;
   const userObj = {};
 
   if (email) userObj.email = email;
@@ -23,7 +22,7 @@ exports.addUser = async (parameters) => {
 
   return {
     success: true,
-    user,
+    data: user,
   };
 };
 
@@ -45,7 +44,7 @@ exports.addUser = async (parameters) => {
  * @param {string} admin admin id
  * @returns {object} user data
  */
-exports.updateUser = async (parameters) => {
+exports.updateUser = async (params) => {
   const {
     user,
     email,
@@ -58,8 +57,8 @@ exports.updateUser = async (parameters) => {
     images,
     customer,
     admin,
-  } = parameters;
-  let { isOnline, coordinates, fcm } = parameters;
+  } = params;
+  let { isOnline, coordinates, fcm } = params;
 
   if (user);
   else throw new Error("Please enter user id!");
@@ -119,7 +118,7 @@ exports.updateUser = async (parameters) => {
   await usersModel.updateOne({ _id: userExists._id }, userExists);
   return {
     success: true,
-    user: userExists,
+    data: userExists,
   };
 };
 
@@ -128,16 +127,16 @@ exports.updateUser = async (parameters) => {
  * @param {string} user user id
  * @returns {object} user data
  */
-exports.deleteUser = async (parameters) => {
-  const { user } = parameters;
-  if (user) {
-  } else throw new Error("Please enter user id!");
+exports.deleteUser = async (params) => {
+  const { user } = params;
+  if (user);
+  else throw new Error("Please enter user id!");
   const userExists = await usersModel.findByIdAndDelete(user);
   if (userExists);
   else throw new Error("Please enter valid user id!");
   return {
     success: true,
-    user: userExists,
+    data: userExists,
   };
 };
 
@@ -146,16 +145,16 @@ exports.deleteUser = async (parameters) => {
  * @param {string} user user id
  * @returns {object} user data
  */
-exports.getUser = async (parameters) => {
-  const { user } = parameters;
-  if (user) {
-  } else throw new Error("Please enter user id!");
+exports.getUser = async (params) => {
+  const { user } = params;
+  if (user);
+  else throw new Error("Please enter user id!");
   let userExists = await usersModel.findById(user);
   if (userExists) userExists = await userExists.populate(userExists.type);
   else throw new Error("Please enter valid user id!");
   return {
     success: true,
-    user: userExists,
+    data: userExists,
   };
 };
 
@@ -166,9 +165,9 @@ exports.getUser = async (parameters) => {
  * @param {number} page users page number
  * @returns {[object]} array of users
  */
-exports.getUsers = async (parameters) => {
-  const { q, type } = parameters;
-  let { page, limit } = parameters;
+exports.getUsers = async (params) => {
+  const { q, type } = params;
+  let { page, limit } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
@@ -185,7 +184,7 @@ exports.getUsers = async (parameters) => {
   }
   const users = await usersModel
     .find(query)
-    .populate("tenant manager admin")
+    .populate("customer admin")
     .sort({ createdAt: -1 })
     .skip(page * limit)
     .limit(limit);
@@ -194,7 +193,7 @@ exports.getUsers = async (parameters) => {
     success: true,
     totalCount,
     totalPages: Math.ceil(totalCount / limit),
-    users,
+    data: users,
   };
 };
 
@@ -208,9 +207,9 @@ exports.getUsers = async (parameters) => {
 //  * @param {string} type user type
 //  * @returns {[object]} array of users
 //  */
-// exports.getAllUsers = async (parameters) => {
-// 	const { user, q, status, type } = parameters;
-// 	let { page, limit } = parameters;
+// exports.getAllUsers = async (params) => {
+// 	const { user, q, status, type } = params;
+// 	let { page, limit } = params;
 // 	const query = {};
 // 	if (!limit) limit = 10;
 // 	if (!page) page = 1;
@@ -221,14 +220,14 @@ exports.getUsers = async (parameters) => {
 // 		var wildcard = [
 // 			{
 // 				$regexMatch: {
-// 					input: "$profile.firstname",
+// 					input: "$profile.firstName",
 // 					regex: q,
 // 					options: "i",
 // 				},
 // 			},
 // 			{
 // 				$regexMatch: {
-// 					input: "$profile.lastname",
+// 					input: "$profile.lastName",
 // 					regex: q,
 // 					options: "i",
 // 				},
@@ -301,6 +300,6 @@ exports.getUsers = async (parameters) => {
 // 		success: true,
 // 		totalCount: totalCount[0]?.count ?? 0,
 // 		totalPages: Math.ceil((totalCount[0]?.count ?? 0) / limit),
-// 		users,
+// 		data: users,
 // 	};
 // };

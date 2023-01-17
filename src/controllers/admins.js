@@ -7,18 +7,18 @@ const { usersModel, adminsModel } = require("../models");
  * @returns {object} admin data
  */
 exports.addAdmin = async (parameters) => {
-	const { user } = parameters;
-	const adminObj = {};
+  const { user } = parameters;
+  const adminObj = {};
 
-	if (user);
-	else throw new Error("Please enter user id!");
-	if (isValidObjectId(user));
-	else throw new Error("Please enter valid user id!");
-	if (await usersModel.exists({ _id: user })) adminObj.user = user;
-	else throw new Error("user not found!");
+  if (user);
+  else throw new Error("Please enter user id!");
+  if (isValidObjectId(user));
+  else throw new Error("Please enter valid user id!");
+  if (await usersModel.exists({ _id: user })) adminObj.user = user;
+  else throw new Error("user not found!");
 
-	const admin = await adminsModel.create(adminObj);
-	return { success: true, admin };
+  const admin = await adminsModel.create(adminObj);
+  return { success: true, data: admin };
 };
 
 /**
@@ -27,19 +27,19 @@ exports.addAdmin = async (parameters) => {
  * @returns {object} admin data
  */
 exports.updateAdmin = async (parameters) => {
-	const { user } = parameters;
-	const adminObj = {};
-	if (admin);
-	else throw new Error("Please enter admin id!");
-	if (isValidObjectId(admin));
-	else throw new Error("Please enter valid admin id!");
+  const { admin } = parameters;
+  const adminObj = {};
+  if (admin);
+  else throw new Error("Please enter admin id!");
+  if (isValidObjectId(admin));
+  else throw new Error("Please enter valid admin id!");
 
-	return {
-		success: true,
-		admin: await adminsModel.findByIdAndUpdate({ user }, adminObj, {
-			new: true,
-		}),
-	};
+  return {
+    success: true,
+    data: await adminsModel.findByIdAndUpdate(admin, adminObj, {
+      new: true,
+    }),
+  };
 };
 
 /**
@@ -48,16 +48,16 @@ exports.updateAdmin = async (parameters) => {
  * @returns {object} admin data
  */
 exports.deleteAdmin = async (parameters) => {
-	const { admin } = parameters;
-	if (admin) {
-	} else throw new Error("Please enter admin id!");
-	const adminExists = await adminsModel.findByIdAndDelete(admin);
-	if (adminExists);
-	else throw new Error("Please enter valid admin id!");
-	return {
-		success: true,
-		admin: adminExists,
-	};
+  const { admin } = parameters;
+  if (admin);
+  else throw new Error("Please enter admin id!");
+  const adminExists = await adminsModel.findByIdAndDelete(admin);
+  if (adminExists);
+  else throw new Error("Please enter valid admin id!");
+  return {
+    success: true,
+    data: adminExists,
+  };
 };
 
 /**
@@ -66,16 +66,16 @@ exports.deleteAdmin = async (parameters) => {
  * @returns {object} admin data
  */
 exports.getAdmin = async (parameters) => {
-	const { admin } = parameters;
-	if (admin) {
-	} else throw new Error("Please enter admin id!");
-	let adminExists = await adminsModel.findById(admin);
-	if (adminExists);
-	else throw new Error("Please enter valid admin id!");
-	return {
-		success: true,
-		admin: adminExists,
-	};
+  const { admin } = parameters;
+  if (admin);
+  else throw new Error("Please enter admin id!");
+  const adminExists = await adminsModel.findById(admin);
+  if (adminExists);
+  else throw new Error("Please enter valid admin id!");
+  return {
+    success: true,
+    data: adminExists,
+  };
 };
 
 /**
@@ -86,18 +86,19 @@ exports.getAdmin = async (parameters) => {
  * @returns {object} admin data
  */
 exports.getAdmins = async (parameters) => {
-	const { q, limit, page } = parameters;
-	if (!limit) limit = 10;
-	if (!page) page = 0;
-	if (page) page = page - 1;
-	const query = {};
-	if (q) query.q = q;
-	const admins = await adminsModel
-		.find(query)
-		.sort({ createdAt: -1 })
-		.skip(page * limit)
-		.limit(limit);
-	const totalCount = await adminsModel.find(query).count();
-	const totalPages = Math.ceil(totalCount / limit);
-	return { success: true, totalCount, totalPages, admins };
+  const { q } = parameters;
+  let { limit, page } = parameters;
+  if (!limit) limit = 10;
+  if (!page) page = 0;
+  if (page) page = page - 1;
+  const query = {};
+  if (q) query.q = q;
+  const admins = await adminsModel
+    .find(query)
+    .sort({ createdAt: -1 })
+    .skip(page * limit)
+    .limit(limit);
+  const totalCount = await adminsModel.find(query).count();
+  const totalPages = Math.ceil(totalCount / limit);
+  return { success: true, totalCount, totalPages, data: admins };
 };

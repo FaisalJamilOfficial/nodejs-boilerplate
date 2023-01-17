@@ -14,12 +14,13 @@ class SharpManager {
    * @param {string} path directory to save resized images
    * @returns {[object]} array of resized images
    */
-  async resizeImages(parameters) {
-    const { images, path } = parameters;
+  async resizeImages(params) {
+    const { images, path } = params;
 
     const array = [];
     if (images) {
-      const imagesMimeRegex = new RegExp("image/(.*)");
+      // const imagesMimeRegex = new RegExp("image/(.*)");
+      const imagesMimeRegex = /image\/(.*)/;
       for (let i = 0; i < images.length; i++) {
         const buffer = images[i].buffer;
         let id;
@@ -56,7 +57,7 @@ class SharpManager {
         });
       }
       return array;
-    } else return;
+    } else return { success: true };
   }
 
   /**
@@ -65,12 +66,13 @@ class SharpManager {
    * @param {string} path directory to save resized images
    * @returns {[object]} array of resized images
    */
-  async resizeImagesWithThumbnails(parameters) {
-    const { images, path } = parameters;
+  async resizeImagesWithThumbnails(params) {
+    const { images, path } = params;
 
     const array = [];
     if (images) {
-      const imagesMimeRegex = new RegExp("image/(.*)");
+      // const imagesMimeRegex = new RegExp("image/(.*)");
+      const imagesMimeRegex = /image\/(.*)/;
       for (let i = 0; i < images.length; i++) {
         const buffer = images[i].buffer;
         let id;
@@ -116,7 +118,7 @@ class SharpManager {
         });
       }
       return array;
-    } else return;
+    } else return { success: true };
   }
 }
 

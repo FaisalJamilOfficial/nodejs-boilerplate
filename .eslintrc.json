@@ -1,0 +1,17 @@
+{
+  "env": {
+    "commonjs": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": ["standard", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "rules": {
+    "no-unused-vars": "warn",
+    "prefer-const": "warn",
+    "camelcase": "warn",
+    "no-throw-literal": "off"
+  }
+}

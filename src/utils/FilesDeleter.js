@@ -15,14 +15,14 @@ class FilesDeleter {
    * @param {string} image image file name
    * @returns {null}
    */
-  async deleteImage(parameters) {
-    const { image } = parameters;
+  async deleteImage(params) {
+    const { image } = params;
     const array = [];
     const PATH = IMAGES_DIRECTORY;
     array.push({ path: PATH + image });
     array.push({ path: PATH + "thumbnails/" + image });
     this.deleteFiles({ files: array });
-    return;
+    return { success: true };
   }
 
   /**
@@ -30,13 +30,13 @@ class FilesDeleter {
    * @param {string} attachment attachment file name
    * @returns {null}
    */
-  async deleteAttachment(parameters) {
-    const { attachment } = parameters;
+  async deleteAttachment(params) {
+    const { attachment } = params;
     const array = [];
     const PATH = ATTACHMENTS_DIRECTORY;
     array.push({ path: PATH + attachment });
     this.deleteFiles({ files: array });
-    return;
+    return { success: true };
   }
 
   /**
@@ -44,8 +44,8 @@ class FilesDeleter {
    * @param {[object]} files array of files
    * @returns {null}
    */
-  async deleteFiles(parameters) {
-    const { files } = parameters;
+  async deleteFiles(params) {
+    const { files } = params;
     if (files && Array.isArray(files)) {
       for (let i = 0; i < files.length; i++) {
         const element = files[i];
@@ -56,7 +56,7 @@ class FilesDeleter {
         }
       }
     }
-    return;
+    return { success: true };
   }
 }
 

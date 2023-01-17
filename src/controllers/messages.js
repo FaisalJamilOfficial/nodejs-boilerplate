@@ -1,3 +1,4 @@
+const SocketManager = require("../utils/SocketManager");
 const { isValidObjectId } = require("mongoose");
 
 const { usersModel, messagesModel, conversationsModel } = require("../models");
@@ -15,53 +16,53 @@ const { READ } = MESSAGE_STATUSES;
  * @param {[object]} attachments message attachments
  * @returns {object} message data
  */
-exports.addMessage = async (parameters) => {
-	const { userFrom, userTo, text, attachments, conversation } = parameters;
-	const messageObj = {};
+exports.addMessage = async (params) => {
+  const { userFrom, userTo, text, attachments, conversation } = params;
+  const messageObj = {};
 
-	if (userTo);
-	else throw new Error("Please enter userTo id!");
-	if (isValidObjectId(userTo));
-	else throw new Error("Please enter valid userTo id!");
-	if (await usersModel.exists({ _id: userTo })) messageObj.userTo = userTo;
-	else throw new Error("userTo not found!");
+  if (userTo);
+  else throw new Error("Please enter userTo id!");
+  if (isValidObjectId(userTo));
+  else throw new Error("Please enter valid userTo id!");
+  if (await usersModel.exists({ _id: userTo })) messageObj.userTo = userTo;
+  else throw new Error("userTo not found!");
 
-	if (userFrom);
-	else throw new Error("Please enter userFrom id!");
-	if (isValidObjectId(userFrom));
-	else throw new Error("Please enter valid userFrom id!");
-	if (await usersModel.exists({ _id: userFrom }))
-		messageObj.userFrom = userFrom;
-	else throw new Error("userFrom not found!");
+  if (userFrom);
+  else throw new Error("Please enter userFrom id!");
+  if (isValidObjectId(userFrom));
+  else throw new Error("Please enter valid userFrom id!");
+  if (await usersModel.exists({ _id: userFrom }))
+    messageObj.userFrom = userFrom;
+  else throw new Error("userFrom not found!");
 
-	if (conversation);
-	else throw new Error("Please enter conversation id!");
-	if (isValidObjectId(conversation));
-	else throw new Error("Please enter valid conversation id!");
-	if (
-		await conversationsModel.exists({
-			_id: conversation,
-		})
-	)
-		messageObj.conversation = conversation;
-	else throw new Error("conversation not found!");
+  if (conversation);
+  else throw new Error("Please enter conversation id!");
+  if (isValidObjectId(conversation));
+  else throw new Error("Please enter valid conversation id!");
+  if (
+    await conversationsModel.exists({
+      _id: conversation,
+    })
+  )
+    messageObj.conversation = conversation;
+  else throw new Error("conversation not found!");
 
-	if (text) messageObj.text = text;
+  if (text) messageObj.text = text;
 
-	if (attachments) {
-		messageObj.attachments = [];
-		attachments.forEach((attachment) => {
-			if (attachment.path)
-				messageObj.attachments.push({
-					path: attachment.filename,
-					type: attachment.mimetype,
-				});
-		});
-	}
+  if (attachments) {
+    messageObj.attachments = [];
+    attachments.forEach((attachment) => {
+      if (attachment.path)
+        messageObj.attachments.push({
+          path: attachment.filename,
+          type: attachment.mimetype,
+        });
+    });
+  }
 
-	const message = await messagesModel.create(messageObj);
+  const message = await messagesModel.create(messageObj);
 
-	return { success: true, message };
+  return { success: true, data: message };
 };
 
 /**
@@ -73,23 +74,23 @@ exports.addMessage = async (parameters) => {
  * @param {[object]} attachments OPTIONAL message attachments
  * @returns {object} message data
  */
-exports.chat = async (parameters) => {
-	const { conversation } = parameters;
-	let { page, limit } = parameters;
-	if (!limit) limit = 10;
-	if (!page) page = 0;
-	if (page) page = page - 1;
-	const query = {};
-	if (conversation) query.conversation = conversation;
-	else throw new Error("Please enter conversation id!");
-	const messages = await messagesModel
-		.find(query)
-		.sort({ createdAt: -1 })
-		.skip(page * limit)
-		.limit(limit);
-	const totalCount = await messagesModel.find(query).count();
-	const totalPages = Math.ceil(totalCount / limit);
-	return { success: true, totalCount, totalPages, messages };
+exports.chat = async (params) => {
+  const { conversation } = params;
+  let { page, limit } = params;
+  if (!limit) limit = 10;
+  if (!page) page = 0;
+  if (page) page = page - 1;
+  const query = {};
+  if (conversation) query.conversation = conversation;
+  else throw new Error("Please enter conversation id!");
+  const messages = await messagesModel
+    .find(query)
+    .sort({ createdAt: -1 })
+    .skip(page * limit)
+    .limit(limit);
+  const totalCount = await messagesModel.find(query).count();
+  const totalPages = Math.ceil(totalCount / limit);
+  return { success: true, totalCount, totalPages, data: messages };
 };
 
 /**
@@ -99,24 +100,22 @@ exports.chat = async (parameters) => {
  * @param {string} status message status
  * @returns {object} message data
  */
-exports.updateMessage = async (parameters) => {
-	const { message, text, status } = parameters;
-	const messageObj = {};
-	if (message);
-	else throw new Error("Please enter message id!");
-	if (isValidObjectId(message));
-	else throw new Error("Please enter valid message id!");
-	if (text) messageObj.text = text;
-	if (status) messageObj.status = status;
+exports.updateMessage = async (params) => {
+  const { message, text, status } = params;
+  const messageObj = {};
+  if (message);
+  else throw new Error("Please enter message id!");
+  if (isValidObjectId(message));
+  else throw new Error("Please enter valid message id!");
+  if (text) messageObj.text = text;
+  if (status) messageObj.status = status;
 
-	return {
-		success: true,
-		message: await messagesModel.findByIdAndUpdate(
-			{ _id: message },
-			messageObj,
-			{ new: true }
-		),
-	};
+  return {
+    success: true,
+    data: await messagesModel.findByIdAndUpdate({ _id: message }, messageObj, {
+      new: true,
+    }),
+  };
 };
 
 /**
@@ -124,17 +123,17 @@ exports.updateMessage = async (parameters) => {
  * @param {string} message message id
  * @returns {object} message data
  */
-exports.deleteMessage = async (parameters) => {
-	const { message } = parameters;
-	if (message) {
-	} else throw new Error("Please enter message id!");
-	const messageExists = await messagesModel.findByIdAndDelete(message);
-	if (messageExists);
-	else throw new Error("Please enter valid message id!");
-	return {
-		success: true,
-		message: messageExists,
-	};
+exports.deleteMessage = async (params) => {
+  const { message } = params;
+  if (message);
+  else throw new Error("Please enter message id!");
+  const messageExists = await messagesModel.findByIdAndDelete(message);
+  if (messageExists);
+  else throw new Error("Please enter valid message id!");
+  return {
+    success: true,
+    data: messageExists,
+  };
 };
 
 /**
@@ -144,26 +143,26 @@ exports.deleteMessage = async (parameters) => {
  * @param {number} page conversations page number
  * @returns {[object]} array of conversations
  */
-exports.getConversations = async (parameters) => {
-	const { user } = parameters;
-	let { limit, page } = parameters;
-	if (!limit) limit = 10;
-	if (!page) page = 0;
-	if (page) page = page - 1;
-	const query = {};
-	if (user) query.$or = [{ userTo: user }, { userFrom: user }];
-	const conversations = await conversationsModel
-		.find(query)
-		.sort({ createdAt: -1 })
-		.skip(page * limit)
-		.limit(limit);
-	const totalCount = await conversationsModel.find(query).count();
-	return {
-		success: true,
-		totalCount,
-		totalPages: Math.ceil(totalCount / limit),
-		conversations,
-	};
+exports.getConversations = async (params) => {
+  const { user } = params;
+  let { limit, page } = params;
+  if (!limit) limit = 10;
+  if (!page) page = 0;
+  if (page) page = page - 1;
+  const query = {};
+  if (user) query.$or = [{ userTo: user }, { userFrom: user }];
+  const conversations = await conversationsModel
+    .find(query)
+    .sort({ createdAt: -1 })
+    .skip(page * limit)
+    .limit(limit);
+  const totalCount = await conversationsModel.find(query).count();
+  return {
+    success: true,
+    totalCount,
+    totalPages: Math.ceil(totalCount / limit),
+    data: conversations,
+  };
 };
 
 /**
@@ -175,47 +174,49 @@ exports.getConversations = async (parameters) => {
  * @param {object} socket socket io
  * @returns {object} message data
  */
-exports.send = async (parameters) => {
-	const { userFrom, userTo, socket } = parameters;
-	let conversation;
-	const query = {
-		$or: [
-			{ $and: [{ userTo: userFrom }, { userFrom: userTo }] },
-			{ $and: [{ userFrom: userFrom }, { userTo: userTo }] },
-		],
-	};
+exports.send = async (params) => {
+  const { userFrom, userTo } = params;
+  let conversation;
+  const query = {
+    $or: [
+      { $and: [{ userTo: userFrom }, { userFrom: userTo }] },
+      { $and: [{ userFrom }, { userTo }] },
+    ],
+  };
 
-	let conversationExists = await conversationsModel.findOne(query);
-	if (conversationExists) {
-		conversation = conversationExists._id;
-		if (conversationExists.status === PENDING) {
-			if (userFrom.equals(conversationExists.userTo)) {
-				conversationExists.status = ACCEPTED;
-				await conversationExists.save();
-			}
-		} else if (conversationExists.status === REJECTED)
-			throw new Error("Conversation request rejected!");
-	} else {
-		const conversationObj = {};
-		conversationObj.userTo = userTo;
-		conversationObj.userFrom = userFrom;
-		conversationExists = await conversationsModel.create(conversationObj);
-		conversation = conversationExists._id;
-	}
+  let conversationExists = await conversationsModel.findOne(query);
+  if (conversationExists) {
+    conversation = conversationExists._id;
+    if (conversationExists.status === PENDING) {
+      if (userFrom.equals(conversationExists.userTo)) {
+        conversationExists.status = ACCEPTED;
+        await conversationExists.save();
+      }
+    } else if (conversationExists.status === REJECTED)
+      throw new Error("Conversation request rejected!");
+  } else {
+    const conversationObj = {};
+    conversationObj.userTo = userTo;
+    conversationObj.userFrom = userFrom;
+    conversationExists = await conversationsModel.create(conversationObj);
+    conversation = conversationExists._id;
+  }
 
-	const arguments = { ...parameters, conversation };
-	const responseMessage = await this.addMessage(arguments);
-	const message = responseMessage.message;
+  const args = { ...params, conversation };
+  const responseMessage = await this.addMessage(args);
+  const message = responseMessage.message;
 
-	socket.emit("newMessage_" + message.conversation, {
-		message,
-	});
+  await new SocketManager().emitEvent({
+    to: message.userTo,
+    event: "newMessage_" + message._id,
+    data: message,
+  });
 
-	await notificationsController.newMessageNotification({
-		message: message._id,
-	});
+  await notificationsController.newMessageNotification({
+    message: message._id,
+  });
 
-	return { success: true, message };
+  return { success: true, data: message };
 };
 
 /**
@@ -224,19 +225,20 @@ exports.send = async (parameters) => {
  * @param {string} userTo user id
  * @returns {object} message data
  */
-exports.readMessages = async (parameters) => {
-	const { conversation, userTo } = parameters;
-	const messageObj = { status: READ };
-	if (userTo);
-	else throw new Error("Please enter userTo id!");
-	if (await usersModel.exists({ _id: userTo }));
-	else throw new Error("Please enter valid userTo id!");
-	if (conversation);
-	else throw new Error("Please enter conversation id!");
-	if (await conversationsModel.exists({ _id: conversation }));
-	else throw new Error("Please enter valid conversation id!");
-	await messagesModel.updateMany({ conversation, userTo }, messageObj);
-	return {
-		success: true,
-	};
+exports.readMessages = async (params) => {
+  const { conversation, userTo } = params;
+  const messageObj = { status: READ };
+  if (userTo);
+  else throw new Error("Please enter userTo id!");
+  if (await usersModel.exists({ _id: userTo }));
+  else throw new Error("Please enter valid userTo id!");
+  if (conversation);
+  else throw new Error("Please enter conversation id!");
+  if (await conversationsModel.exists({ _id: conversation }));
+  else throw new Error("Please enter valid conversation id!");
+  await messagesModel.updateMany({ conversation, userTo }, messageObj);
+  return {
+    success: true,
+    message: "messages read successfully!",
+  };
 };

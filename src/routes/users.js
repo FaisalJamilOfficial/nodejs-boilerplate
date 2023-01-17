@@ -5,242 +5,220 @@ const authController = require("../controllers/auth");
 const notificationsController = require("../controllers/notifications");
 const usersController = require("../controllers/users");
 const {
-	verifyOTP,
-	verifyToken,
-	verifyUser,
-	verifyAdmin,
-	verifyUserToken,
+  verifyOTP,
+  verifyToken,
+  verifyUser,
+  verifyAdmin,
+  verifyUserToken,
 } = require("../middlewares/authenticator");
 const TwilioManager = require("../utils/TwilioManager");
 const { uploadTemporary } = require("../middlewares/uploader");
 const { resizeImages } = require("../middlewares/imageResizer");
 const { OTP_TYPES, USER_TYPES } = require("../configs/enums");
+const { asyncHandler } = require("../middlewares/asyncHandler");
 const { LOGIN } = OTP_TYPES;
 const { ADMIN } = USER_TYPES;
 
 router
-	.route("/")
-	.post(
-		(req, res, next) => verifyToken(req, res, next, true),
-		async (req, res, next) => {
-			try {
-				const isAdmin = req?.user?.type === ADMIN ? true : false;
-				const arguments = {
-					...req.body,
-					isAdmin,
-				};
-				const response = await authController.signup(arguments);
-				res.json(response);
-			} catch (error) {
-				next(error);
-			}
-		}
-	)
-	.put(
-		verifyToken,
-		verifyUser,
-		uploadTemporary.fields([{ name: "images", maxCount: 1 }]),
-		resizeImages,
-		async (req, res, next) => {
-			try {
-				const { _id, type } = req?.user;
-				const { user } = req.body;
-				const { images } = req.files || {};
-				const isAdmin = type === ADMIN ? true : false;
-				const user_id = isAdmin ? user : _id;
-				const arguments = {
-					...req.body,
-					user: user_id,
-					images,
-					isAdmin,
-				};
-				const response = await usersController.updateUser(arguments);
-				res.json(response);
-			} catch (error) {
-				next(error);
-			}
-		}
-	)
-	.get(verifyToken, verifyAdmin, async (req, res, next) => {
-		try {
-			const { _id: user } = req?.user;
-			const { page, limit } = req.query;
-			const arguments = {
-				...req.query,
-				user,
-				limit: Number(limit),
-				page: Number(page),
-			};
-			const response = await usersController.getUsers(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	})
-	.delete(verifyToken, verifyAdmin, async (req, res, next) => {
-		try {
-			const { _id } = req?.user;
-			const { user } = req.query;
-			const arguments = { user };
-			const response = await usersController.deleteUser(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	});
+  .route("/")
+  .post(
+    (req, res, next) => verifyToken(req, res, next, true),
+    asyncHandler(async (req, res) => {
+      const isAdmin = req?.user?.type === ADMIN;
+      const args = {
+        ...req.body,
+        isAdmin,
+      };
+      const response = await authController.register(args);
+      res.json(response);
+    })
+  )
+  .put(
+    verifyToken,
+    verifyUser,
+    uploadTemporary.fields([{ name: "images", maxCount: 1 }]),
+    resizeImages,
+    asyncHandler(async (req, res) => {
+      const { _id, type } = req?.user;
+      const { user } = req.body;
+      const { images } = req.files || {};
+      const isAdmin = type === ADMIN;
+      const userID = isAdmin ? user : _id;
+      const args = {
+        ...req.body,
+        user: userID,
+        images,
+        isAdmin,
+      };
+      const response = await usersController.updateUser(args);
+      res.json(response);
+    })
+  )
+  .get(
+    verifyToken,
+    verifyAdmin,
+    asyncHandler(async (req, res) => {
+      const { _id: user } = req?.user;
+      const { page, limit } = req.query;
+      const args = {
+        ...req.query,
+        user,
+        limit: Number(limit),
+        page: Number(page),
+      };
+      const response = await usersController.getUsers(args);
+      res.json(response);
+    })
+  )
+  .delete(
+    verifyToken,
+    verifyAdmin,
+    asyncHandler(async (req, res) => {
+      const { _id, type } = req?.user;
+      const { user } = req.query;
+      const isAdmin = type === ADMIN;
+      const userID = isAdmin ? user : _id;
+      const args = { user: userID };
+      const response = await usersController.deleteUser(args);
+      res.json(response);
+    })
+  );
 
 router
-	.route("/login")
-	.post(async (req, res, next) => {
-		try {
-			const arguments = { ...req.body };
-			const response = await authController.login(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	})
-	.put(verifyToken, verifyOTP, verifyUserToken, async (req, res, next) => {
-		try {
-			const { _id: user } = req?.user;
-			const arguments = { user };
-			const response = await usersController.getUser(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	});
+  .route("/login")
+  .post(
+    asyncHandler(async (req, res) => {
+      const args = { ...req.body };
+      const response = await authController.login(args);
+      res.json(response);
+    })
+  )
+  .put(
+    verifyToken,
+    verifyOTP,
+    verifyUserToken,
+    asyncHandler(async (req, res) => {
+      const { _id: user } = req?.user;
+      const args = { user };
+      const response = await usersController.getUser(args);
+      res.json(response);
+    })
+  );
 router.put(
-	"/phone",
-	verifyToken,
-	verifyOTP,
-	verifyUserToken,
-	async (req, res, next) => {
-		try {
-			const { _id: user, phone } = req?.user;
-			const arguments = { user, phone };
-			const response = await usersController.updateUser(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	}
+  "/phone",
+  verifyToken,
+  verifyOTP,
+  verifyUserToken,
+  asyncHandler(async (req, res) => {
+    const { _id: user, phone } = req?.user;
+    const args = { user, phone };
+    const response = await usersController.updateUser(args);
+    res.json(response);
+  })
 );
-router.put("/password", verifyToken, verifyUser, async (req, res, next) => {
-	try {
-		const { _id: user, email, type } = req?.user;
-		const arguments = { ...req.body, email, user, type };
-		await authController.login(arguments);
-		arguments.password = arguments.newPassword;
-		const response = await usersController.updateUser(arguments);
-		res.json(response);
-	} catch (error) {
-		next(error);
-	}
-});
+router.put(
+  "/password",
+  verifyToken,
+  verifyUser,
+  asyncHandler(async (req, res) => {
+    const { _id: user, email, type } = req?.user;
+    const args = { ...req.body, email, user, type };
+    await authController.login(args);
+    args.password = args.newPassword;
+    const response = await usersController.updateUser(args);
+    res.json(response);
+  })
+);
 
 router
-	.route("/otp")
-	.post(verifyToken, verifyUser, async (req, res, next) => {
-		try {
-			const { _id: user } = req?.user;
-			const arguments = { ...req.body, user };
-			const response = await new TwilioManager().sendOTP(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	})
-	.put(async (req, res, next) => {
-		try {
-			const { type } = req.query;
-
-			let userExists;
-			const arguments = { ...req.body };
-			if (type === LOGIN) {
-				const userResponse = await authController.getUserByPhone(arguments);
-				userExists = userResponse?.user;
-			}
-			arguments.user = userExists?._id;
-			const response = await new TwilioManager().sendOTP(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	});
+  .route("/otp")
+  .post(
+    verifyToken,
+    verifyUser,
+    asyncHandler(async (req, res) => {
+      const { _id: user } = req?.user;
+      const args = { ...req.body, user };
+      const response = await new TwilioManager().sendOTP(args);
+      res.json(response);
+    })
+  )
+  .put(
+    asyncHandler(async (req, res) => {
+      const { type } = req.query;
+      let userExists;
+      const args = { ...req.body };
+      if (type === LOGIN) {
+        const userResponse = await authController.getUserByPhone(args);
+        userExists = userResponse?.user;
+      }
+      args.user = userExists?._id;
+      const response = await new TwilioManager().sendOTP(args);
+      res.json(response);
+    })
+  );
 
 router
-	.route("/password/email")
-	.post(async (req, res, next) => {
-		try {
-			const arguments = { ...req.body };
-			const response = await authController.emailResetPassword(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	})
-	.put(async (req, res, next) => {
-		try {
-			const { password, user, token } = req.body;
-			const arguments = { password, user, token };
-			const response = await authController.resetPassword(arguments);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	});
+  .route("/password/email")
+  .post(
+    asyncHandler(async (req, res) => {
+      const args = { ...req.body };
+      const response = await authController.emailResetPassword(args);
+      res.json(response);
+    })
+  )
+  .put(
+    asyncHandler(async (req, res) => {
+      const { password, user, token } = req.body;
+      const args = { password, user, token };
+      const response = await authController.resetPassword(args);
+      res.json(response);
+    })
+  );
 
 router.get(
-	"/notifications",
-	verifyToken,
-	verifyUser,
-	async (req, res, next) => {
-		try {
-			const { _id, type } = req?.user;
-			let { q, page, limit } = req.query;
-			const isAdmin = type === ADMIN ? true : false;
-			const user_id = isAdmin ? user : _id;
-			const arguments = {
-				user: user_id,
-				type,
-				q,
-				limit: Number(limit),
-				page: Number(page),
-			};
-			const response = await notificationsController.getAllNotifications(
-				arguments
-			);
-			res.json(response);
-		} catch (error) {
-			next(error);
-		}
-	}
+  "/notifications",
+  verifyToken,
+  verifyUser,
+  asyncHandler(async (req, res) => {
+    const { _id, type } = req?.user;
+    const { user, q, page, limit } = req.query;
+    const isAdmin = type === ADMIN;
+    const userID = isAdmin ? user : _id;
+    const args = {
+      user: userID,
+      type,
+      q,
+      limit: Number(limit),
+      page: Number(page),
+    };
+    const response = await notificationsController.getAllNotifications(args);
+    res.json(response);
+  })
 );
 
-router.post("/super-admin", async (req, res, next) => {
-	try {
-		const arguments = {
-			...req.body,
-		};
-		const response = await authController.addSuperAdmin(arguments);
-		res.json(response);
-	} catch (error) {
-		next(error);
-	}
-});
+router.post(
+  "/super-admin",
+  asyncHandler(async (req, res) => {
+    const args = {
+      ...req.body,
+    };
+    const response = await authController.addSuperAdmin(args);
+    res.json(response);
+  })
+);
 
-router.get("/:user", verifyToken, verifyUser, async (req, res, next) => {
-	try {
-		const { _id } = req?.user;
-		const { user } = req.params;
-		const user_id = req?.user?.type === ADMIN ? user : _id;
-		const arguments = { user: user_id };
-		const response = await usersController.getUser(arguments);
-		res.json(response);
-	} catch (error) {
-		next(error);
-	}
-});
+router.get(
+  "/:user",
+  verifyToken,
+  verifyUser,
+  asyncHandler(async (req, res) => {
+    const { _id } = req?.user;
+    const { user } = req.params;
+    const userID = req?.user?.type === ADMIN ? user : _id;
+    const args = { user: userID };
+    const response = await usersController.getUser(args);
+    res.json(response);
+  })
+);
 
 module.exports = router;

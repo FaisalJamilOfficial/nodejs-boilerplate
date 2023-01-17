@@ -20,6 +20,7 @@
 	},
 	"homepage": "https://github.com/FaisalJamilOfficial/backend-boilerplate#readme",
 	"dependencies": {
+		"aws-sdk": "^2.1295.0",
 		"bcryptjs": "^2.4.3",
 		"braintree": "^3.11.0",
 		"cookie-parser": "^1.4.6",
@@ -45,5 +46,13 @@
 		"socket.io": "^4.5.1",
 		"twilio": "^3.71.1",
 		"uuid": "^8.3.2"
+	},
+	"devDependencies": {
+		"eslint": "^8.32.0",
+		"eslint-config-prettier": "^8.6.0",
+		"eslint-config-standard": "^17.0.0",
+		"eslint-plugin-import": "^2.27.5",
+		"eslint-plugin-n": "^15.6.1",
+		"eslint-plugin-promise": "^6.1.1"
 	}
 }

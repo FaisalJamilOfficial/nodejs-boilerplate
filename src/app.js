@@ -48,7 +48,7 @@ const serverFunction = async () => {
               `***App is running at port: ${chalk.underline(port)}***`
             );
         });
-        console.log(chalk.hex("#00BFFF")("***Database Connected!***"));
+        console.log(chalk.hex("#01CDEF")("***Database Connected!***"));
       },
       (err) => {
         console.log(err);
@@ -85,4 +85,4 @@ const serverFunction = async () => {
   }
 };
 serverFunction();
-console.log(chalk.underline(NODE_ENV.toUpperCase()));
+console.log(chalk.hex("#607070")(chalk.underline(NODE_ENV.toUpperCase())));

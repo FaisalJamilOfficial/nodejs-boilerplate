@@ -41,7 +41,7 @@ exports.register = async (params) => {
       // profile = profileResponse?.admin;
     }
     if (profileResponse?.success) await usersController.updateUser(userObj);
-    else throw new Error("Profile creation failed!");
+    else throw new Error("User profile creation failed!");
 
     const token = user.getSignedjwtToken();
     return {

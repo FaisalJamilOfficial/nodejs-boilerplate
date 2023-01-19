@@ -161,18 +161,21 @@ exports.getUser = async (params) => {
 /**
  * Get users
  * @param {string} q users search keyword
+ * @param {string} type users type
+ * @param {string} user user id not match
  * @param {number} limit users limit
  * @param {number} page users page number
  * @returns {[object]} array of users
  */
 exports.getUsers = async (params) => {
-  const { q, type } = params;
+  const { q, type, user } = params;
   let { page, limit } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
   const query = {};
   if (type) query.type = type;
+  if (user) query._id = { $ne: user };
   if (q && q.trim() !== "") {
     query.$or = [
       { email: { $regex: q, $options: "i" } },

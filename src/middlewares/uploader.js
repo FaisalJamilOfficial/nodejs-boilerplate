@@ -22,7 +22,7 @@ exports.uploadImages = async (req, res, next) => {
     const { images } = req.files || {};
     if (images && images.length > 0) {
       for (let i = 0; i < images.length; i++) {
-        const path = await S3BucketManager.upload(images[i]);
+        const path = await new S3BucketManager().uploadFile(images[i]);
         images[i].path = path;
       }
       req.files.images = images;
@@ -40,7 +40,7 @@ exports.uploadAttachments = async (req, res, next) => {
     const { attachments } = req.files || {};
     if (attachments && attachments.length > 0) {
       for (let i = 0; i < attachments.length; i++) {
-        const path = await S3BucketManager.upload(attachments[i]);
+        const path = await new S3BucketManager().uploadFile(attachments[i]);
         attachments[i].path = path;
       }
       next();

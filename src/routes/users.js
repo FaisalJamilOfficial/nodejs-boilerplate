@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { SECRET } = process.env;
 
 const authController = require("../controllers/auth");
 const notificationsController = require("../controllers/notifications");
@@ -148,7 +149,7 @@ router
       let userExists;
       const args = { ...req.body };
       if (type === LOGIN) {
-        const userResponse = await authController.getUserByPhone(args);
+        const userResponse = await usersController.getUser(args);
         userExists = userResponse?.user;
       }
       args.user = userExists?._id;
@@ -197,12 +198,19 @@ router.get(
 );
 
 router.post(
-  "/super-admin",
+  "/admin",
   asyncHandler(async (req, res) => {
+    const { secret } = req.headers;
+    const { email, password, type } = req.body;
     const args = {
-      ...req.body,
+      email,
+      password,
+      type,
+      name: type,
     };
-    const response = await authController.addSuperAdmin(args);
+    if (secret === SECRET);
+    else throw new Error("Invalid secret key!");
+    const response = await authController.addAdmin(args);
     res.json(response);
   })
 );

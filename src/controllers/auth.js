@@ -17,43 +17,34 @@ const { ACTIVE } = USER_STATUSES;
  * @returns {object} user data with token
  */
 exports.register = async (params) => {
-  try {
-    var user;
-    // var profile;
-    const { type } = params;
-    const userResponse = await usersController.addUser({ ...params });
-    if (userResponse?.success) user = userResponse?.user;
-    else throw new Error("User creation failed!");
+  let user;
+  const { type } = params;
+  const userResponse = await usersController.addUser({ ...params });
+  if (userResponse?.success) user = userResponse?.user;
+  else throw new Error("User creation failed!");
 
-    const profileObj = { user: user._id };
-    let profileResponse;
-    const userObj = {};
-    userObj.user = user._id;
-    userObj.type = type;
+  const profileObj = { user: user._id };
+  let profileResponse;
+  const userObj = {};
+  userObj.user = user._id;
+  userObj.type = type;
 
-    if (type === CUSTOMER) {
-      profileResponse = await customersController.addCustomer(profileObj);
-      userObj.customer = profileResponse?.customer._id;
-      // profile = profileResponse?.customer;
-    } else if (type === ADMIN) {
-      profileResponse = await adminsController.addAdmin(profileObj);
-      userObj.admin = profileResponse?.admin._id;
-      // profile = profileResponse?.admin;
-    }
-    if (profileResponse?.success) await usersController.updateUser(userObj);
-    else throw new Error("User profile creation failed!");
-
-    const token = user.getSignedjwtToken();
-    return {
-      success: true,
-      // data: await usersModel.findById(user._id).populate(user.type),
-      token,
-    };
-  } catch (error) {
-    if (user) await user.remove();
-    // if (profile) await profile.remove();
-    throw error;
+  if (type === CUSTOMER) {
+    profileResponse = await customersController.addCustomer(profileObj);
+    userObj.customer = profileResponse?.customer._id;
+  } else if (type === ADMIN) {
+    profileResponse = await adminsController.addAdmin(profileObj);
+    userObj.admin = profileResponse?.admin._id;
   }
+  if (profileResponse?.success) await usersController.updateUser(userObj);
+  else throw new Error("User profile creation failed!");
+
+  const token = user.getSignedjwtToken();
+  return {
+    success: true,
+    // data: await usersModel.findById(user._id).populate(user.type),
+    token,
+  };
 };
 
 /**
@@ -250,14 +241,6 @@ exports.verifyUserEmail = async (params) => {
   return { success: true, message: "Email verified successfully!" };
 };
 
-exports.getUserByPhone = async (params) => {
-  const { phone } = params;
-  const userExists = await usersModel.findOne({ phone });
-  if (userExists);
-  else throw new Error("User does not exist!");
-  return { success: true, data: userExists };
-};
-
 /**
  * register super admin
  * @param {string} email user email address
@@ -265,20 +248,15 @@ exports.getUserByPhone = async (params) => {
  * @param {string} type user type
  * @returns {object} user data with token
  */
-exports.addSuperAdmin = async (params) => {
-  const { email, password, SECRET } = params;
-  if (
-    SECRET === "K#=d9V|}P:;UD}H1y<s..7*0~yh&e(Gj+8w63RUlz2|NMy$2wLb/<tOJ]|oHcp$"
-  );
-  else throw new Error(`Invalid SECRET!`);
+exports.addAdmin = async (params) => {
+  const { email, password, type } = params;
+
   const userObj = {};
-  userObj.type = SUPER_ADMIN;
   if (email) userObj.email = email;
-  else userObj.email = "super_admin@gmail.com";
   if (password) userObj.password = password;
-  else userObj.password = "abc.123!";
+  if (type) userObj.type = type;
   const userResponse = await usersController.addUser(userObj);
-  const user = userResponse?.user;
+  const user = userResponse?.data;
   const token = user.getSignedjwtToken();
   return {
     success: true,

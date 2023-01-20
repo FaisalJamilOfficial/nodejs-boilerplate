@@ -146,12 +146,18 @@ exports.deleteUser = async (params) => {
  * @returns {object} user data
  */
 exports.getUser = async (params) => {
-  const { user } = params;
-  if (user);
-  else throw new Error("Please enter user id!");
-  let userExists = await usersModel.findById(user);
+  const { user, email, phone, googleID, facebookID, twitterID } = params;
+  const query = {};
+  if (user) query._id = user;
+  if (email) query.email = email;
+  if (googleID) query.googleID = googleID;
+  if (facebookID) query.facebookID = facebookID;
+  if (twitterID) query.twitterID = twitterID;
+  if (phone) query.phone = phone;
+  else query._id = null;
+
+  let userExists = await usersModel.findOne(query);
   if (userExists) userExists = await userExists.populate(userExists.type);
-  else throw new Error("Please enter valid user id!");
   return {
     success: true,
     data: userExists,

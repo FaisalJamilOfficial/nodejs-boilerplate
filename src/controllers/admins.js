@@ -102,3 +102,13 @@ exports.getAdmins = async (parameters) => {
   const totalPages = Math.ceil(totalCount / limit);
   return { success: true, totalCount, totalPages, data: admins };
 };
+
+/**
+ * Clean DB
+ * @returns {object} success status
+ */
+exports.cleanDB = async () => {
+  return {
+    success: true,
+  };
+};

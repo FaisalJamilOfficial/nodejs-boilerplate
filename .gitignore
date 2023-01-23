@@ -55,7 +55,9 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+.env 
+.env.development
+.env.production
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -74,8 +76,3 @@ typings/
 
 # FuseBox cache
 .fusebox/
-
-# Enviornment variables
-.env 
-.env.development
-.env.production

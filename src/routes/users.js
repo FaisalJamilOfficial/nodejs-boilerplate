@@ -85,26 +85,6 @@ router
     })
   );
 
-router
-  .route("/login")
-  .post(
-    asyncHandler(async (req, res) => {
-      const args = { ...req.body };
-      const response = await authController.login(args);
-      res.json(response);
-    })
-  )
-  .put(
-    verifyToken,
-    verifyOTP,
-    verifyUserToken,
-    asyncHandler(async (req, res) => {
-      const { _id: user } = req?.user;
-      const args = { user };
-      const response = await usersController.getUser(args);
-      res.json(response);
-    })
-  );
 router.put(
   "/phone",
   verifyToken,
@@ -193,24 +173,6 @@ router.get(
       page: Number(page),
     };
     const response = await notificationsController.getAllNotifications(args);
-    res.json(response);
-  })
-);
-
-router.post(
-  "/admin",
-  asyncHandler(async (req, res) => {
-    const { secret } = req.headers;
-    const { email, password, type } = req.body;
-    const args = {
-      email,
-      password,
-      type,
-      name: type,
-    };
-    if (secret === SECRET);
-    else throw new Error("Invalid secret key!");
-    const response = await authController.addAdmin(args);
     res.json(response);
   })
 );

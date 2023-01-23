@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { SECRET } = process.env;
+const {
+  verifyOTP,
+  verifyToken,
+  verifyUserToken,
+} = require("../middlewares/authenticator");
 
 const authController = require("../controllers/auth");
 const usersController = require("../controllers/users");
@@ -31,6 +36,19 @@ router.post(
       password,
     };
     const response = await authController.login(args);
+    res.json(response);
+  })
+);
+
+router.post(
+  "/login/phone",
+  verifyToken,
+  verifyOTP,
+  verifyUserToken,
+  asyncHandler(async (req, res) => {
+    const { _id: user } = req?.user;
+    const args = { user };
+    const response = await usersController.getUser(args);
     res.json(response);
   })
 );

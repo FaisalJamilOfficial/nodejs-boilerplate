@@ -4,6 +4,12 @@ const usersController = require("../controllers/users");
 const customersController = require("./customers");
 const adminsController = require("../controllers/admins");
 const NodeMailer = require("../utils/NodeMailer");
+const {
+  sendEmail,
+  getEmailVerificationEmailTemplate,
+  getResetPasswordEmailTemplate,
+  getWelcomeUserEmailTemplate,
+} = new NodeMailer();
 const { USER_TYPES, USER_STATUSES } = require("../configs/enums");
 const { CUSTOMER, ADMIN, SUPER_ADMIN } = USER_TYPES;
 const { ACTIVE } = USER_STATUSES;
@@ -20,7 +26,7 @@ exports.register = async (params) => {
   let user;
   const { type } = params;
   const userResponse = await usersController.addUser({ ...params });
-  if (userResponse?.success) user = userResponse?.user;
+  if (userResponse?.success) user = userResponse?.data;
   else throw new Error("User creation failed!");
 
   const profileObj = { user: user._id };
@@ -31,10 +37,10 @@ exports.register = async (params) => {
 
   if (type === CUSTOMER) {
     profileResponse = await customersController.addCustomer(profileObj);
-    userObj.customer = profileResponse?.customer._id;
+    userObj.customer = profileResponse?.data._id;
   } else if (type === ADMIN) {
     profileResponse = await adminsController.addAdmin(profileObj);
-    userObj.admin = profileResponse?.admin._id;
+    userObj.admin = profileResponse?.data._id;
   }
   if (profileResponse?.success) await usersController.updateUser(userObj);
   else throw new Error("User profile creation failed!");
@@ -101,22 +107,12 @@ exports.emailResetPassword = async (params) => {
     email,
     tokenExpirationTime,
   });
-  const userEmailToken = emailTokenResponse.userToken;
-
-  const link = `${process.env.BASE_URL}forgot-password/reset?user=${userEmailToken.user}&token=${userEmailToken.token}`;
-  const body = `
-To reset your password, click on this link 
-${link}
-Link will expire in 10 minutes.
-
-If you didn't do this, click here backendboilerplate@gmail.com`;
-
+  const { user, token } = emailTokenResponse?.data;
   const args = {};
   args.to = email;
   args.subject = "Password reset";
-  args.text = body;
-  await new NodeMailer().sendEmail(args);
-
+  args.text = getResetPasswordEmailTemplate({ user, token });
+  await sendEmail(args);
   return {
     success: true,
     message: "Password reset link sent to your email address!",
@@ -136,25 +132,35 @@ exports.emailVerifyEmail = async (params) => {
     email,
     tokenExpirationTime,
   });
-  const userEmailToken = emailTokenResponse.userToken;
-
-  const link = `${process.env.BASE_URL}api/v1/users/emails?user=${userEmailToken.user}&token=${userEmailToken.token}`;
-  const body = `
-To verify your email address, click on this link 
-${link}
-Link will expire in 10 minutes.
-
-If you didn't do this, click here backendboilerplate@gmail.com`;
-
+  const { user, token } = emailTokenResponse?.data;
   const args = {};
   args.to = email;
   args.subject = "Email verification";
-  args.text = body;
+  args.text = getEmailVerificationEmailTemplate({ user, token });
   await new NodeMailer().sendEmail(args);
 
   return {
     success: true,
     message: "Email verification link sent to your email address!",
+  };
+};
+
+/**
+ * Send welcome email
+ * @param {string} email user email address
+ * @param {string} name user name
+ * @returns {object} user welcome result
+ */
+exports.emailWelcomeUser = async (params) => {
+  const { email, name } = params;
+  const args = {};
+  args.to = email;
+  args.subject = "Greetings";
+  args.text = getWelcomeUserEmailTemplate({ name });
+  await new NodeMailer().sendEmail(args);
+  return {
+    success: true,
+    message: "Welcome email to your email address!",
   };
 };
 
@@ -183,7 +189,7 @@ exports.generateEmailToken = async (params) => {
   }
   return {
     success: true,
-    token: userTokenExists,
+    data: userTokenExists,
   };
 };
 

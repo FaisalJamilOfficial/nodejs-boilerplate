@@ -3,11 +3,7 @@ const { STRIPE_SECRET_KEY, STRIPE_ENDPOINT_SECRET } = process.env;
 const stripe = require("stripe")(STRIPE_SECRET_KEY);
 const CURRENCY = "usd";
 
-const {
-  paymentAccountsModel,
-  profilesModel,
-  usersModel,
-} = require("../models");
+const paymentAccountsController = require("../controllers/paymentAccounts");
 
 const { PAYMENT_ACCOUNT_TYPES } = require("../configs/enums");
 const { STRIPE_ACCOUNT, STRIPE_CUSTOMER } = PAYMENT_ACCOUNT_TYPES;
@@ -107,7 +103,9 @@ class StripeManager {
     if (cardHolderName);
     else throw new Error("Please enter cardHolderName!");
 
-    const paymentAccountExists = await paymentAccountsModel.exists({ user });
+    const { data: paymentAccountExists } =
+      await paymentAccountsController.getPaymentAccount({ user });
+
     let userStripeID;
 
     if (paymentAccountExists)
@@ -131,12 +129,26 @@ class StripeManager {
         type: STRIPE_CUSTOMER,
         account: card,
       };
-      const paymentAccount = await paymentAccountsModel.create(
-        paymentAccountObj
-      );
-
+      const { data: paymentAccount } =
+        await paymentAccountsController.addPaymentAccount(paymentAccountObj);
       return paymentAccount;
     } else throw new Error("Stripe source creation failed!");
+  }
+
+  /**
+   * Create stripe customer
+   * @param {string} user OPTIONAL user id
+   * @param {string} email OPTIONAL user email address
+   * @param {string} phone OPTIONAL user phone number
+   * @returns {object} stripe customer data
+   */
+  async createCustomer(params) {
+    const { user, email, phone } = params;
+    const customerObj = {};
+    if (user) customerObj.id = user;
+    if (email) customerObj.email = email;
+    if (phone) customerObj.phone = phone;
+    return await stripe.customers.create(customerObj);
   }
 
   /**
@@ -147,9 +159,8 @@ class StripeManager {
    */
   async createAccountWithCheck(params) {
     const { user, email } = params;
-    const paymentAccountExists = await paymentAccountsModel.findOne({
-      user,
-    });
+    const { data: paymentAccountExists } =
+      await paymentAccountsController.getPaymentAccount({ user });
 
     if (paymentAccountExists) return paymentAccountExists;
     else {
@@ -171,13 +182,9 @@ class StripeManager {
           type: STRIPE_ACCOUNT,
           account,
         };
-        const paymentAccount = await paymentAccountsModel.create(
-          paymentAccountObj
-        );
-        await profilesModel.updateOne(
-          { user },
-          { paymentAccount, isStripeConnected: true }
-        );
+
+        const { data: paymentAccount } =
+          await paymentAccountsController.addPaymentAccount(paymentAccountObj);
         return paymentAccount;
       } else throw new Error("Stripe account creation failed!");
     }
@@ -231,10 +238,11 @@ class StripeManager {
    */
   async createTransfer(params) {
     const { user, amount, currency, description } = params;
-    const paymentAccountExists = await paymentAccountsModel.findOne({ user });
+    const { data: paymentAccountExists } =
+      await paymentAccountsController.getPaymentAccount({ user });
     const transferObj = {
       amount,
-      currency: CURRENCY,
+      currency: currency ?? CURRENCY,
       destination: paymentAccountExists?.account?._id,
       description,
     };
@@ -259,15 +267,13 @@ class StripeManager {
       STRIPE_ENDPOINT_SECRET
     );
 
-    if (event.type === "account.external_account.created") {
-      const paymentAccountExists = await paymentAccountsModel.findOne({
-        "account.id": account,
+    if (event.type === "account.external_account.created")
+      // const { data: paymentAccountExists } =
+      await paymentAccountsController.getPaymentAccount({
+        key: "account.id",
+        value: account,
       });
-      await usersModel.updateOne(
-        { _id: paymentAccountExists.user },
-        { isStripeConnected: true }
-      );
-    }
+
     return event;
   }
 
@@ -280,7 +286,7 @@ class StripeManager {
     const { user } = params;
     const query = {};
     if (user) query.user = user;
-    return await paymentAccountsModel.find(query);
+    return await paymentAccountsController.getPaymentAccounts(query);
   }
 }
 
@@ -293,15 +299,12 @@ exports.constructWebhooksEvent = async (req, res, next) => {
     const event = await new StripeManager().constructWebhooksEvent(args);
 
     console.log("EVENT TYPE: ", JSON.stringify(event.type));
-    if (event.type === "account.external_account.created") {
-      const paymentAccountExists = await paymentAccountsModel.findOne({
-        "account.id": req.body.account,
+    if (event.type === "account.external_account.created")
+      // const { data: paymentAccountExists } =
+      await paymentAccountsController.getPaymentAccount({
+        key: "account.id",
+        value: req?.body?.account,
       });
-      await usersModel.updateOne(
-        { _id: paymentAccountExists.user },
-        { isStripeAccountCreated: true }
-      );
-    }
     return res.status(200).send({
       success: true,
       message: "Done",

@@ -7,7 +7,7 @@ const {
 } = process.env;
 const { ENVIRONMENTS } = require("../configs/enums");
 const { DEVELOPMENT } = ENVIRONMENTS;
-const { paymentAccountsModel } = require("../models");
+const paymentAccountsController = require("../controllers/paymentAccounts");
 
 const productionGateway = {
   environment: braintree.Environment.Production,
@@ -220,7 +220,7 @@ class BraintreeManager {
     const { user } = params;
     const query = {};
     if (user) query.user = user;
-    return await paymentAccountsModel.find(query);
+    return await paymentAccountsController.getPaymentAccounts(query);
   }
 }
 

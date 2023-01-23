@@ -51,8 +51,8 @@ class SocketManager {
   }
 
   /**
-   * @param {*} httpServer http server instance
-   * @param {*} app express app instance
+   * @param {Object} httpServer http server instance
+   * @param {Object} app express app instance
    */
   async initializeSocket(params) {
     const { server, app } = params;

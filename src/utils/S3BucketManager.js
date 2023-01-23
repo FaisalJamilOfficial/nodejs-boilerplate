@@ -52,13 +52,13 @@ class S3BucketManager {
 
   async uploadFile(file, directory) {
     const fileObj = Array.isArray(file) ? file[0] : file;
-    let file_name = uuid();
+    let fileName = uuid();
     const fileExtension = mime.extension(fileObj.mimetype);
-    file_name += "." + fileExtension;
-    if (directory) file_name = `${directory}/${file_name}`;
+    fileName += "." + fileExtension;
+    if (directory) fileName = `${directory}/${fileName}`;
     const uploadParams = {
       Bucket: AWS_NAME,
-      Key: file_name, // pass key
+      Key: fileName, // pass key
       ContentType: fileObj.mimetype,
       Body: fileObj.buffer, // pass file body
     };

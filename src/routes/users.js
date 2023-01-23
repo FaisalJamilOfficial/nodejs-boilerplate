@@ -23,12 +23,11 @@ const { ADMIN } = USER_TYPES;
 router
   .route("/")
   .post(
-    (req, res, next) => verifyToken(req, res, next, true),
+    verifyToken,
+    verifyAdmin,
     asyncHandler(async (req, res) => {
-      const isAdmin = req?.user?.type === ADMIN;
       const args = {
         ...req.body,
-        isAdmin,
       };
       const response = await authController.register(args);
       res.json(response);
@@ -36,20 +35,14 @@ router
   )
   .put(
     verifyToken,
-    verifyUser,
+    verifyAdmin,
     uploadTemporary.fields([{ name: "images", maxCount: 1 }]),
     resizeImages,
     asyncHandler(async (req, res) => {
-      const { _id, type } = req?.user;
-      const { user } = req.body;
       const { images } = req.files || {};
-      const isAdmin = type === ADMIN;
-      const userID = isAdmin ? user : _id;
       const args = {
         ...req.body,
-        user: userID,
         images,
-        isAdmin,
       };
       const response = await usersController.updateUser(args);
       res.json(response);
@@ -75,11 +68,7 @@ router
     verifyToken,
     verifyAdmin,
     asyncHandler(async (req, res) => {
-      const { _id, type } = req?.user;
-      const { user } = req.query;
-      const isAdmin = type === ADMIN;
-      const userID = isAdmin ? user : _id;
-      const args = { user: userID };
+      const args = { ...req.query };
       const response = await usersController.deleteUser(args);
       res.json(response);
     })
@@ -178,14 +167,22 @@ router.get(
 );
 
 router.get(
-  "/:user",
+  "/me",
   verifyToken,
   verifyUser,
   asyncHandler(async (req, res) => {
-    const { _id } = req?.user;
+    const response = { success: true, data: req?.user };
+    res.json(response);
+  })
+);
+
+router.get(
+  "/:user",
+  verifyToken,
+  verifyAdmin,
+  asyncHandler(async (req, res) => {
     const { user } = req.params;
-    const userID = req?.user?.type === ADMIN ? user : _id;
-    const args = { user: userID };
+    const args = { user };
     const response = await usersController.getUser(args);
     res.json(response);
   })

@@ -33,17 +33,18 @@ exports.verifyToken = async (
       (req.signedCookies && req.signedCookies.jwt) ||
       (req.cookies && req.cookies.jwt);
     if (token) {
-      let verificationObject;
-      verificationObject = jwt.verify(token.trim(), JWT_SECRET);
+      const verificationObject = jwt.verify(token.trim(), JWT_SECRET);
 
       if (verificationObject.shouldValidateOTP) {
         req.user = verificationObject;
         return next();
       }
-      let user = await usersModel.findOne({ _id: verificationObject._id });
+      const user = await usersModel.findOne({ _id: verificationObject._id });
       if (user) {
         if (user.status === DELETED)
-          return res.status(401).send("User account deleted!");
+          return res
+            .status(401)
+            .json({ success: false, message: "User account deleted!" });
         req.user = user;
         return next();
       }
@@ -52,13 +53,13 @@ exports.verifyToken = async (
       req.user = null;
       return next();
     }
-    return res.status(401).send("Unauthorized!");
+    return res.status(401).json({ success: false, message: "Invalid token!" });
   } catch (error) {
     if (shouldReturnUserOnFailure) {
       req.user = null;
       return next();
     }
-    return res.status(401).send("Unauthorized!");
+    return res.status(401).json({ success: false, message: "Unauthorized!" });
   }
 };
 

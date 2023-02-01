@@ -63,7 +63,9 @@ exports.updateUser = async (params) => {
   if (user);
   else throw new Error("Please enter user id!");
 
-  const userExists = await usersModel.findById(user);
+  const userExists = await usersModel
+    .findById(user)
+    .select("-createdAt -updatedAt -__v");
   if (userExists);
   else throw new Error("Please enter valid user id!");
 
@@ -156,7 +158,9 @@ exports.getUser = async (params) => {
   if (phone) query.phone = phone;
   else query._id = null;
 
-  let userExists = await usersModel.findOne(query);
+  let userExists = await usersModel
+    .findOne(query)
+    .select("-createdAt -updatedAt -__v");
   if (userExists) userExists = await userExists.populate(userExists.type);
   return {
     success: true,
@@ -194,6 +198,7 @@ exports.getUsers = async (params) => {
   const users = await usersModel
     .find(query)
     .populate("customer admin")
+    .select("-createdAt -updatedAt -__v")
     .sort({ createdAt: -1 })
     .skip(page * limit)
     .limit(limit);

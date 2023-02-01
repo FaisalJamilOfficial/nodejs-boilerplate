@@ -5,7 +5,7 @@ const { usersModel } = require("../models");
 
 const { USER_STATUSES, USER_TYPES } = require("../configs/enums");
 const { ACTIVE, DELETED } = USER_STATUSES;
-const { TENANT, MANAGER, ADMIN, SUPER_ADMIN } = USER_TYPES;
+const { CUSTOMER, ADMIN, SUPER_ADMIN } = USER_TYPES;
 
 /**
  * Get JWT token
@@ -39,11 +39,13 @@ exports.verifyToken = async (
         req.user = verificationObject;
         return next();
       }
-      const user = await usersModel.findOne({ _id: verificationObject._id });
+      const user = await usersModel
+        .findOne({ _id: verificationObject._id })
+        .select("-createdAt -updatedAt -__v");
       if (user) {
         if (user.status === DELETED)
           return res
-            .status(401)
+            .status(403)
             .json({ success: false, message: "User account deleted!" });
         req.user = user;
         return next();
@@ -53,13 +55,13 @@ exports.verifyToken = async (
       req.user = null;
       return next();
     }
-    return res.status(401).json({ success: false, message: "Invalid token!" });
+    return res.status(403).json({ success: false, message: "Invalid token!" });
   } catch (error) {
     if (shouldReturnUserOnFailure) {
       req.user = null;
       return next();
     }
-    return res.status(401).json({ success: false, message: "Unauthorized!" });
+    return res.status(403).json({ success: false, message: "Unauthorized!" });
   }
 };
 
@@ -102,21 +104,11 @@ exports.verifySuperAdmin = (req, res, next) => {
   }
 };
 
-exports.verifyTenant = (req, res, next) => {
-  if (req?.user?.type === TENANT && req?.user?.status === ACTIVE) {
+exports.verifyCustomer = (req, res, next) => {
+  if (req?.user?.type === CUSTOMER && req?.user?.status === ACTIVE) {
     next();
   } else {
-    const error = new Error("You are not authorized as tenant!");
-    error.status = 403;
-    return next(error);
-  }
-};
-
-exports.verifyManager = (req, res, next) => {
-  if (req?.user?.type === MANAGER && req?.user?.status === ACTIVE) {
-    next();
-  } else {
-    const error = new Error("You are not authorized as tenant!");
+    const error = new Error("You are not authorized as customer!");
     error.status = 403;
     return next(error);
   }

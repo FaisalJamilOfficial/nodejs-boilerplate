@@ -69,7 +69,9 @@ exports.getCustomer = async (params) => {
   const { customer } = params;
   if (customer);
   else throw new Error("Please enter customer id!");
-  const customerExists = await customersModel.findById(customer);
+  const customerExists = await customersModel
+    .findById(customer)
+    .select("-createdAt -updatedAt -__v");
   if (customerExists);
   else throw new Error("Please enter valid customer id!");
   return {
@@ -95,6 +97,7 @@ exports.getCustomers = async (params) => {
   if (q) query.q = q;
   const customers = await customersModel
     .find(query)
+    .select("-createdAt -updatedAt -__v")
     .sort({ createdAt: -1 })
     .skip(page * limit)
     .limit(limit);

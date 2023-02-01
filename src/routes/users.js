@@ -55,7 +55,6 @@ router
       const { _id: user } = req?.user;
       const { page, limit } = req.query;
       const args = {
-        ...req.query,
         user,
         limit: Number(limit),
         page: Number(page),

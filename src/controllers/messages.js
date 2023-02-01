@@ -85,6 +85,7 @@ exports.chat = async (params) => {
   else throw new Error("Please enter conversation id!");
   const messages = await messagesModel
     .find(query)
+    .select("-createdAt -updatedAt -__v")
     .sort({ createdAt: -1 })
     .skip(page * limit)
     .limit(limit);
@@ -153,6 +154,7 @@ exports.getConversations = async (params) => {
   if (user) query.$or = [{ userTo: user }, { userFrom: user }];
   const conversations = await conversationsModel
     .find(query)
+    .select("-createdAt -updatedAt -__v")
     .sort({ createdAt: -1 })
     .skip(page * limit)
     .limit(limit);
@@ -167,11 +169,10 @@ exports.getConversations = async (params) => {
 
 /**
  * Send message
- * @param {string} user user id
+ * @param {string} userFrom sender user id
  * @param {string} userTo receiver user id
  * @param {string} text message text
  * @param {[object]} attachments message attachments
- * @param {object} socket socket io
  * @returns {object} message data
  */
 exports.send = async (params) => {

@@ -69,7 +69,9 @@ exports.getAdmin = async (parameters) => {
   const { admin } = parameters;
   if (admin);
   else throw new Error("Please enter admin id!");
-  const adminExists = await adminsModel.findById(admin);
+  const adminExists = await adminsModel
+    .findById(admin)
+    .select("-createdAt -updatedAt -__v");
   if (adminExists);
   else throw new Error("Please enter valid admin id!");
   return {
@@ -95,6 +97,7 @@ exports.getAdmins = async (parameters) => {
   if (q) query.q = q;
   const admins = await adminsModel
     .find(query)
+    .select("-createdAt -updatedAt -__v")
     .sort({ createdAt: -1 })
     .skip(page * limit)
     .limit(limit);

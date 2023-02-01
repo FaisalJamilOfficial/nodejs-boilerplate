@@ -36,7 +36,9 @@ exports.getPaymentAccount = async (params) => {
   if (user) query.user = user;
   if (key) query.key = value;
   else query._id = null;
-  const paymentAccountExists = await paymentAccountsModel.findOne(query);
+  const paymentAccountExists = await paymentAccountsModel
+    .findOne(query)
+    .select("-createdAt -updatedAt -__v");
   return {
     success: true,
     data: paymentAccountExists,
@@ -60,6 +62,7 @@ exports.getPaymentAccounts = async (params) => {
   if (user) query.user = user;
   const paymentAccounts = await paymentAccountsModel
     .find(query)
+    .select("-createdAt -updatedAt -__v")
     .sort({ createdAt: -1 })
     .skip(page * limit)
     .limit(limit);

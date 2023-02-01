@@ -18,15 +18,14 @@ router
       { name: "attachments", maxCount: 10 },
     ]),
     asyncHandler(async (req, res) => {
-      const { _id, type } = req?.user;
-      const { user } = req.body;
-      const userFrom = type === ADMIN ? user : _id;
+      const { _id } = req?.user;
+      const { user, text } = req.body;
       const { attachments } = req.files || {};
       const args = {
-        ...req.body,
-        userFrom,
+        userFrom: _id,
+        userTo: user,
+        text,
         attachments,
-        socket: req.io,
       };
       const response = await messagesController.send(args);
       res.json(response);
@@ -47,20 +46,17 @@ router
   )
   .put(
     asyncHandler(async (req, res) => {
-      const { _id } = req?.user;
-      const { user, message, text, status } = req.body;
-      const userID = req?.user?.type === ADMIN ? user : _id;
-      const args = { user: userID, message, text, status };
+      const { message, text, status } = req.body;
+      const args = { message, text, status };
       const response = await messagesController.updateMessage(args);
       res.json(response);
     })
   )
   .patch(
     asyncHandler(async (req, res) => {
-      const { _id, type } = req?.user;
-      const { user } = req.query;
-      const userID = type === ADMIN ? user : _id;
-      const args = { ...req.body, userTo: userID };
+      const { _id } = req?.user;
+      const { conversation } = req.body;
+      const args = { conversation, userTo: _id };
       const response = await messagesController.readMessages(args);
       res.json(response);
     })

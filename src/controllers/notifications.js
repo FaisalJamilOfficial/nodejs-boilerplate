@@ -37,18 +37,11 @@ exports.getAllNotifications = async (params) => {
  */
 exports.newMessageNotification = async (params) => {
   const { message } = params;
-  const messageExists = await messagesModel.findOne({ _id: message }).populate([
-    {
-      path: "userTo",
-      // populate: { path: "profile", model: "profiles" },
-    },
-    {
-      path: "userFrom",
-      // populate: { path: "profile", model: "profiles" },
-    },
-  ]);
+  const messageExists = await messagesModel
+    .findById(message)
+    .populate(["userTo", "userFrom"]);
   if (messageExists);
-  else throw new Error("Message not found!");
+  else throw new Error("Message not found!|||404");
 
   const title = "New Message";
   let body = `New message from {"user":"${messageExists.userFrom._id}"} !`;

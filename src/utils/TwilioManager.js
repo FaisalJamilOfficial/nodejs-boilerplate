@@ -20,11 +20,8 @@ class TwilioManager {
   async sendOTP(params) {
     const { user, phone } = params;
 
-    let userExists;
-    if (phone) {
-      const response = await usersController.getUser({ phone });
-      userExists = response?.data;
-    } else throw new Error("Please enter phone number!");
+    const response = await usersController.getUser({ phone });
+    const userExists = response?.data;
 
     const otp = otpGenerator.generate(6, {
       alphabets: false,

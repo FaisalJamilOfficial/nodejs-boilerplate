@@ -74,16 +74,14 @@ class StripeManager {
    */
   async createCharge(params) {
     const { customer, amount, currency, source, description } = params;
-    const chargeObj = { currency: CURRENCY };
-    if (amount) chargeObj.amount = amount;
-    else throw new Error("Please enter amount!");
-    // if (currency) chargeObj.currency = currency;
-    // else throw new Error("Please enter currency!");
-    if (source) chargeObj.source = source;
-    else throw new Error("Please enter source token!");
-    if (customer) chargeObj.customer = customer;
-    else throw new Error("Please enter customer_id!");
-    if (description) chargeObj.description = description;
+    const chargeObj = {
+      currency: currency ?? CURRENCY,
+      customer,
+      amount,
+      source,
+      description,
+    };
+
     return await stripe.charges.create(chargeObj);
   }
 
@@ -97,28 +95,23 @@ class StripeManager {
    */
   async createCustomerSourceWithCheck(params) {
     const { source, cardHolderName, user, email, phone } = params;
-    if (source);
-    else throw new Error("Please enter source token!");
-
-    if (cardHolderName);
-    else throw new Error("Please enter cardHolderName!");
 
     const { data: paymentAccountExists } =
       await paymentAccountsController.getPaymentAccount({ user });
 
-    let userStripeID;
+    let userStripeId;
 
     if (paymentAccountExists)
-      userStripeID = paymentAccountExists.account.stripeID;
+      userStripeId = paymentAccountExists.account.stripeId;
     else {
       const customerObj = {};
       if (email) customerObj.email = email;
       if (phone) customerObj.phone = phone;
       const customer = await stripe.customers.create(customerObj);
-      if (customer) userStripeID = customer.id;
+      if (customer) userStripeId = customer.id;
       else throw new Error("Stripe customer creation failed!");
     }
-    const card = await stripe.customers.createSource(userStripeID, {
+    const card = await stripe.customers.createSource(userStripeId, {
       source,
     });
 
@@ -144,10 +137,7 @@ class StripeManager {
    */
   async createCustomer(params) {
     const { user, email, phone } = params;
-    const customerObj = {};
-    if (user) customerObj.id = user;
-    if (email) customerObj.email = email;
-    if (phone) customerObj.phone = phone;
+    const customerObj = { user, email, phone };
     return await stripe.customers.create(customerObj);
   }
 
@@ -220,7 +210,7 @@ class StripeManager {
     const { amount, currency, description, statement_descriptor } = params;
     const topupObj = {
       amount,
-      currency: CURRENCY,
+      currency: currency ?? CURRENCY,
       description,
       statement_descriptor,
     };

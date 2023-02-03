@@ -14,7 +14,6 @@ const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const passport = require("passport");
 const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -22,7 +21,7 @@ const chalk = require("chalk");
 
 const indexRouter = require("./routes/index");
 const SocketManager = require("./utils/SocketManager");
-const errorHandler = require("./utils/ErrorHandler");
+const errorHandler = require("./middlewares/errorHandler");
 
 const serverFunction = async () => {
   console.log(chalk.hex("#00BFFF")("***Server Execution Started!***"));
@@ -55,7 +54,6 @@ const serverFunction = async () => {
       }
     );
 
-    app.use(passport.initialize());
     app.use(logger("dev"));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));

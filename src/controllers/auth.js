@@ -11,7 +11,7 @@ const {
   getWelcomeUserEmailTemplate,
 } = new NodeMailer();
 const { USER_TYPES, USER_STATUSES } = require("../configs/enums");
-const { CUSTOMER, ADMIN, SUPER_ADMIN } = USER_TYPES;
+const { CUSTOMER, ADMIN } = USER_TYPES;
 const { ACTIVE } = USER_STATUSES;
 
 /**
@@ -48,7 +48,6 @@ exports.register = async (params) => {
   const token = user.getSignedjwtToken();
   return {
     success: true,
-    // data: await usersModel.findById(user._id).populate(user.type),
     token,
   };
 };
@@ -66,20 +65,20 @@ exports.login = async (params) => {
   const query = {};
 
   if (email && password) query.email = email;
-  else throw new Error("Please enter login credentials!");
+  else throw new Error("Please enter login credentials!|||400");
 
   const userExists = await usersModel.findOne(query).populate();
   if (userExists);
-  else throw new Error("User not registered!");
+  else throw new Error("User not registered!|||404");
 
   if (userExists.type === type);
-  else throw new Error("Invalid type login credentials!");
+  else throw new Error("Invalid type login credentials!|||401");
 
   if (await userExists.validatePassword(password));
-  else throw new Error("Invalid password!");
+  else throw new Error("Invalid password!|||401");
 
   if (userExists.status === ACTIVE);
-  else throw new Error(`User ${userExists.status}!`);
+  else throw new Error(`User ${userExists.status}!|||403`);
 
   await usersModel.updateOne(
     { _id: userExists._id },
@@ -89,7 +88,6 @@ exports.login = async (params) => {
   const token = userExists.getSignedjwtToken();
   return {
     success: true,
-    // data: userExists,
     token,
   };
 };
@@ -174,7 +172,7 @@ exports.generateEmailToken = async (params) => {
   const { email, tokenExpirationTime } = params;
   const userExists = await usersModel.findOne({ email });
   if (userExists);
-  else throw new Error("User with given email doesn't exist!");
+  else throw new Error("User with given email doesn't exist!|||404");
   let userTokenExists = await userTokensModel.findOne({
     user: userExists._id,
   });
@@ -205,14 +203,14 @@ exports.resetPassword = async (params) => {
 
   const userExists = await usersModel.findById(user);
   if (userExists);
-  else throw new Error("Invalid link!");
+  else throw new Error("Invalid link!|||400");
 
   const userTokenExists = await userTokensModel.findOne({
     user,
     token,
   });
   if (userTokenExists);
-  else throw new Error("Invalid or expired link !");
+  else throw new Error("Invalid or expired link!|||400");
 
   await userExists.setPassword(password);
   await userTokenExists.delete();
@@ -231,14 +229,14 @@ exports.verifyUserEmail = async (params) => {
 
   const userExists = await usersModel.findById(user);
   if (userExists);
-  else throw new Error("Invalid link!");
+  else throw new Error("Invalid link!|||400");
 
   const userTokenExists = await userTokensModel.findOne({
     user,
     token,
   });
   if (userTokenExists);
-  else throw new Error("Invalid or expired link !");
+  else throw new Error("Invalid or expired link!|||400");
 
   userExists.isEmailVerified = true;
   await userExists.save();

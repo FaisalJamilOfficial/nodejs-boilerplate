@@ -11,11 +11,11 @@ exports.addCustomer = async (params) => {
   const customerObj = {};
 
   if (user);
-  else throw new Error("Please enter user id!");
+  else throw new Error("Please enter user id!|||400");
   if (isValidObjectId(user));
-  else throw new Error("Please enter valid user id!");
+  else throw new Error("Please enter valid user id!|||400");
   if (await usersModel.exists({ _id: user })) customerObj.user = user;
-  else throw new Error("user not found!");
+  else throw new Error("user not found!|||404");
 
   const customer = await customersModel.create(customerObj);
   return { success: true, data: customer };
@@ -30,30 +30,38 @@ exports.updateCustomer = async (params) => {
   const { user } = params;
   const customerObj = {};
   if (user);
-  else throw new Error("Please enter user id!");
+  else throw new Error("Please enter user id!|||400");
   if (isValidObjectId(user));
-  else throw new Error("Please enter valid user id!");
-
+  else throw new Error("Please enter valid user id!|||400");
+  const customerExists = await customersModel.findOneAndUpdate(
+    { user },
+    customerObj,
+    {
+      new: true,
+    }
+  );
+  if (customerExists);
+  else throw new Error("Customer not found!|||404");
   return {
     success: true,
-    data: await customersModel.findOneAndUpdate({ user }, customerObj, {
-      new: true,
-    }),
+    data: customerExists,
   };
 };
 
 /**
  * Delete customer
- * @param {string} customer customer id
+ * @param {string} user user id
  * @returns {object} customer data
  */
 exports.deleteCustomer = async (params) => {
-  const { customer } = params;
-  if (customer);
-  else throw new Error("Please enter customer id!");
-  const customerExists = await customersModel.findByIdAndDelete(customer);
+  const { user } = params;
+  if (user);
+  else throw new Error("Please enter user id!|||400");
+  if (isValidObjectId(user));
+  else throw new Error("Please enter valid user id!|||400");
+  const customerExists = await customersModel.findOneAndDelete({ user });
   if (customerExists);
-  else throw new Error("Please enter valid customer id!");
+  else throw new Error("Customer not found!|||404");
   return {
     success: true,
     data: customerExists,
@@ -62,18 +70,20 @@ exports.deleteCustomer = async (params) => {
 
 /**
  * Get customer
- * @param {string} customer customer id
+ * @param {string} user user id
  * @returns {object} customer data
  */
 exports.getCustomer = async (params) => {
-  const { customer } = params;
-  if (customer);
-  else throw new Error("Please enter customer id!");
+  const { user } = params;
+  if (user);
+  else throw new Error("Please enter user id!|||400");
+  if (isValidObjectId(user));
+  else throw new Error("Please enter valid user id!|||400");
   const customerExists = await customersModel
-    .findById(customer)
+    .findOne({ user })
     .select("-createdAt -updatedAt -__v");
   if (customerExists);
-  else throw new Error("Please enter valid customer id!");
+  else throw new Error("Customer not found!|||404");
   return {
     success: true,
     data: customerExists,

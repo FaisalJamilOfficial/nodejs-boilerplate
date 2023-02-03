@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -139,6 +138,18 @@ const users = new Schema(
       select: false,
       default: false,
     },
+    googleID: {
+      type: String,
+      trim: true,
+    },
+    facebookID: {
+      type: String,
+      trim: true,
+    },
+    twitterID: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -172,5 +183,4 @@ users.methods.validatePassword = async function (enteredPassword) {
   return isMatched;
 };
 
-users.plugin(aggregatePaginate);
 module.exports = mongoose.model("users", users);

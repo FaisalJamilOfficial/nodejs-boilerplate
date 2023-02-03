@@ -12,7 +12,7 @@ router.delete(
   asyncHandler(async (req, res) => {
     const { secret } = req.headers;
     if (secret === SECRET);
-    else throw new Error(`Invalid SECRET!`);
+    else throw new Error("Invalid SECRET!|||400");
     const response = await adminsController.cleanDB();
     res.json(response);
   })

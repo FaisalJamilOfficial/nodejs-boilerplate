@@ -56,9 +56,9 @@ router.post(
 router.post(
   "/login/google",
   asyncHandler(async (req, res) => {
-    const { googleID } = req.body;
+    const { googleId } = req.body;
     const args = {
-      googleID,
+      googleId,
     };
     const response = await usersController.getUser(args);
     res.json(response);
@@ -68,9 +68,9 @@ router.post(
 router.post(
   "/login/facebook",
   asyncHandler(async (req, res) => {
-    const { facebookID } = req.body;
+    const { facebookId } = req.body;
     const args = {
-      facebookID,
+      facebookId,
     };
     const response = await usersController.getUser(args);
     res.json(response);
@@ -80,9 +80,9 @@ router.post(
 router.post(
   "/login/twitter",
   asyncHandler(async (req, res) => {
-    const { twitterID } = req.body;
+    const { twitterId } = req.body;
     const args = {
-      twitterID,
+      twitterId,
     };
     const response = await usersController.getUser(args);
     res.json(response);
@@ -115,7 +115,7 @@ router.post(
       name: type,
     };
     if (secret === SECRET);
-    else throw new Error(`Invalid SECRET!`);
+    else throw new Error("Invalid SECRET!|||400");
     const response = await authController.addAdmin(args);
     res.json(response);
   })

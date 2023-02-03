@@ -7,8 +7,6 @@ const { asyncHandler } = require("../middlewares/asyncHandler");
 
 const { upload } = require("../middlewares/uploader");
 const { ATTACHMENTS_DIRECTORY } = require("../configs/directories");
-const { USER_TYPES } = require("../configs/enums");
-const { ADMIN } = USER_TYPES;
 
 router
   .route("/")
@@ -31,7 +29,6 @@ router
       res.json(response);
     })
   )
-
   .get(
     asyncHandler(async (req, res) => {
       const { conversation, limit, page } = req.query;
@@ -61,16 +58,16 @@ router
       res.json(response);
     })
   );
+
 router.get(
   "/conversations",
   verifyToken,
   verifyUser,
   asyncHandler(async (req, res) => {
-    const { _id } = req?.user;
-    const { limit, page, user } = req.query;
-    const userID = req?.user?.type === ADMIN ? user : _id;
+    const { _id: user } = req?.user;
+    const { limit, page } = req.query;
     const args = {
-      user: userID,
+      user,
       limit: Number(limit),
       page: Number(page),
     };

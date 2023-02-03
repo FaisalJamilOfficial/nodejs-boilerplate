@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const { SECRET } = process.env;
-
 const authController = require("../controllers/auth");
 const notificationsController = require("../controllers/notifications");
 const usersController = require("../controllers/users");
@@ -15,10 +13,9 @@ const {
 const TwilioManager = require("../utils/TwilioManager");
 const { uploadTemporary } = require("../middlewares/uploader");
 const { resizeImages } = require("../middlewares/imageResizer");
-const { OTP_TYPES, USER_TYPES } = require("../configs/enums");
+const { OTP_TYPES } = require("../configs/enums");
 const { asyncHandler } = require("../middlewares/asyncHandler");
 const { LOGIN } = OTP_TYPES;
-const { ADMIN } = USER_TYPES;
 
 router
   .route("/")
@@ -26,8 +23,12 @@ router
     verifyToken,
     verifyAdmin,
     asyncHandler(async (req, res) => {
+      const { email, password, phone, type } = req.body;
       const args = {
-        ...req.body,
+        email,
+        password,
+        phone,
+        type,
       };
       const response = await authController.register(args);
       res.json(response);
@@ -39,11 +40,10 @@ router
     uploadTemporary.fields([{ name: "images", maxCount: 1 }]),
     resizeImages,
     asyncHandler(async (req, res) => {
+      const { _id: user } = req?.user;
+      const { firstName, lastName } = req.body;
       const { images } = req.files || {};
-      const args = {
-        ...req.body,
-        images,
-      };
+      const args = { user, firstName, lastName, images };
       const response = await usersController.updateUser(args);
       res.json(response);
     })
@@ -67,7 +67,8 @@ router
     verifyToken,
     verifyAdmin,
     asyncHandler(async (req, res) => {
-      const args = { ...req.query };
+      const { user } = req.query;
+      const args = { user };
       const response = await usersController.deleteUser(args);
       res.json(response);
     })
@@ -91,7 +92,8 @@ router.put(
   verifyUser,
   asyncHandler(async (req, res) => {
     const { _id: user, email, type } = req?.user;
-    const args = { ...req.body, email, user, type };
+    const { password, newPassword } = req.body;
+    const args = { password, newPassword, email, user, type };
     await authController.login(args);
     args.password = args.newPassword;
     const response = await usersController.updateUser(args);
@@ -106,7 +108,10 @@ router
     verifyUser,
     asyncHandler(async (req, res) => {
       const { _id: user } = req?.user;
-      const args = { ...req.body, user };
+      const { phone } = req.body;
+      const args = { user };
+      if (phone) args.phone = phone;
+      else throw new Error("Please enter phone number!|||400");
       const response = await new TwilioManager().sendOTP(args);
       res.json(response);
     })
@@ -114,8 +119,12 @@ router
   .put(
     asyncHandler(async (req, res) => {
       const { type } = req.query;
+      const { phone } = req.body;
       let userExists;
-      const args = { ...req.body };
+      const args = {};
+      if (phone) args.phone = phone;
+      else throw new Error("Please enter phone number!|||400");
+
       if (type === LOGIN) {
         const userResponse = await usersController.getUser(args);
         userExists = userResponse?.user;
@@ -130,7 +139,8 @@ router
   .route("/password/email")
   .post(
     asyncHandler(async (req, res) => {
-      const args = { ...req.body };
+      const { email } = req.body;
+      const args = { email };
       const response = await authController.emailResetPassword(args);
       res.json(response);
     })
@@ -149,13 +159,10 @@ router.get(
   verifyToken,
   verifyUser,
   asyncHandler(async (req, res) => {
-    const { _id, type } = req?.user;
-    const { user, q, page, limit } = req.query;
-    const isAdmin = type === ADMIN;
-    const userID = isAdmin ? user : _id;
+    const { _id: user } = req?.user;
+    const { q, page, limit } = req.query;
     const args = {
-      user: userID,
-      type,
+      user,
       q,
       limit: Number(limit),
       page: Number(page),

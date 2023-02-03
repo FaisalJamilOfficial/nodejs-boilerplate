@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
 
+const { asyncHandler } = require("./asyncHandler");
 const { usersModel } = require("../models");
 
 const { USER_STATUSES, USER_TYPES } = require("../configs/enums");
@@ -44,9 +45,7 @@ exports.verifyToken = async (
         .select("-createdAt -updatedAt -__v");
       if (user) {
         if (user.status === DELETED)
-          return res
-            .status(403)
-            .json({ success: false, message: "User account deleted!" });
+          next(new Error("User account deleted!|||403"));
         req.user = user;
         return next();
       }
@@ -55,13 +54,13 @@ exports.verifyToken = async (
       req.user = null;
       return next();
     }
-    return res.status(403).json({ success: false, message: "Invalid token!" });
+    next(new Error("Invalid token!|||403"));
   } catch (error) {
     if (shouldReturnUserOnFailure) {
       req.user = null;
       return next();
     }
-    return res.status(403).json({ success: false, message: "Unauthorized!" });
+    return next(new Error("Unauthorized!|||401"));
   }
 };
 
@@ -69,13 +68,8 @@ exports.verifyOTP = async (req, res, next) => {
   try {
     const { otp } = req?.user;
     const { code } = req.body;
-    if (Number(code) === Number(otp)) {
-      next();
-    } else {
-      const error = new Error("Invalid Code!");
-      error.status = 400;
-      return next(error);
-    }
+    if (Number(code) === Number(otp)) next();
+    else return next(new Error("Invalid Code!|||400"));
   } catch (error) {
     return next(error);
   }
@@ -85,66 +79,33 @@ exports.verifyAdmin = (req, res, next) => {
   if (
     (req?.user?.type === ADMIN || req?.user?.type === SUPER_ADMIN) &&
     req?.user?.status === ACTIVE
-  ) {
+  )
     next();
-  } else {
-    const error = new Error("You are not authorized as admin!");
-    error.status = 403;
-    return next(error);
-  }
+  else return next(new Error("Unauthorized as admin!|||403"));
 };
 
 exports.verifySuperAdmin = (req, res, next) => {
-  if (req?.user?.type === SUPER_ADMIN && req?.user?.status === ACTIVE) {
-    next();
-  } else {
-    const error = new Error("You are not authorized as admin!");
-    error.status = 403;
-    return next(error);
-  }
+  if (req?.user?.type === SUPER_ADMIN && req?.user?.status === ACTIVE) next();
+  else return next(new Error("Unauthorized as super-admin!|||403"));
 };
 
 exports.verifyCustomer = (req, res, next) => {
-  if (req?.user?.type === CUSTOMER && req?.user?.status === ACTIVE) {
-    next();
-  } else {
-    const error = new Error("You are not authorized as customer!");
-    error.status = 403;
-    return next(error);
-  }
+  if (req?.user?.type === CUSTOMER && req?.user?.status === ACTIVE) next();
+  else return next(new Error("Unauthorized as customer!|||403"));
 };
 
 exports.verifyUser = (req, res, next) => {
-  if (req?.user && req?.user?.status === ACTIVE) {
-    next();
-  } else {
-    const error = new Error("You are not authorized as user!");
-    error.status = 403;
-    return next(error);
-  }
+  if (req?.user && req?.user?.status === ACTIVE) next();
+  else return next(new Error("Unauthorized as user!|||403"));
 };
 
 exports.verifyUserToken = async (req, res, next) => {
-  try {
-    if (req?.user?._id) {
-      next();
-    } else {
-      const error = new Error("You are not authorized as existing user!");
-      error.status = 403;
-      return next(error);
-    }
-  } catch (error) {
-    next(error);
-  }
+  if (req?.user?._id) next();
+  else return next(new Error("Invalid user token!|||400"));
 };
 
-exports.checkUserPhoneExists = async (req, res, next) => {
-  try {
-    const userExists = await usersModel.exists({ phone: req.body.phone });
-    if (userExists) {
-      next();
-    } else next(new Error("User does not exist!"));
-  } catch (error) {
-    next(error);
-  }
-};
+exports.checkUserPhoneExists = asyncHandler(async (req, res, next) => {
+  const userExists = await usersModel.exists({ phone: req.body.phone });
+  if (userExists) next();
+  else next(new Error("User not found!|||404"));
+});

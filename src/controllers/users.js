@@ -1,3 +1,4 @@
+const { isValidObjectId } = require("mongoose");
 const { usersModel, customersModel, adminsModel } = require("../models");
 const FilesDeleter = require("../utils/FilesDeleter");
 
@@ -61,13 +62,15 @@ exports.updateUser = async (params) => {
   let { isOnline, coordinates, fcm } = params;
 
   if (user);
-  else throw new Error("Please enter user id!");
+  else throw new Error("Please enter user id!|||400");
+  if (isValidObjectId(user));
+  else throw new Error("Please enter valid user id!|||400");
 
   const userExists = await usersModel
     .findById(user)
     .select("-createdAt -updatedAt -__v");
   if (userExists);
-  else throw new Error("Please enter valid user id!");
+  else throw new Error("User not found!|||404");
 
   if (email) userExists.email = email;
   if (password) await userExists.setPassword(password);
@@ -85,7 +88,7 @@ exports.updateUser = async (params) => {
       });
       if (alreadyExists);
       else userExists.fcms.push({ device: fcm.device, token: fcm.token });
-    } else throw new Error("Please enter FCM token and device both!");
+    } else throw new Error("Please enter FCM token and device both!|||400");
   }
   if (isOnline) {
     isOnline = JSON.parse(isOnline);
@@ -103,19 +106,22 @@ exports.updateUser = async (params) => {
   if (coordinates) {
     if (coordinates?.length === 2)
       userExists.location.coordinates = coordinates;
-    else throw new Error("Please enter location longitude and latitude both!");
+    else
+      throw new Error(
+        "Please enter location longitude and latitude both!|||400"
+      );
   }
 
   if (customer)
     if (await customersModel.exists({ _id: customer })) {
       userExists.customer = customer;
       userExists.isCustomer = true;
-    } else throw new Error("Please enter valid customer id!");
+    } else throw new Error("Customer not found!|||404");
   if (admin)
     if (await adminsModel.exists({ _id: admin })) {
       userExists.admin = admin;
       userExists.isAdmin = true;
-    } else throw new Error("Please enter valid admin id!");
+    } else throw new Error("Admin not found!|||404");
 
   await usersModel.updateOne({ _id: userExists._id }, userExists);
   return {
@@ -132,10 +138,12 @@ exports.updateUser = async (params) => {
 exports.deleteUser = async (params) => {
   const { user } = params;
   if (user);
-  else throw new Error("Please enter user id!");
+  else throw new Error("Please enter user id!|||400");
+  if (isValidObjectId(user));
+  else throw new Error("Please enter valid user id!|||400");
   const userExists = await usersModel.findByIdAndDelete(user);
   if (userExists);
-  else throw new Error("Please enter valid user id!");
+  else throw new Error("user not found!|||404");
   return {
     success: true,
     data: userExists,
@@ -148,13 +156,13 @@ exports.deleteUser = async (params) => {
  * @returns {object} user data
  */
 exports.getUser = async (params) => {
-  const { user, email, phone, googleID, facebookID, twitterID } = params;
+  const { user, email, phone, googleId, facebookId, twitterId } = params;
   const query = {};
   if (user) query._id = user;
   if (email) query.email = email;
-  if (googleID) query.googleID = googleID;
-  if (facebookID) query.facebookID = facebookID;
-  if (twitterID) query.twitterID = twitterID;
+  if (googleId) query.googleId = googleId;
+  if (facebookId) query.facebookId = facebookId;
+  if (twitterId) query.twitterId = twitterId;
   if (phone) query.phone = phone;
   else query._id = null;
 
@@ -163,7 +171,7 @@ exports.getUser = async (params) => {
     .select("-createdAt -updatedAt -__v");
   if (userExists) userExists = await userExists.populate(userExists.type);
   return {
-    success: true,
+    success: !!userExists,
     data: userExists,
   };
 };
@@ -222,98 +230,103 @@ exports.getUsers = async (params) => {
 //  * @returns {[object]} array of users
 //  */
 // exports.getAllUsers = async (params) => {
-// 	const { user, q, status, type } = params;
-// 	let { page, limit } = params;
-// 	const query = {};
-// 	if (!limit) limit = 10;
-// 	if (!page) page = 1;
-// 	query._id = { $ne: user };
-// 	if (type) query.type = type;
-// 	if (status) query.status = status;
-// 	if (q && q.trim() !== "") {
-// 		var wildcard = [
-// 			{
-// 				$regexMatch: {
-// 					input: "$profile.firstName",
-// 					regex: q,
-// 					options: "i",
-// 				},
-// 			},
-// 			{
-// 				$regexMatch: {
-// 					input: "$profile.lastName",
-// 					regex: q,
-// 					options: "i",
-// 				},
-// 			},
-// 			{
-// 				$regexMatch: {
-// 					input: "$phone",
-// 					regex: q,
-// 					options: "i",
-// 				},
-// 			},
-// 			{
-// 				$regexMatch: {
-// 					input: "$email",
-// 					regex: q,
-// 					options: "i",
-// 				},
-// 			},
-// 		];
-// 	}
-// 	const aggregation = [
-// 		{ $match: query },
-// 		{ $project: { hash: 0, salt: 0, type: 0 } },
-// 		{
-// 			$lookup: {
-// 				from: "profiles",
-// 				let: { profile: "$profile" },
-// 				pipeline: [
-// 					{
-// 						$match: {
-// 							$expr: {
-// 								$and: [
-// 									{
-// 										$and: [{ $eq: ["$$profile", "$_id"] }],
-// 									},
-// 								],
-// 							},
-// 						},
-// 					},
-// 				],
-// 				as: "profile",
-// 			},
-// 		},
-// 		{ $unwind: { path: "$profile" } },
-// 		{
-// 			$match: {
-// 				$expr: {
-// 					$and: [
-// 						{
-// 							$or: wildcard ?? {},
-// 						},
-// 					],
-// 				},
-// 			},
-// 		},
-// 	];
-// 	const users = await usersModel
-// 		.aggregate(aggregation)
-// 		.sort({ createdAt: -1 })
-// 		.skip((page - 1) * limit)
-// 		.limit(limit);
+//   const { user, q, status, type } = params;
+//   let { page, limit } = params;
+//   const query = {};
+//   if (!limit) limit = 10;
+//   if (!page) page = 1;
+//   query._id = { $ne: user };
+//   if (type) query.type = type;
+//   if (status) query.status = status;
+//   if (q && q.trim() !== "") {
+//     var wildcard = [
+//       {
+//         $regexMatch: {
+//           input: "$firstName",
+//           regex: q,
+//           options: "i",
+//         },
+//       },
+//       {
+//         $regexMatch: {
+//           input: "$lastName",
+//           regex: q,
+//           options: "i",
+//         },
+//       },
+//       {
+//         $regexMatch: {
+//           input: "$name",
+//           regex: q,
+//           options: "i",
+//         },
+//       },
+//       {
+//         $regexMatch: {
+//           input: "$phone",
+//           regex: q,
+//           options: "i",
+//         },
+//       },
+//       {
+//         $regexMatch: {
+//           input: "$email",
+//           regex: q,
+//           options: "i",
+//         },
+//       },
+//     ];
+//   }
+//   const aggregation = [
+//     { $match: query },
+//     { $project: { hash: 0, salt: 0, type: 0 } },
+//     {
+//       $lookup: {
+//         from: "customers",
+//         localField: "customer",
+//         foreignField: "_id",
+//         as: "customer",
+//       },
+//     },
+//     { $unwind: { path: "$customer" } },
+//     {
+//       $match: {
+//         $expr: {
+//           $and: [
+//             {
+//               $or: wildcard ?? {},
+//             },
+//           ],
+//         },
+//       },
+//     },
+//     {
+//       $facet: {
+//         totalCount: [{ $count: "totalCount" }],
+//         data: [{ $skip: page * limit }, { $limit: limit }],
+//       },
+//     },
+//     { $unwind: "$totalCount" },
+//     {
+//       $project: {
+//         totalCount: "$totalCount.totalCount",
+//         totalPages: {
+//           $ceil: {
+//             $divide: ["$totalCount.totalCount", limit],
+//           },
+//         },
+//         data: 1,
+//       },
+//     },
+//   ];
+//   const users = await usersModel
+//     .aggregate(aggregation)
+//     .sort({ createdAt: -1 })
+//     .skip((page - 1) * limit)
+//     .limit(limit);
 
-// 	aggregation.push(
-// 		...[{ $group: { _id: null, count: { $sum: 1 } } }, { $project: { _id: 0 } }]
-// 	);
-
-// 	const totalCount = await usersModel.aggregate(aggregation);
-
-// 	return {
-// 		success: true,
-// 		totalCount: totalCount[0]?.count ?? 0,
-// 		totalPages: Math.ceil((totalCount[0]?.count ?? 0) / limit),
-// 		data: users,
-// 	};
+//   return {
+//     success: true,
+//     ...users[0],
+//   };
 // };

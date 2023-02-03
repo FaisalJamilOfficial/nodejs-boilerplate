@@ -21,31 +21,31 @@ exports.addMessage = async (params) => {
   const messageObj = {};
 
   if (userTo);
-  else throw new Error("Please enter userTo id!");
+  else throw new Error("Please enter userTo id!|||400");
   if (isValidObjectId(userTo));
-  else throw new Error("Please enter valid userTo id!");
+  else throw new Error("Please enter valid userTo id!|||400");
   if (await usersModel.exists({ _id: userTo })) messageObj.userTo = userTo;
-  else throw new Error("userTo not found!");
+  else throw new Error("userTo not found!|||404");
 
   if (userFrom);
-  else throw new Error("Please enter userFrom id!");
+  else throw new Error("Please enter userFrom id!|||400");
   if (isValidObjectId(userFrom));
-  else throw new Error("Please enter valid userFrom id!");
+  else throw new Error("Please enter valid userFrom id!|||400");
   if (await usersModel.exists({ _id: userFrom }))
     messageObj.userFrom = userFrom;
-  else throw new Error("userFrom not found!");
+  else throw new Error("userFrom not found!|||404");
 
   if (conversation);
-  else throw new Error("Please enter conversation id!");
+  else throw new Error("Please enter conversation id!|||400");
   if (isValidObjectId(conversation));
-  else throw new Error("Please enter valid conversation id!");
+  else throw new Error("Please enter valid conversation id!|||400");
   if (
     await conversationsModel.exists({
       _id: conversation,
     })
   )
     messageObj.conversation = conversation;
-  else throw new Error("conversation not found!");
+  else throw new Error("conversation not found!|||404");
 
   if (text) messageObj.text = text;
 
@@ -82,7 +82,7 @@ exports.chat = async (params) => {
   if (page) page = page - 1;
   const query = {};
   if (conversation) query.conversation = conversation;
-  else throw new Error("Please enter conversation id!");
+  else throw new Error("Please enter conversation id!|||400");
   const messages = await messagesModel
     .find(query)
     .select("-createdAt -updatedAt -__v")
@@ -105,17 +105,23 @@ exports.updateMessage = async (params) => {
   const { message, text, status } = params;
   const messageObj = {};
   if (message);
-  else throw new Error("Please enter message id!");
+  else throw new Error("Please enter message id!|||400");
   if (isValidObjectId(message));
-  else throw new Error("Please enter valid message id!");
+  else throw new Error("Please enter valid message id!|||400");
   if (text) messageObj.text = text;
   if (status) messageObj.status = status;
-
+  const messageExists = await messagesModel.findByIdAndUpdate(
+    { _id: message },
+    messageObj,
+    {
+      new: true,
+    }
+  );
+  if (messageExists);
+  else throw new Error("Message not found!|||404");
   return {
     success: true,
-    data: await messagesModel.findByIdAndUpdate({ _id: message }, messageObj, {
-      new: true,
-    }),
+    data: messageExists,
   };
 };
 

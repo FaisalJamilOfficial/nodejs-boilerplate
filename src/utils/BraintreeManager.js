@@ -63,18 +63,17 @@ class BraintreeManager {
       creditCard,
       paymentMethodNonce,
     } = params;
-    const customerObj = {};
-    if (paymentMethodNonce) customerObj.paymentMethodNonce = paymentMethodNonce;
-    else throw new Error("Please enter paymentMethodNonce!");
-    if (firstName) customerObj.firstName = firstName;
-    if (lastName) customerObj.lastName = lastName;
-    if (email) customerObj.email = email;
-    if (phone) customerObj.phone = phone;
-    if (creditCard) customerObj.creditCard = creditCard;
+    const customerObj = {
+      firstName,
+      lastName,
+      email,
+      phone,
+      creditCard,
+      paymentMethodNonce,
+    };
     const response = await gateway.customer.create(customerObj);
-    if (response.success) {
-      return response;
-    } else throw new Error(response?.message);
+    if (response.success) return response;
+    else throw new Error(response?.message);
   }
 
   /**
@@ -95,15 +94,10 @@ class BraintreeManager {
    */
   async createPaymentMethod(params) {
     const { customerId, paymentMethodNonce } = params;
-    const paymentMethodObj = {};
-    if (paymentMethodNonce)
-      paymentMethodObj.paymentMethodNonce = paymentMethodNonce;
-    else throw new Error("Please enter paymentMethodNonce!");
-    if (customerId) paymentMethodObj.customerId = customerId;
+    const paymentMethodObj = { customerId, paymentMethodNonce };
     const response = await gateway.paymentMethod.create(paymentMethodObj);
-    if (response.success) {
-      return response;
-    } else throw new Error(response?.message);
+    if (response.success) return response;
+    else throw new Error(response?.message);
   }
 
   /**

@@ -71,6 +71,7 @@ class SharpManager {
 
     const array = [];
     if (images) {
+      if (path);
       // const imagesMimeRegex = new RegExp("image/(.*)");
       const imagesMimeRegex = /image\/(.*)/;
       for (let i = 0; i < images.length; i++) {

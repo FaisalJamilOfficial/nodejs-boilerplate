@@ -11,11 +11,11 @@ exports.addAdmin = async (parameters) => {
   const adminObj = {};
 
   if (user);
-  else throw new Error("Please enter user id!");
+  else throw new Error("Please enter user id!|||400");
   if (isValidObjectId(user));
-  else throw new Error("Please enter valid user id!");
+  else throw new Error("Please enter valid user id!|||400");
   if (await usersModel.exists({ _id: user })) adminObj.user = user;
-  else throw new Error("user not found!");
+  else throw new Error("User not found!|||404");
 
   const admin = await adminsModel.create(adminObj);
   return { success: true, data: admin };
@@ -23,37 +23,41 @@ exports.addAdmin = async (parameters) => {
 
 /**
  * Update admin data
- * @param {string} admin admin id
+ * @param {string} user user id
  * @returns {object} admin data
  */
 exports.updateAdmin = async (parameters) => {
-  const { admin } = parameters;
+  const { user } = parameters;
   const adminObj = {};
-  if (admin);
-  else throw new Error("Please enter admin id!");
-  if (isValidObjectId(admin));
-  else throw new Error("Please enter valid admin id!");
-
+  if (user);
+  else throw new Error("Please enter user id!|||400");
+  if (isValidObjectId(user));
+  else throw new Error("Please enter valid user id!|||400");
+  const adminExists = await adminsModel.findOneAndUpdate({ user }, adminObj, {
+    new: true,
+  });
+  if (adminExists);
+  else throw new Error("Admin not found!|||404");
   return {
     success: true,
-    data: await adminsModel.findByIdAndUpdate(admin, adminObj, {
-      new: true,
-    }),
+    data: adminExists,
   };
 };
 
 /**
  * Delete admin
- * @param {string} admin admin id
+ * @param {string} user user id
  * @returns {object} admin data
  */
 exports.deleteAdmin = async (parameters) => {
-  const { admin } = parameters;
-  if (admin);
-  else throw new Error("Please enter admin id!");
-  const adminExists = await adminsModel.findByIdAndDelete(admin);
+  const { user } = parameters;
+  if (user);
+  else throw new Error("Please enter user id!|||400");
+  if (isValidObjectId(user));
+  else throw new Error("Please enter valid user id!|||400");
+  const adminExists = await adminsModel.findOneAndDelete({ user });
   if (adminExists);
-  else throw new Error("Please enter valid admin id!");
+  else throw new Error("Admin not found!|||404");
   return {
     success: true,
     data: adminExists,
@@ -62,18 +66,20 @@ exports.deleteAdmin = async (parameters) => {
 
 /**
  * Get admin
- * @param {string} admin admin id
+ * @param {string} user user id
  * @returns {object} admin data
  */
 exports.getAdmin = async (parameters) => {
-  const { admin } = parameters;
-  if (admin);
-  else throw new Error("Please enter admin id!");
+  const { user } = parameters;
+  if (user);
+  else throw new Error("Please enter user id!");
+  if (isValidObjectId(user));
+  else throw new Error("Please enter valid user id!|||400");
   const adminExists = await adminsModel
-    .findById(admin)
+    .findOne({ user })
     .select("-createdAt -updatedAt -__v");
   if (adminExists);
-  else throw new Error("Please enter valid admin id!");
+  else throw new Error("Admin not found!|||404");
   return {
     success: true,
     data: adminExists,
@@ -113,5 +119,6 @@ exports.getAdmins = async (parameters) => {
 exports.cleanDB = async () => {
   return {
     success: true,
+    message: "Operation completed successfully!",
   };
 };

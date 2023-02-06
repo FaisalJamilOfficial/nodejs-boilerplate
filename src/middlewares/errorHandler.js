@@ -30,7 +30,7 @@ const error = (err, req, res, next) => {
     error = new ErrorHandler(message, 400);
   }
 
-  res.status(error.statusCode).json({
+  res.status(Number(error.statusCode)).json({
     success: false,
     error: error.message || "Server Error",
   });

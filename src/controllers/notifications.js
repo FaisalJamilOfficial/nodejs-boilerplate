@@ -57,6 +57,14 @@ exports.newMessageNotification = async (params) => {
   messageExists.userTo.fcms.forEach(async (element) => {
     fcms.push(element.token);
   });
-  await new FirebaseManager().sendNotification({ fcms, title, body });
+  await new FirebaseManager().sendNotification({
+    fcms,
+    title,
+    body,
+    data: {
+      type: NEW_MESSAGE,
+      // message: JSON.stringify(messageExists)
+    },
+  });
   return { success: true, message: "Message notification sent successfully!" };
 };

@@ -2,7 +2,7 @@ const SocketManager = require("../utils/SocketManager");
 const { isValidObjectId } = require("mongoose");
 
 const { usersModel, messagesModel, conversationsModel } = require("../models");
-const notificationsController = require("../controllers/notifications");
+const notificationsController = require("./notifications");
 
 const { CONVERSATION_STATUSES, MESSAGE_STATUSES } = require("../configs/enums");
 const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;

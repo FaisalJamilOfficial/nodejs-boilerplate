@@ -1,8 +1,7 @@
-const { isValidObjectId } = require("mongoose");
 const { usersModel, userTokensModel } = require("../models");
-const usersController = require("../controllers/users");
+const usersController = require("./users");
 const customersController = require("./customers");
-const adminsController = require("../controllers/admins");
+const adminsController = require("./admins");
 const NodeMailer = require("../utils/NodeMailer");
 const {
   sendEmail,

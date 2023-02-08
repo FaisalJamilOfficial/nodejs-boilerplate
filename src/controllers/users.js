@@ -164,7 +164,7 @@ exports.getUser = async (params) => {
   if (facebookId) query.facebookId = facebookId;
   if (twitterId) query.twitterId = twitterId;
   if (phone) query.phone = phone;
-  else query._id = null;
+  if (Object.keys(query).length === 0) query._id = null;
 
   let userExists = await usersModel
     .findOne(query)

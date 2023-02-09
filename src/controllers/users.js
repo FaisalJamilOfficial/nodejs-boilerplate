@@ -327,6 +327,9 @@ exports.getUsers = async (params) => {
 
 //   return {
 //     success: true,
+//     data: [],
+//     totalCount: 0,
+//     totalPages: 0,
 //     ...users[0],
 //   };
 // };

@@ -1,7 +1,10 @@
-const { messagesModel, notificationsModel } = require("../models");
-const FirebaseManager = require("../utils/FirebaseManager");
+// file imports
+import * as models from "../models/index.js";
+import FirebaseManager from "../utils/firebase-manager.js";
+import { NOTIFICATION_TYPES } from "../configs/enums.js";
 
-const { NOTIFICATION_TYPES } = require("../configs/enums");
+// destructuring assignments
+const { messagesModel, notificationsModel } = models;
 const { NEW_MESSAGE } = NOTIFICATION_TYPES;
 
 /**
@@ -11,7 +14,7 @@ const { NEW_MESSAGE } = NOTIFICATION_TYPES;
  * @param {number} page notifications page number
  * @returns {[object]} array of notifications
  */
-exports.getAllNotifications = async (params) => {
+export const getAllNotifications = async (params) => {
   const { user } = params;
   let { page, limit } = params;
   const query = {};
@@ -35,7 +38,7 @@ exports.getAllNotifications = async (params) => {
  * @param {string} message message id
  * @returns {null}
  */
-exports.newMessageNotification = async (params) => {
+export const newMessageNotification = async (params) => {
   const { message } = params;
   const messageExists = await messagesModel
     .findById(message)

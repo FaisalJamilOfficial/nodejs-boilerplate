@@ -1,10 +1,17 @@
-const express = require("express");
-const router = express.Router();
+// module imports
+import express from "express";
+
+// file imports
+import * as adminsController from "../controllers/admins.js";
+import { verifyToken, verifyAdmin } from "../middlewares/authenticator.js";
+import { asyncHandler } from "../middlewares/async-handler.js";
+
+// destructuring assignments
 const { SECRET } = process.env;
 
-const adminsController = require("../controllers/admins");
-const { verifyToken, verifyAdmin } = require("../middlewares/authenticator");
-const { asyncHandler } = require("../middlewares/asyncHandler");
+// variable initializations
+const router = express.Router();
+
 router.delete(
   "/clean/DB",
   verifyToken,
@@ -18,4 +25,4 @@ router.delete(
   })
 );
 
-module.exports = router;
+export default router;

@@ -1,13 +1,12 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+// module imports
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const {
-  USER_STATUSES,
-  USER_TYPES,
-  GEO_JSON_TYPES,
-} = require("../configs/enums");
+// file imports
+import { USER_STATUSES, USER_TYPES, GEO_JSON_TYPES } from "../configs/enums.js";
+
+// destructuring assignments
 const { ACTIVE, DELETED } = USER_STATUSES;
 const { CUSTOMER, ADMIN, SUPER_ADMIN, MULTI } = USER_TYPES;
 const {
@@ -18,6 +17,9 @@ const {
   MULTILINESTRING,
   MULTIPOLYGON,
 } = GEO_JSON_TYPES;
+
+// variable initializations
+const Schema = mongoose.Schema;
 
 const fcm = {
   device: { type: String, required: [true, "Please enter FCM device id!"] },
@@ -183,4 +185,4 @@ users.methods.validatePassword = async function (enteredPassword) {
   return isMatched;
 };
 
-module.exports = mongoose.model("users", users);
+export default mongoose.model("users", users);

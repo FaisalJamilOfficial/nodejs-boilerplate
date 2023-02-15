@@ -1,6 +1,12 @@
-const { isValidObjectId } = require("mongoose");
-const { usersModel, customersModel, adminsModel } = require("../models");
-const FilesDeleter = require("../utils/FilesDeleter");
+// module imports
+import { isValidObjectId } from "mongoose";
+
+// file imports
+import * as models from "../models/index.js";
+import FilesDeleter from "../utils/files-deleter.js";
+
+// destructuring assignments
+const { usersModel, customersModel, adminsModel } = models;
 
 /**
  * Add user
@@ -10,7 +16,7 @@ const FilesDeleter = require("../utils/FilesDeleter");
  * @param {string} type user type
  * @returns {object} user data
  */
-exports.addUser = async (params) => {
+export const addUser = async (params) => {
   const { email, password, phone, type } = params;
   const userObj = {};
 
@@ -45,7 +51,7 @@ exports.addUser = async (params) => {
  * @param {string} admin admin id
  * @returns {object} user data
  */
-exports.updateUser = async (params) => {
+export const updateUser = async (params) => {
   const {
     user,
     email,
@@ -135,7 +141,7 @@ exports.updateUser = async (params) => {
  * @param {string} user user id
  * @returns {object} user data
  */
-exports.deleteUser = async (params) => {
+export const deleteUser = async (params) => {
   const { user } = params;
   if (user);
   else throw new Error("Please enter user id!|||400");
@@ -155,7 +161,7 @@ exports.deleteUser = async (params) => {
  * @param {string} user user id
  * @returns {object} user data
  */
-exports.getUser = async (params) => {
+export const getUser = async (params) => {
   const { user, email, phone, googleId, facebookId, twitterId } = params;
   const query = {};
   if (user) query._id = user;
@@ -185,7 +191,7 @@ exports.getUser = async (params) => {
  * @param {number} page users page number
  * @returns {[object]} array of users
  */
-exports.getUsers = async (params) => {
+export const getUsers = async (params) => {
   const { q, type, user } = params;
   let { page, limit } = params;
   if (!limit) limit = 10;
@@ -229,7 +235,7 @@ exports.getUsers = async (params) => {
 //  * @param {string} type user type
 //  * @returns {[object]} array of users
 //  */
-// exports.getAllUsers = async (params) => {
+// export const getAllUsers = async (params) => {
 //   const { user, q, status, type } = params;
 //   let { page, limit } = params;
 //   const query = {};

@@ -1,12 +1,18 @@
-const express = require("express");
+// module imports
+import express from "express";
+
+// file imports
+import * as messagesController from "../controllers/messages.js";
+import { verifyToken, verifyUser } from "../middlewares/authenticator.js";
+import { asyncHandler } from "../middlewares/async-handler.js";
+import { upload } from "../middlewares/uploader.js";
+import directories from "../configs/directories.js";
+
+// destructuring assignments
+const { ATTACHMENTS_DIRECTORY } = directories;
+
+// variable initializations
 const router = express.Router();
-
-const messagesController = require("../controllers/messages");
-const { verifyToken, verifyUser } = require("../middlewares/authenticator");
-const { asyncHandler } = require("../middlewares/asyncHandler");
-
-const { upload } = require("../middlewares/uploader");
-const { ATTACHMENTS_DIRECTORY } = require("../configs/directories");
 
 router
   .route("/")
@@ -76,4 +82,4 @@ router.get(
   })
 );
 
-module.exports = router;
+export default router;

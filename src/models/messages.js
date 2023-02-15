@@ -1,57 +1,63 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+// module imports
+import mongoose from "mongoose";
 
-const { MESSAGE_STATUSES } = require("../configs/enums");
+// file imports
+import { MESSAGE_STATUSES } from "../configs/enums.js";
+
+// destructuring assignments
 const { UNREAD, READ, DELETED } = MESSAGE_STATUSES;
 
+// variable initializations
+const Schema = mongoose.Schema;
+
 const attachment = new Schema(
-	{
-		path: {
-			type: String,
-			required: true,
-		},
-		type: {
-			type: String,
-			required: true,
-		},
-	},
-	{ timestamps: true }
+  {
+    path: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+    },
+  },
+  { timestamps: true }
 );
 
 const messages = new Schema(
-	{
-		conversation: {
-			type: Schema.Types.ObjectId,
-			ref: "conversations",
-			required: true,
-			index: true,
-		},
-		userTo: {
-			type: Schema.Types.ObjectId,
-			ref: "users",
-			required: true,
-			index: true,
-		},
-		userFrom: {
-			type: Schema.Types.ObjectId,
-			ref: "users",
-			required: true,
-			index: true,
-		},
-		text: {
-			type: String,
-			trim: true,
-		},
-		attachments: [attachment],
-		status: {
-			type: String,
-			enum: [UNREAD, READ, DELETED],
-			default: UNREAD,
-			required: true,
-			index: true,
-		},
-	},
-	{ timestamps: true }
+  {
+    conversation: {
+      type: Schema.Types.ObjectId,
+      ref: "conversations",
+      required: true,
+      index: true,
+    },
+    userTo: {
+      type: Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+      index: true,
+    },
+    userFrom: {
+      type: Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+      index: true,
+    },
+    text: {
+      type: String,
+      trim: true,
+    },
+    attachments: [attachment],
+    status: {
+      type: String,
+      enum: [UNREAD, READ, DELETED],
+      default: UNREAD,
+      required: true,
+      index: true,
+    },
+  },
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("messages", messages);
+export default mongoose.model("messages", messages);

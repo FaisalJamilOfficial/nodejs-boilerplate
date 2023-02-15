@@ -1,18 +1,21 @@
-const { isValidObjectId } = require("mongoose");
-const { usersModel, userTokensModel } = require("../models");
-const usersController = require("../controllers/users");
-const customersController = require("./customers");
-const adminsController = require("../controllers/admins");
-const NodeMailer = require("../utils/NodeMailer");
+// file imports
+import * as models from "../models/index.js";
+import * as usersController from "./users.js";
+import * as customersController from "./customers.js";
+import * as adminsController from "./admins.js";
+import NodeMailer from "../utils/node-mailer.js";
+import { USER_TYPES, USER_STATUSES } from "../configs/enums.js";
+
+// destructuring assignments
+const { usersModel, userTokensModel } = models;
+const { CUSTOMER, ADMIN } = USER_TYPES;
+const { ACTIVE } = USER_STATUSES;
 const {
   sendEmail,
   getEmailVerificationEmailTemplate,
   getResetPasswordEmailTemplate,
   getWelcomeUserEmailTemplate,
 } = new NodeMailer();
-const { USER_TYPES, USER_STATUSES } = require("../configs/enums");
-const { CUSTOMER, ADMIN } = USER_TYPES;
-const { ACTIVE } = USER_STATUSES;
 
 /**
  * Register user
@@ -22,7 +25,7 @@ const { ACTIVE } = USER_STATUSES;
  * @param {string} type user type
  * @returns {object} user data with token
  */
-exports.register = async (params) => {
+export const register = async (params) => {
   let user;
   const { type } = params;
   const userResponse = await usersController.addUser({ ...params });
@@ -59,7 +62,7 @@ exports.register = async (params) => {
  * @param {string} type user type
  * @returns {object} user data with token
  */
-exports.login = async (params) => {
+export const login = async (params) => {
   const { email, password, type } = params;
 
   const query = {};
@@ -97,7 +100,7 @@ exports.login = async (params) => {
  * @param {string} email user email address
  * @returns {object} user password reset result
  */
-exports.emailResetPassword = async (params) => {
+export const emailResetPassword = async (params) => {
   const { email } = params;
   const tokenExpirationTime = new Date();
   tokenExpirationTime.setMinutes(tokenExpirationTime.getMinutes() + 10);
@@ -122,7 +125,7 @@ exports.emailResetPassword = async (params) => {
  * @param {string} email user email address
  * @returns {object} user email verification result
  */
-exports.emailVerifyEmail = async (params) => {
+export const emailVerifyEmail = async (params) => {
   const { email } = params;
   const tokenExpirationTime = new Date();
   tokenExpirationTime.setMinutes(tokenExpirationTime.getMinutes() + 10);
@@ -149,7 +152,7 @@ exports.emailVerifyEmail = async (params) => {
  * @param {string} name user name
  * @returns {object} user welcome result
  */
-exports.emailWelcomeUser = async (params) => {
+export const emailWelcomeUser = async (params) => {
   const { email, name } = params;
   const args = {};
   args.to = email;
@@ -168,7 +171,7 @@ exports.emailWelcomeUser = async (params) => {
  * @param {Date} tokenExpirationTime email token expiration time
  * @returns {object} user email token
  */
-exports.generateEmailToken = async (params) => {
+export const generateEmailToken = async (params) => {
   const { email, tokenExpirationTime } = params;
   const userExists = await usersModel.findOne({ email });
   if (userExists);
@@ -198,7 +201,7 @@ exports.generateEmailToken = async (params) => {
  * @param {string} token reset password token
  * @returns {object} user password reset result
  */
-exports.resetPassword = async (params) => {
+export const resetPassword = async (params) => {
   const { password, user, token } = params;
 
   const userExists = await usersModel.findById(user);
@@ -224,7 +227,7 @@ exports.resetPassword = async (params) => {
  * @param {string} token user email token
  * @returns {object} user email verification result
  */
-exports.verifyUserEmail = async (params) => {
+export const verifyUserEmail = async (params) => {
   const { user, token } = params;
 
   const userExists = await usersModel.findById(user);
@@ -252,7 +255,7 @@ exports.verifyUserEmail = async (params) => {
  * @param {string} type user type
  * @returns {object} user data with token
  */
-exports.addAdmin = async (params) => {
+export const addAdmin = async (params) => {
   const { email, password, type } = params;
 
   const userObj = {};

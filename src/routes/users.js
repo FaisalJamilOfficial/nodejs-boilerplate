@@ -1,21 +1,28 @@
-const express = require("express");
-const router = express.Router();
-const authController = require("../controllers/auth");
-const notificationsController = require("../controllers/notifications");
-const usersController = require("../controllers/users");
-const {
+// module imports
+import express from "express";
+
+// file imports
+import * as authController from "../controllers/auth.js";
+import * as notificationsController from "../controllers/notifications.js";
+import * as usersController from "../controllers/users.js";
+import TwilioManager from "../utils/twilio-manager.js";
+import { uploadTemporary } from "../middlewares/uploader.js";
+import { resizeImages } from "../middlewares/image-resizer.js";
+import { OTP_TYPES } from "../configs/enums.js";
+import { asyncHandler } from "../middlewares/async-handler.js";
+import {
   verifyOTP,
   verifyToken,
   verifyUser,
   verifyAdmin,
   verifyUserToken,
-} = require("../middlewares/authenticator");
-const TwilioManager = require("../utils/TwilioManager");
-const { uploadTemporary } = require("../middlewares/uploader");
-const { resizeImages } = require("../middlewares/imageResizer");
-const { OTP_TYPES } = require("../configs/enums");
-const { asyncHandler } = require("../middlewares/asyncHandler");
+} from "../middlewares/authenticator.js";
+
+// destructuring assignments
 const { LOGIN } = OTP_TYPES;
+
+// variable initializations
+const router = express.Router();
 
 router
   .route("/")
@@ -194,4 +201,4 @@ router.get(
   })
 );
 
-module.exports = router;
+export default router;

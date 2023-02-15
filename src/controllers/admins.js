@@ -1,12 +1,18 @@
-const { isValidObjectId } = require("mongoose");
-const { usersModel, adminsModel } = require("../models");
+// module imports
+import { isValidObjectId } from "mongoose";
+
+// file imports
+import models from "../models/index.js";
+
+// destructuring assignments
+const { usersModel, adminsModel } = models;
 
 /**
  * Add admin
  * @param {string} user user id
  * @returns {object} admin data
  */
-exports.addAdmin = async (parameters) => {
+export const addAdmin = async (parameters) => {
   const { user } = parameters;
   const adminObj = {};
 
@@ -26,7 +32,7 @@ exports.addAdmin = async (parameters) => {
  * @param {string} user user id
  * @returns {object} admin data
  */
-exports.updateAdmin = async (parameters) => {
+export const updateAdmin = async (parameters) => {
   const { user } = parameters;
   const adminObj = {};
   if (user);
@@ -49,7 +55,7 @@ exports.updateAdmin = async (parameters) => {
  * @param {string} user user id
  * @returns {object} admin data
  */
-exports.deleteAdmin = async (parameters) => {
+export const deleteAdmin = async (parameters) => {
   const { user } = parameters;
   if (user);
   else throw new Error("Please enter user id!|||400");
@@ -69,7 +75,7 @@ exports.deleteAdmin = async (parameters) => {
  * @param {string} user user id
  * @returns {object} admin data
  */
-exports.getAdmin = async (parameters) => {
+export const getAdmin = async (parameters) => {
   const { user } = parameters;
   if (user);
   else throw new Error("Please enter user id!");
@@ -93,7 +99,7 @@ exports.getAdmin = async (parameters) => {
  * @param {number} page admins page number
  * @returns {object} admin data
  */
-exports.getAdmins = async (parameters) => {
+export const getAdmins = async (parameters) => {
   const { q } = parameters;
   let { limit, page } = parameters;
   if (!limit) limit = 10;
@@ -116,7 +122,7 @@ exports.getAdmins = async (parameters) => {
  * Clean DB
  * @returns {object} success status
  */
-exports.cleanDB = async () => {
+export const cleanDB = async () => {
   return {
     success: true,
     message: "Operation completed successfully!",

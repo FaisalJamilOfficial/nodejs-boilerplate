@@ -1,10 +1,14 @@
-const SocketManager = require("../utils/SocketManager");
-const { isValidObjectId } = require("mongoose");
+// module imports
+import { isValidObjectId } from "mongoose";
 
-const { usersModel, messagesModel, conversationsModel } = require("../models");
-const notificationsController = require("./notifications");
+// file imports
+import SocketManager from "../utils/socket-manager.js";
+import * as notificationsController from "./notifications.js";
+import * as models from "../models/index.js";
+import { CONVERSATION_STATUSES, MESSAGE_STATUSES } from "../configs/enums.js";
 
-const { CONVERSATION_STATUSES, MESSAGE_STATUSES } = require("../configs/enums");
+// destructuring assignments
+const { usersModel, messagesModel, conversationsModel } = models;
 const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;
 const { READ } = MESSAGE_STATUSES;
 
@@ -16,7 +20,7 @@ const { READ } = MESSAGE_STATUSES;
  * @param {[object]} attachments message attachments
  * @returns {object} message data
  */
-exports.addMessage = async (params) => {
+export const addMessage = async (params) => {
   const { userFrom, userTo, text, attachments, conversation } = params;
   const messageObj = {};
 
@@ -74,7 +78,7 @@ exports.addMessage = async (params) => {
  * @param {[object]} attachments OPTIONAL message attachments
  * @returns {object} message data
  */
-exports.chat = async (params) => {
+export const chat = async (params) => {
   const { conversation } = params;
   let { page, limit } = params;
   if (!limit) limit = 10;
@@ -101,7 +105,7 @@ exports.chat = async (params) => {
  * @param {string} status message status
  * @returns {object} message data
  */
-exports.updateMessage = async (params) => {
+export const updateMessage = async (params) => {
   const { message, text, status } = params;
   const messageObj = {};
   if (message);
@@ -130,7 +134,7 @@ exports.updateMessage = async (params) => {
  * @param {string} message message id
  * @returns {object} message data
  */
-exports.deleteMessage = async (params) => {
+export const deleteMessage = async (params) => {
   const { message } = params;
   if (message);
   else throw new Error("Please enter message id!");
@@ -150,7 +154,7 @@ exports.deleteMessage = async (params) => {
  * @param {number} page conversations page number
  * @returns {[object]} array of conversations
  */
-exports.getConversations = async (params) => {
+export const getConversations = async (params) => {
   const { user } = params;
   let { limit, page } = params;
   if (!limit) limit = 10;
@@ -181,7 +185,7 @@ exports.getConversations = async (params) => {
  * @param {[object]} attachments message attachments
  * @returns {object} message data
  */
-exports.send = async (params) => {
+export const send = async (params) => {
   const { userFrom, userTo } = params;
   let conversation;
   const query = {
@@ -232,7 +236,7 @@ exports.send = async (params) => {
  * @param {string} userTo user id
  * @returns {object} message data
  */
-exports.readMessages = async (params) => {
+export const readMessages = async (params) => {
   const { conversation, userTo } = params;
   const messageObj = { status: READ };
   if (userTo);

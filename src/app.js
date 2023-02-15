@@ -1,33 +1,37 @@
-const dotenv = require("dotenv");
-const { ENVIRONMENTS } = require("./configs/enums");
-const { PRODUCTION } = ENVIRONMENTS;
-dotenv.config();
-dotenv.config({
-  path:
-    process.env.NODE_ENV === PRODUCTION
-      ? ".env.production"
-      : ".env.development",
-});
+// module imports
+// import dotenv from "dotenv";
+import http from "http";
+import createError from "http-errors";
+import express from "express";
+import path from "path";
+import cookieParser from "cookie-parser";
+import logger from "morgan";
+import cors from "cors";
+import chalk from "chalk";
+import mongoose from "mongoose";
+import { fileURLToPath } from "url";
+import { applySpeedGooseCacheLayer, SharedCacheStrategies } from "speedgoose";
 
-const { MONGO_URL, NODE_ENV } = process.env;
-const createError = require("http-errors");
-const express = require("express");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-const logger = require("morgan");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const chalk = require("chalk");
+// file imports
+import "./.bin/www.js";
+import indexRouter from "./routes/index.js";
+import SocketManager from "./utils/socket-manager.js";
+import errorHandler from "./middlewares/error-handler.js";
+// import { ENVIRONMENTS } from "./configs/enums.js";
 
-const indexRouter = require("./routes/index");
-const SocketManager = require("./utils/SocketManager");
-const errorHandler = require("./middlewares/errorHandler");
+// destructuring assignments
+const { NODE_ENV, MONGO_URL } = process.env;
+// const { PRODUCTION } = ENVIRONMENTS;
+
+// variable initializations
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const serverFunction = async () => {
   console.log(chalk.hex("#00BFFF")("***Server Execution Started!***"));
+
   try {
     const app = express();
-    const server = require("http").createServer(app);
+    const server = http.createServer(app);
     app.use(cors());
 
     new SocketManager().initializeSocket({ server, app });
@@ -39,6 +43,10 @@ const serverFunction = async () => {
 
     connect.then(
       (db) => {
+        applySpeedGooseCacheLayer(mongoose, {
+          sharedCacheStrategy: SharedCacheStrategies.IN_MEMORY,
+          defaultTtl: 60 * 60 * 24,
+        });
         const port = process.env.PORT || "5002";
         server.listen(port, (err) => {
           if (err) console.log(err);
@@ -62,12 +70,13 @@ const serverFunction = async () => {
 
     app.use("/api/v1", indexRouter);
 
-    app.use(express.static(path.join(__dirname, "client/build")));
-    app.get("/forgot-password/*", (req, res, next) => {
-      res.sendFile(path.resolve(__dirname, "client/build/index.html"));
+    // app.use(express.static(path.join(__dirname, "client/build")));
+    app.get("/forgot-password", (req, res, next) => {
+      res.sendFile(path.join(__dirname, "public/reset-password.html"));
     });
 
     app.get("/*", (req, res, next) => {
+      console.log("__dirname", path.join(__dirname, "/public/image.png"));
       res.sendFile(path.join(__dirname, "/public/image.png"));
     });
 
@@ -82,5 +91,14 @@ const serverFunction = async () => {
     console.log(error);
   }
 };
+
+// dotenv.config();
+// dotenv.config({
+//   path:
+//     NODE_ENV === PRODUCTION
+//       ? ".env.production"
+//       : ".env.development",
+// });
+
 serverFunction();
 console.log(chalk.hex("#607070")(chalk.underline(NODE_ENV.toUpperCase())));

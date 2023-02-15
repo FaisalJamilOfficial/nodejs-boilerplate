@@ -1,40 +1,47 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+// module imports
+import mongoose from "mongoose";
 
-const { NOTIFICATION_TYPES } = require("../configs/enums");
+// file imports
+import { NOTIFICATION_TYPES } from "../configs/enums.js";
+
+// destructuring assignments
 const { NEW_MESSAGE, NEW_CONVERSATION } = NOTIFICATION_TYPES;
 
-const notifications = new Schema(
-	{
-		type: {
-			type: String,
-			enum: [NEW_MESSAGE, NEW_CONVERSATION],
-			required: true,
-			index: true,
-		},
+// variable initializations
+const Schema = mongoose.Schema;
 
-		text: {
-			type: String,
-			default: "",
-		},
-		message: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "messages",
-			index: true,
-		},
-		messenger: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "users",
-			index: true,
-		},
-		user: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "users",
-			index: true,
-		},
-	},
-	{
-		timestamps: true,
-	}
+const notifications = new Schema(
+  {
+    type: {
+      type: String,
+      enum: [NEW_MESSAGE, NEW_CONVERSATION],
+      required: true,
+      index: true,
+    },
+
+    text: {
+      type: String,
+      default: "",
+    },
+    message: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "messages",
+      index: true,
+    },
+    messenger: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      index: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      index: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
-module.exports = mongoose.model("notifications", notifications);
+
+export default mongoose.model("notifications", notifications);

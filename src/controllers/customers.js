@@ -1,12 +1,18 @@
-const { isValidObjectId } = require("mongoose");
-const { usersModel, customersModel } = require("../models");
+// module imports
+import { isValidObjectId } from "mongoose";
+
+// file imports
+import * as models from "../models/index.js";
+
+// destructuring assignments
+const { usersModel, customersModel } = models;
 
 /**
  * Add customer
  * @param {string} user user id
  * @returns {object} customer data
  */
-exports.addCustomer = async (params) => {
+export const addCustomer = async (params) => {
   const { user } = params;
   const customerObj = {};
 
@@ -26,7 +32,7 @@ exports.addCustomer = async (params) => {
  * @param {string} user user id
  * @returns {object} customer data
  */
-exports.updateCustomer = async (params) => {
+export const updateCustomer = async (params) => {
   const { user } = params;
   const customerObj = {};
   if (user);
@@ -53,7 +59,7 @@ exports.updateCustomer = async (params) => {
  * @param {string} user user id
  * @returns {object} customer data
  */
-exports.deleteCustomer = async (params) => {
+export const deleteCustomer = async (params) => {
   const { user } = params;
   if (user);
   else throw new Error("Please enter user id!|||400");
@@ -73,7 +79,7 @@ exports.deleteCustomer = async (params) => {
  * @param {string} user user id
  * @returns {object} customer data
  */
-exports.getCustomer = async (params) => {
+export const getCustomer = async (params) => {
   const { user } = params;
   if (user);
   else throw new Error("Please enter user id!|||400");
@@ -97,7 +103,7 @@ exports.getCustomer = async (params) => {
  * @param {number} page customers page number
  * @returns {object} customer data
  */
-exports.getCustomers = async (params) => {
+export const getCustomers = async (params) => {
   const { q } = params;
   let { limit, page } = params;
   if (!limit) limit = 10;

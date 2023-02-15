@@ -1,17 +1,18 @@
-const multer = require("multer");
-const uuid = require("uuid");
+// module imports
+import multer from "multer";
+import { v4 } from "uuid";
 
-exports.upload = (directory) => {
+export const upload = (directory) => {
   return multer({
     storage: multer.diskStorage({
       destination: function (req, file, cb) {
         cb(null, directory);
       },
       filename: function (req, file, cb) {
-        cb(null, uuid.v4() + file.originalname);
+        cb(null, v4() + file.originalname);
       },
     }),
   });
 };
 
-exports.uploadTemporary = multer({ storage: multer.memoryStorage() });
+export const uploadTemporary = multer({ storage: multer.memoryStorage() });

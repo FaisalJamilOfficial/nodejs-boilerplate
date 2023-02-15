@@ -1,10 +1,14 @@
-const express = require("express");
-const router = express.Router();
+// module imports
+import express from "express";
 
-const admins = require("./admins");
-const auth = require("./auth");
-const messages = require("./messages");
-const users = require("./users");
+// file imports
+import admins from "./admins.js";
+import auth from "./auth.js";
+import messages from "./messages.js";
+import users from "./users.js";
+
+// variable initializations
+const router = express.Router();
 
 router.use("/admins", admins);
 router.use("/auth", auth);
@@ -14,4 +18,4 @@ router.use("/users", users);
 router.use("/docs", (req, res, next) =>
   res.redirect("https://documenter.getpostman.com/view/14185057/UVkqruXK")
 );
-module.exports = router;
+export default router;

@@ -1,27 +1,27 @@
-exports.CONVERSATION_STATUSES = {
+export const CONVERSATION_STATUSES = {
   PENDING: "pending",
   ACCEPTED: "accepted",
   REJECTED: "rejected",
 };
 
-exports.MESSAGE_STATUSES = {
+export const MESSAGE_STATUSES = {
   UNREAD: "unread",
   READ: "read",
   DELETED: "deleted",
 };
 
-exports.NOTIFICATION_TYPES = {
+export const NOTIFICATION_TYPES = {
   NEW_MESSAGE: "new-message",
   NEW_CONVERSATION: "new-conversation",
 };
 
-exports.PAYMENT_ACCOUNT_TYPES = {
+export const PAYMENT_ACCOUNT_TYPES = {
   BRAINTREE: "braintree",
   STRIPE_CUSTOMER: "stripe-customer",
   STRIPE_ACCOUNT: "stripe-account",
 };
 
-exports.GEO_JSON_TYPES = {
+export const GEO_JSON_TYPES = {
   POINT: "Point",
   LINESTRING: "LineString",
   POLYGON: "Polygon",
@@ -30,25 +30,25 @@ exports.GEO_JSON_TYPES = {
   MULTIPOLYGON: "MultiPolygon",
 };
 
-exports.USER_STATUSES = {
+export const USER_STATUSES = {
   ACTIVE: "active",
   DELETED: "deleted",
 };
 
-exports.USER_TYPES = {
+export const USER_TYPES = {
   CUSTOMER: "customer",
   ADMIN: "admin",
   SUPER_ADMIN: "super-admin",
   MULTI: "multi",
 };
 
-exports.OTP_TYPES = {
+export const OTP_TYPES = {
   LOGIN: "login",
   SIGN_UP: "sign-up",
   OTHER: "other",
 };
 
-exports.ENVIRONMENTS = {
+export const ENVIRONMENTS = {
   PRODUCTION: "production",
   DEVELOPMENT: "development",
 };

@@ -1,17 +1,23 @@
-const express = require("express");
-const router = express.Router();
-const { SECRET } = process.env;
-const {
+// module imports
+import express from "express";
+
+// file imports
+import * as authController from "../controllers/auth.js";
+import * as usersController from "../controllers/users.js";
+import { USER_TYPES } from "../configs/enums.js";
+import { asyncHandler } from "../middlewares/async-handler.js";
+import {
   verifyOTP,
   verifyToken,
   verifyUserToken,
-} = require("../middlewares/authenticator");
+} from "../middlewares/authenticator.js";
 
-const authController = require("../controllers/auth");
-const usersController = require("../controllers/users");
-const { USER_TYPES } = require("../configs/enums");
-const { asyncHandler } = require("../middlewares/asyncHandler");
+// destructuring assignments
 const { ADMIN } = USER_TYPES;
+const { SECRET } = process.env;
+
+// variable initializations
+const router = express.Router();
 
 router.post(
   "/register",
@@ -121,4 +127,4 @@ router.post(
   })
 );
 
-module.exports = router;
+export default router;

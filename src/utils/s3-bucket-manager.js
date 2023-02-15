@@ -1,9 +1,9 @@
 // module imports
-const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const multer = require("multer");
-const multerS3 = require("multer-s3");
-const uuid = require("uuid").v4;
-const mime = require("mime-types");
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import multer from "multer";
+import multerS3 from "multer-s3";
+import { v4 } from "uuid";
+import mime from "mime-types";
 
 // destructuring assignments
 const { AWS_BUCKET_NAME, AWS_ACCESS_KEY, AWS_SECRET_KEY } = process.env;
@@ -31,7 +31,7 @@ class S3BucketManager {
       },
       key: (req, file, cb) => {
         const fileExtension = "." + mime.extension(file.mimetype);
-        cb(null, uuid() + fileExtension);
+        cb(null, v4() + fileExtension);
       },
     }),
   });

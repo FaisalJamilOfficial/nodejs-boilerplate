@@ -1,7 +1,6 @@
 // module imports
 // import dotenv from "dotenv";
 import http from "http";
-import createError from "http-errors";
 import express from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
@@ -71,18 +70,17 @@ const serverFunction = async () => {
     app.use("/api/v1", indexRouter);
 
     // app.use(express.static(path.join(__dirname, "client/build")));
-    app.get("/forgot-password", (req, res, next) => {
+    app.get("/reset-password", (req, res, next) => {
       res.sendFile(path.join(__dirname, "public/reset-password.html"));
     });
 
-    app.get("/*", (req, res, next) => {
-      console.log("__dirname", path.join(__dirname, "/public/image.png"));
+    app.get("/", (req, res, next) => {
       res.sendFile(path.join(__dirname, "/public/image.png"));
     });
 
     // catch 404 and forward to error handler
     app.use(function (req, res, next) {
-      next(createError(404));
+      next(new Error("Not Found|||404"));
     });
 
     // error handler

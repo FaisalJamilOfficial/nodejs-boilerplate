@@ -8,9 +8,9 @@ import * as models from "../models/index.js";
 const { usersModel, customersModel } = models;
 
 /**
- * Add customer
- * @param {string} user user id
- * @returns {object} customer data
+ * @description Add customer
+ * @param {String} user user id
+ * @returns {Object} customer data
  */
 export const addCustomer = async (params) => {
   const { user } = params;
@@ -28,9 +28,9 @@ export const addCustomer = async (params) => {
 };
 
 /**
- * Update customer data
- * @param {string} user user id
- * @returns {object} customer data
+ * @description Update customer data
+ * @param {String} user user id
+ * @returns {Object} customer data
  */
 export const updateCustomer = async (params) => {
   const { user } = params;
@@ -55,9 +55,9 @@ export const updateCustomer = async (params) => {
 };
 
 /**
- * Delete customer
- * @param {string} user user id
- * @returns {object} customer data
+ * @description Delete customer
+ * @param {String} user user id
+ * @returns {Object} customer data
  */
 export const deleteCustomer = async (params) => {
   const { user } = params;
@@ -75,9 +75,9 @@ export const deleteCustomer = async (params) => {
 };
 
 /**
- * Get customer
- * @param {string} user user id
- * @returns {object} customer data
+ * @description Get customer
+ * @param {String} user user id
+ * @returns {Object} customer data
  */
 export const getCustomer = async (params) => {
   const { user } = params;
@@ -97,11 +97,11 @@ export const getCustomer = async (params) => {
 };
 
 /**
- * Get customers
- * @param {string} q search keyword
- * @param {number} limit customers limit
- * @param {number} page customers page number
- * @returns {object} customer data
+ * @description Get customers
+ * @param {String} q search keyword
+ * @param {Number} limit customers limit
+ * @param {Number} page customers page number
+ * @returns {Object} customer data
  */
 export const getCustomers = async (params) => {
   const { q } = params;

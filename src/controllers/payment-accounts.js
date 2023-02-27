@@ -8,9 +8,9 @@ import * as models from "../models/index.js";
 const { paymentAccountsModel, usersModel } = models;
 
 /**
- * Add paymentAccount
- * @param {string} user user id
- * @returns {object} paymentAccount data
+ * @description Add paymentAccount
+ * @param {String} user user id
+ * @returns {Object} paymentAccount data
  */
 exports.addPaymentAccount = async (params) => {
   const { user, account, type } = params;
@@ -30,10 +30,10 @@ exports.addPaymentAccount = async (params) => {
 };
 
 /**
- * Get paymentAccount
- * @param {string} paymentAccount paymentAccount id
- * @param {string} user user id
- * @returns {object} paymentAccount data
+ * @description Get paymentAccount
+ * @param {String} paymentAccount paymentAccount id
+ * @param {String} user user id
+ * @returns {Object} paymentAccount data
  */
 exports.getPaymentAccount = async (params) => {
   const { paymentAccount, user, key, value } = params;
@@ -54,11 +54,11 @@ exports.getPaymentAccount = async (params) => {
 };
 
 /**
- * Get paymentAccounts
- * @param {string} q search keyword
- * @param {number} limit paymentAccounts limit
- * @param {number} page paymentAccounts page number
- * @returns {object} paymentAccount data
+ * @description Get paymentAccounts
+ * @param {String} q search keyword
+ * @param {Number} limit paymentAccounts limit
+ * @param {Number} page paymentAccounts page number
+ * @returns {Object} paymentAccount data
  */
 exports.getPaymentAccounts = async (params) => {
   const { user } = params;

@@ -15,11 +15,11 @@ class FirebaseManager {
   }
 
   /**
-   * Send firebase notification
+   * @description Send firebase notification
    * @param {[string]} fcms firebase cloud messaging user tokens array
-   * @param {string} title notification title
-   * @param {string} body notification body
-   * @param {object} data notification data
+   * @param {String} title notification title
+   * @param {String} body notification body
+   * @param {Object} data notification data
    * @returns {null}
    */
   async sendNotifications(params) {

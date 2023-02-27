@@ -13,13 +13,13 @@ const { ACTIVE, DELETED } = USER_STATUSES;
 const { CUSTOMER, ADMIN, SUPER_ADMIN } = USER_TYPES;
 
 /**
- * Get JWT token
- * @param {string} _id user id
- * @param {string} phone user phone number
- * @param {string} otp OTP code
- * @param {string} shouldValidateOTP OTP validation check
+ * @description Get JWT token
+ * @param {String} _id user id
+ * @param {String} phone user phone number
+ * @param {String} otp OTP code
+ * @param {String} shouldValidateOTP OTP validation check
  * @param {string | boolean } variable any variable
- * @returns {object} JWT token
+ * @returns {Object} JWT token
  */
 export const getToken = function (params) {
   return jwt.sign(params, process.env.JWT_SECRET);

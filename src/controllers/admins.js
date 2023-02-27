@@ -8,9 +8,9 @@ import models from "../models/index.js";
 const { usersModel, adminsModel } = models;
 
 /**
- * Add admin
- * @param {string} user user id
- * @returns {object} admin data
+ * @description @description Add admin
+ * @param {String} user user id
+ * @returns {Object} admin data
  */
 export const addAdmin = async (parameters) => {
   const { user } = parameters;
@@ -28,9 +28,9 @@ export const addAdmin = async (parameters) => {
 };
 
 /**
- * Update admin data
- * @param {string} user user id
- * @returns {object} admin data
+ * @description Update admin data
+ * @param {String} user user id
+ * @returns {Object} admin data
  */
 export const updateAdmin = async (parameters) => {
   const { user } = parameters;
@@ -51,9 +51,9 @@ export const updateAdmin = async (parameters) => {
 };
 
 /**
- * Delete admin
- * @param {string} user user id
- * @returns {object} admin data
+ * @description Delete admin
+ * @param {String} user user id
+ * @returns {Object} admin data
  */
 export const deleteAdmin = async (parameters) => {
   const { user } = parameters;
@@ -71,9 +71,9 @@ export const deleteAdmin = async (parameters) => {
 };
 
 /**
- * Get admin
- * @param {string} user user id
- * @returns {object} admin data
+ * @description Get admin
+ * @param {String} user user id
+ * @returns {Object} admin data
  */
 export const getAdmin = async (parameters) => {
   const { user } = parameters;
@@ -93,11 +93,11 @@ export const getAdmin = async (parameters) => {
 };
 
 /**
- * Get admins
- * @param {string} q search keyword
- * @param {number} limit admins limit
- * @param {number} page admins page number
- * @returns {object} admin data
+ * @description Get admins
+ * @param {String} q search keyword
+ * @param {Number} limit admins limit
+ * @param {Number} page admins page number
+ * @returns {Object} admin data
  */
 export const getAdmins = async (parameters) => {
   const { q } = parameters;
@@ -119,8 +119,8 @@ export const getAdmins = async (parameters) => {
 };
 
 /**
- * Clean DB
- * @returns {object} success status
+ * @description Clean DB
+ * @returns {Object} success status
  */
 export const cleanDB = async () => {
   return {

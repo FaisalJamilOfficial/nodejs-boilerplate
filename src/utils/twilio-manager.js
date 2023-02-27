@@ -18,10 +18,10 @@ class TwilioManager {
   }
 
   /**
-   * Send OTP to phone number
-   * @param {string} user user id
-   * @param {string} phone user phone number in INTERNATIONAL format
-   * @returns {object} token
+   * @description Send OTP to phone number
+   * @param {String} user user id
+   * @param {String} phone user phone number in INTERNATIONAL format
+   * @returns {Object} token
    */
   async sendOTP(params) {
     const { user, phone } = params;

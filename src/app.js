@@ -31,6 +31,7 @@ const serverFunction = async () => {
   try {
     const app = express();
     const server = http.createServer(app);
+    mongoose.set("strictQuery", false);
     app.use(cors());
 
     new SocketManager().initializeSocket({ server, app });

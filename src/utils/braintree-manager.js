@@ -38,9 +38,9 @@ class BraintreeManager {
   }
 
   /**
-   * Generate a client token
-   * @param {string} customerId OPTIONAL braintree customer id
-   * @returns {object} client token
+   * @description Generate a client token
+   * @param {String} customerId OPTIONAL braintree customer id
+   * @returns {Object} client token
    */
   async generateClientToken(params) {
     const { customerId } = params;
@@ -49,14 +49,14 @@ class BraintreeManager {
   }
 
   /**
-   * Create a braintree customer account
-   * @param {string} firstName first name
-   * @param {string} lastName last name
-   * @param {string} email email address
-   * @param {string} phone phone number
-   * @param {object} creditCard credit card data
-   * @param {string} paymentMethodNonce nonce token
-   * @returns {object} paymentAccount
+   * @description Create a braintree customer account
+   * @param {String} firstName first name
+   * @param {String} lastName last name
+   * @param {String} email email address
+   * @param {String} phone phone number
+   * @param {Object} creditCard credit card data
+   * @param {String} paymentMethodNonce nonce token
+   * @returns {Object} paymentAccount
    */
   async createCustomer(params) {
     const {
@@ -81,9 +81,9 @@ class BraintreeManager {
   }
 
   /**
-   * Delete a customer
-   * @param {string} customerId braintree customer id
-   * @returns {object} customer data
+   * @description Delete a customer
+   * @param {String} customerId braintree customer id
+   * @returns {Object} customer data
    */
   async deleteCustomer(params) {
     const { customerId } = params;
@@ -91,10 +91,10 @@ class BraintreeManager {
   }
 
   /**
-   * Create a braintree payment method
-   * @param {object} customerId braintree customer id
-   * @param {string} paymentMethodNonce nonce token
-   * @returns {object} paymentMethod
+   * @description Create a braintree payment method
+   * @param {Object} customerId braintree customer id
+   * @param {String} paymentMethodNonce nonce token
+   * @returns {Object} paymentMethod
    */
   async createPaymentMethod(params) {
     const { customerId, paymentMethodNonce } = params;
@@ -105,9 +105,9 @@ class BraintreeManager {
   }
 
   /**
-   * Remove a payment method
-   * @param {string} token payment method token
-   * @returns {object} payment method data
+   * @description Remove a payment method
+   * @param {String} token payment method token
+   * @returns {Object} payment method data
    */
   async removePaymentMethod(params) {
     const { token } = params;
@@ -115,13 +115,13 @@ class BraintreeManager {
   }
 
   /**
-   * Create a transaction
-   * @param {number} amount transaction amount in smaller units of currency
-   * @param {string} customerId braintree customer id
-   * @param {string} paymentMethodNonce nonce token
-   * @param {string} paymentMethodToken method token
-   * @param {string} deviceData OPTIONAL device data
-   * @returns {object} transaction
+   * @description Create a transaction
+   * @param {Number} amount transaction amount in smaller units of currency
+   * @param {String} customerId braintree customer id
+   * @param {String} paymentMethodNonce nonce token
+   * @param {String} paymentMethodToken method token
+   * @param {String} deviceData OPTIONAL device data
+   * @returns {Object} transaction
    */
   async saleTransaction(params) {
     const {
@@ -146,10 +146,10 @@ class BraintreeManager {
   }
 
   /**
-   * Submit transaction for settlement
-   * @param {string} transactionId braintree transaction id
-   * @param {number} amount transaction amount in smaller units of currency
-   * @returns {object} transaction
+   * @description Submit transaction for settlement
+   * @param {String} transactionId braintree transaction id
+   * @param {Number} amount transaction amount in smaller units of currency
+   * @returns {Object} transaction
    */
   async adjustTransaction(params) {
     const { transactionId, amount } = params;
@@ -159,9 +159,9 @@ class BraintreeManager {
   }
 
   /**
-   * Adjust authorized transaction
-   * @param {string} transactionId braintree transaction id
-   * @returns {object} transaction
+   * @description Adjust authorized transaction
+   * @param {String} transactionId braintree transaction id
+   * @returns {Object} transaction
    */
   async submitTransaction(params) {
     const { transactionId } = params;
@@ -169,9 +169,9 @@ class BraintreeManager {
   }
 
   /**
-   * Void a transaction
-   * @param {string} transactionId braintree transaction id
-   * @returns {object} transaction
+   * @description Void a transaction
+   * @param {String} transactionId braintree transaction id
+   * @returns {Object} transaction
    */
   async voidTransaction(params) {
     const { transactionId } = params;
@@ -179,9 +179,9 @@ class BraintreeManager {
   }
 
   /**
-   * Hold a transaction
-   * @param {string} transactionId braintree transaction id
-   * @returns {object} transaction hold data
+   * @description Hold a transaction
+   * @param {String} transactionId braintree transaction id
+   * @returns {Object} transaction hold data
    */
   async holdTransaction(params) {
     const { transactionId } = params;
@@ -190,9 +190,9 @@ class BraintreeManager {
   }
 
   /**
-   * Refund a transaction
-   * @param {string} transactionId braintree transaction id
-   * @returns {object} transaction refund data
+   * @description Refund a transaction
+   * @param {String} transactionId braintree transaction id
+   * @returns {Object} transaction refund data
    */
   async refundTransaction(params) {
     const { transactionId } = params;
@@ -200,9 +200,9 @@ class BraintreeManager {
   }
 
   /**
-   * Release a transaction
-   * @param {string} transactionId braintree transaction id
-   * @returns {object} transaction refund data
+   * @description Release a transaction
+   * @param {String} transactionId braintree transaction id
+   * @returns {Object} transaction refund data
    */
   async releaseTransaction(params) {
     const { transactionId } = params;
@@ -210,9 +210,9 @@ class BraintreeManager {
   }
 
   /**
-   * Get user payment accounts
-   * @param {string} user user id
-   * @returns {[object]} array of paymentAccount
+   * @description Get user payment accounts
+   * @param {String} user user id
+   * @returns {[Object]} array of paymentAccount
    */
   async getAllAccounts(params) {
     const { user } = params;

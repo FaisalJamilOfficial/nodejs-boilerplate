@@ -55,12 +55,12 @@ class NodeMailer {
   }
 
   /**
-   * Send email
-   * @param {string} to receiver email address
-   * @param {string} subject email subject
-   * @param {string} text email text
-   * @param {object} html email html
-   * @returns {object} email response
+   * @description Send email
+   * @param {String} to receiver email address
+   * @param {String} subject email subject
+   * @param {String} text email text
+   * @param {Object} html email html
+   * @returns {Object} email response
    */
   async sendEmail(params) {
     const { to, subject, text, html } = params;
@@ -75,10 +75,10 @@ class NodeMailer {
   }
 
   /**
-   * Get reset password email template
-   * @param {string} user user id
-   * @param {string} token user token
-   * @returns {object} email template
+   * @description Get reset password email template
+   * @param {String} user user id
+   * @param {String} token user token
+   * @returns {Object} email template
    */
   getResetPasswordEmailTemplate(params) {
     const { user, token } = params;
@@ -92,10 +92,10 @@ If you didn't do this, contact us here ${EMAIL_USER}`;
   }
 
   /**
-   * Get email verification email template
-   * @param {string} user user id
-   * @param {string} token user token
-   * @returns {object} email template
+   * @description Get email verification email template
+   * @param {String} user user id
+   * @param {String} token user token
+   * @returns {Object} email template
    */
   getEmailVerificationEmailTemplate(params) {
     const { user, token } = params;

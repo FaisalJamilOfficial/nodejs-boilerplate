@@ -9,10 +9,10 @@ class FilesUploader {
   }
 
   /**
-   * Upload file
-   * @param {object} file file object
-   * @param {string} directory directory to save file
-   * @returns {object} file object
+   * @description Upload file
+   * @param {Object} file file object
+   * @param {String} directory directory to save file
+   * @returns {Object} file object
    */
   async uploadFile(params) {
     const { file, directory } = params;
@@ -24,10 +24,10 @@ class FilesUploader {
   }
 
   /**
-   * Upload files
+   * @description Upload files
    * @param {[object]} files array of file
-   * @param {string} directory directory to save file
-   * @returns {[object]} array of file
+   * @param {String} directory directory to save file
+   * @returns {[Object]} array of file
    */
   async uploadFiles(params) {
     let { files, directory } = params;

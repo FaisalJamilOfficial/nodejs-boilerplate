@@ -13,8 +13,8 @@ class FilesDeleter {
   }
 
   /**
-   * Delete image file
-   * @param {string} image image file name
+   * @description Delete image file
+   * @param {String} image image file name
    * @returns {null}
    */
   async deleteImage(params) {
@@ -28,8 +28,8 @@ class FilesDeleter {
   }
 
   /**
-   * Delete attachment file
-   * @param {string} attachment attachment file name
+   * @description Delete attachment file
+   * @param {String} attachment attachment file name
    * @returns {null}
    */
   async deleteAttachment(params) {
@@ -42,7 +42,7 @@ class FilesDeleter {
   }
 
   /**
-   * Delete files from server
+   * @description Delete files from server
    * @param {[object]} files array of files
    * @returns {null}
    */

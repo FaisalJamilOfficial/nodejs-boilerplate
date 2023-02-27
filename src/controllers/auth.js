@@ -18,12 +18,12 @@ const {
 } = new NodeMailer();
 
 /**
- * Register user
- * @param {string} email user email address
- * @param {string} password user password
- * @param {string} phone user phone number
- * @param {string} type user type
- * @returns {object} user data with token
+ * @description Register user
+ * @param {String} email user email address
+ * @param {String} password user password
+ * @param {String} phone user phone number
+ * @param {String} type user type
+ * @returns {Object} user data with token
  */
 export const register = async (params) => {
   let user;
@@ -56,11 +56,11 @@ export const register = async (params) => {
 };
 
 /**
- * Login user
- * @param {string} email user email address
- * @param {string} password user password
- * @param {string} type user type
- * @returns {object} user data with token
+ * @description Login user
+ * @param {String} email user email address
+ * @param {String} password user password
+ * @param {String} type user type
+ * @returns {Object} user data with token
  */
 export const login = async (params) => {
   const { email, password, type } = params;
@@ -96,9 +96,9 @@ export const login = async (params) => {
 };
 
 /**
- * Send reset password email
- * @param {string} email user email address
- * @returns {object} user password reset result
+ * @description Send reset password email
+ * @param {String} email user email address
+ * @returns {Object} user password reset result
  */
 export const emailResetPassword = async (params) => {
   const { email } = params;
@@ -121,9 +121,9 @@ export const emailResetPassword = async (params) => {
 };
 
 /**
- * Send email verification email
- * @param {string} email user email address
- * @returns {object} user email verification result
+ * @description Send email verification email
+ * @param {String} email user email address
+ * @returns {Object} user email verification result
  */
 export const emailVerifyEmail = async (params) => {
   const { email } = params;
@@ -147,10 +147,10 @@ export const emailVerifyEmail = async (params) => {
 };
 
 /**
- * Send welcome email
- * @param {string} email user email address
- * @param {string} name user name
- * @returns {object} user welcome result
+ * @description Send welcome email
+ * @param {String} email user email address
+ * @param {String} name user name
+ * @returns {Object} user welcome result
  */
 export const emailWelcomeUser = async (params) => {
   const { email, name } = params;
@@ -166,10 +166,10 @@ export const emailWelcomeUser = async (params) => {
 };
 
 /**
- * Generate user email token
- * @param {string} email user email address
+ * @description Generate user email token
+ * @param {String} email user email address
  * @param {Date} tokenExpirationTime email token expiration time
- * @returns {object} user email token
+ * @returns {Object} user email token
  */
 export const generateEmailToken = async (params) => {
   const { email, tokenExpirationTime } = params;
@@ -195,11 +195,11 @@ export const generateEmailToken = async (params) => {
 };
 
 /**
- * Reset user password
- * @param {string} user user id
- * @param {string} password user password
- * @param {string} token reset password token
- * @returns {object} user password reset result
+ * @description Reset user password
+ * @param {String} user user id
+ * @param {String} password user password
+ * @param {String} token reset password token
+ * @returns {Object} user password reset result
  */
 export const resetPassword = async (params) => {
   const { password, user, token } = params;
@@ -222,10 +222,10 @@ export const resetPassword = async (params) => {
 };
 
 /**
- * Email user email
- * @param {string} user user id
- * @param {string} token user email token
- * @returns {object} user email verification result
+ * @description Email user email
+ * @param {String} user user id
+ * @param {String} token user email token
+ * @returns {Object} user email verification result
  */
 export const verifyUserEmail = async (params) => {
   const { user, token } = params;
@@ -249,11 +249,11 @@ export const verifyUserEmail = async (params) => {
 };
 
 /**
- * register super admin
- * @param {string} email user email address
- * @param {string} password user password
- * @param {string} type user type
- * @returns {object} user data with token
+ * @description register super admin
+ * @param {String} email user email address
+ * @param {String} password user password
+ * @param {String} type user type
+ * @returns {Object} user data with token
  */
 export const addAdmin = async (params) => {
   const { email, password, type } = params;

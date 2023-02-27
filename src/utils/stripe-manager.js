@@ -19,13 +19,13 @@ class StripeManager {
   }
 
   /**
-   * Create stripe token
-   * @param {string} number card number
-   * @param {string} expMonth expiry month
-   * @param {string} expYear expiry year
-   * @param {string} cvc card cvc
-   * @param {string} name user name
-   * @returns {object} stripe token
+   * @description Create stripe token
+   * @param {String} number card number
+   * @param {String} expMonth expiry month
+   * @param {String} expYear expiry year
+   * @param {String} cvc card cvc
+   * @param {String} name user name
+   * @returns {Object} stripe token
    */
   async createToken(params) {
     const { number, expMonth, expYear, cvc, name } = params;
@@ -44,9 +44,9 @@ class StripeManager {
   }
 
   /**
-   * Delete stripe customer
-   * @param {string} customerId stripe customer id
-   * @returns {object} stripe customer deletion response
+   * @description Delete stripe customer
+   * @param {String} customerId stripe customer id
+   * @returns {Object} stripe customer deletion response
    */
   async deleteCustomer(params) {
     const { customerId } = params;
@@ -56,9 +56,9 @@ class StripeManager {
   }
 
   /**
-   * Refund stripe charge
-   * @param {string} charge stripe charge id
-   * @returns {object} stripe charge refund response
+   * @description Refund stripe charge
+   * @param {String} charge stripe charge id
+   * @returns {Object} stripe charge refund response
    */
   async createRefund(params) {
     const { charge } = params;
@@ -69,13 +69,13 @@ class StripeManager {
   }
 
   /**
-   * Create stripe charge
-   * @param {string} customer stripe customer id
-   * @param {string} amount charge amount in currency smallest unit
-   * @param {string} currency amount currency e.g "usd"
-   * @param {string} source stripe source token
-   * @param {string} description charge description
-   * @returns {object} stripe charge response
+   * @description Create stripe charge
+   * @param {String} customer stripe customer id
+   * @param {String} amount charge amount in currency smallest unit
+   * @param {String} currency amount currency e.g "usd"
+   * @param {String} source stripe source token
+   * @param {String} description charge description
+   * @returns {Object} stripe charge response
    */
   async createCharge(params) {
     const { customer, amount, currency, source, description } = params;
@@ -91,12 +91,12 @@ class StripeManager {
   }
 
   /**
-   * Create stripe customer source with customer existence check
-   * @param {string} source stripe source token
-   * @param {string} cardHolderName user card title
-   * @param {string} user user id
-   * @param {string} email OPTIONAL user email address
-   * @returns {object} paymentAccount
+   * @description Create stripe customer source with customer existence check
+   * @param {String} source stripe source token
+   * @param {String} cardHolderName user card title
+   * @param {String} user user id
+   * @param {String} email OPTIONAL user email address
+   * @returns {Object} paymentAccount
    */
   async createCustomerSourceWithCheck(params) {
     const { source, cardHolderName, user, email, phone } = params;
@@ -134,11 +134,11 @@ class StripeManager {
   }
 
   /**
-   * Create stripe customer
-   * @param {string} user OPTIONAL user id
-   * @param {string} email OPTIONAL user email address
-   * @param {string} phone OPTIONAL user phone number
-   * @returns {object} stripe customer data
+   * @description Create stripe customer
+   * @param {String} user OPTIONAL user id
+   * @param {String} email OPTIONAL user email address
+   * @param {String} phone OPTIONAL user phone number
+   * @returns {Object} stripe customer data
    */
   async createCustomer(params) {
     const { user, email, phone } = params;
@@ -147,10 +147,10 @@ class StripeManager {
   }
 
   /**
-   * Create stripe express account with account existence check
-   * @param {string} user user id
-   * @param {string} email user email address
-   * @returns {object} paymentAccount
+   * @description Create stripe express account with account existence check
+   * @param {String} user user id
+   * @param {String} email user email address
+   * @returns {Object} paymentAccount
    */
   async createAccountWithCheck(params) {
     const { user, email } = params;
@@ -186,11 +186,11 @@ class StripeManager {
   }
 
   /**
-   * Create stripe account sign up link
-   * @param {string} account stripe account id
-   * @param {string} refreshUrl redirect url for link expiration or invalidity
-   * @param {string} returnUrl redirect url for completion or incompletion linked flow
-   * @returns {object} stripe account link
+   * @description Create stripe account sign up link
+   * @param {String} account stripe account id
+   * @param {String} refreshUrl redirect url for link expiration or invalidity
+   * @param {String} returnUrl redirect url for completion or incompletion linked flow
+   * @returns {Object} stripe account link
    */
   async createAccountLink(params) {
     const { account, refreshUrl, returnUrl } = params;
@@ -204,12 +204,12 @@ class StripeManager {
   }
 
   /**
-   * Create stripe topUp
-   * @param {string} amount topUp amount in smaller units of currency
-   * @param {string} currency amount currency e.g "usd"
-   * @param {string} description OPTIONAL topUp description
-   * @param {string} statementDescriptor OPTIONAL statement description e.g "Top-up"
-   * @returns {object} stripe topUp response
+   * @description Create stripe topUp
+   * @param {String} amount topUp amount in smaller units of currency
+   * @param {String} currency amount currency e.g "usd"
+   * @param {String} description OPTIONAL topUp description
+   * @param {String} statementDescriptor OPTIONAL statement description e.g "Top-up"
+   * @returns {Object} stripe topUp response
    */
   async createTopUp(params) {
     const { amount, currency, description, statementDescriptor } = params;
@@ -223,13 +223,13 @@ class StripeManager {
   }
 
   /**
-   * Create stripe transfer
-   * @param {string} user user id
-   * @param {string} amount transfer amount in smaller units of currency
-   * @param {string} currency amount currency e.g "usd"
-   * @param {string} destination destination stripe account
-   * @param {string} description OPTIONAL transfer description
-   * @returns {object} stripe transfer response
+   * @description Create stripe transfer
+   * @param {String} user user id
+   * @param {String} amount transfer amount in smaller units of currency
+   * @param {String} currency amount currency e.g "usd"
+   * @param {String} destination destination stripe account
+   * @param {String} description OPTIONAL transfer description
+   * @returns {Object} stripe transfer response
    */
   async createTransfer(params) {
     const { user, amount, currency, description } = params;
@@ -248,11 +248,11 @@ class StripeManager {
   }
 
   /**
-   * Construct stripe webhook event
-   * @param {string} rawBody body from stripe request
-   * @param {string} signature stripe signature from request headers
-   * @param {string} endpointSecret stripe CLI webhook secret
-   * @returns {object} stripe webhook event
+   * @description Construct stripe webhook event
+   * @param {String} rawBody body from stripe request
+   * @param {String} signature stripe signature from request headers
+   * @param {String} endpointSecret stripe CLI webhook secret
+   * @returns {Object} stripe webhook event
    */
   async constructWebhooksEvent(params) {
     const { rawBody, signature, account } = params;
@@ -273,9 +273,9 @@ class StripeManager {
   }
 
   /**
-   * Get user payment accounts
-   * @param {string} user user id
-   * @returns {[object]} array of paymentAccount
+   * @description Get user payment accounts
+   * @param {String} user user id
+   * @returns {[Object]} array of paymentAccount
    */
   async getAllAccounts(params) {
     const { user } = params;

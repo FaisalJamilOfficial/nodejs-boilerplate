@@ -7,11 +7,11 @@ class NodeScheduler {
   }
 
   /**
-   * Schedule job
+   * @description Schedule job
    * @param {Date} date job date time
-   * @param {object} rule job pattern rule
+   * @param {Object} rule job pattern rule
    * @param {Function} func function
-   * @returns {object} scheduler response
+   * @returns {Object} scheduler response
    */
   async schedule(params) {
     const { date, rule, func } = params;

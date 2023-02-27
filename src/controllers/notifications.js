@@ -8,11 +8,11 @@ const { messagesModel, notificationsModel } = models;
 const { NEW_MESSAGE } = NOTIFICATION_TYPES;
 
 /**
- * Get user notifications
- * @param {string} user user id
- * @param {number} limit notifications limit
- * @param {number} page notifications page number
- * @returns {[object]} array of notifications
+ * @description Get user notifications
+ * @param {String} user user id
+ * @param {Number} limit notifications limit
+ * @param {Number} page notifications page number
+ * @returns {[Object]} array of notifications
  */
 export const getAllNotifications = async (params) => {
   const { user } = params;
@@ -34,8 +34,8 @@ export const getAllNotifications = async (params) => {
 };
 
 /**
- * New message notification
- * @param {string} message message id
+ * @description New message notification
+ * @param {String} message message id
  * @returns {null}
  */
 export const newMessageNotification = async (params) => {

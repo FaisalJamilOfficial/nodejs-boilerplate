@@ -19,8 +19,8 @@ class S3BucketManager {
   }
 
   /**
-   * upload image to s3 bucket
-   * @returns {object} file object <req.file>
+   * @description upload image to s3 bucket
+   * @returns {Object} file object <req.file>
    */
   upload = multer({
     storage: multerS3({
@@ -38,8 +38,8 @@ class S3BucketManager {
 
   /**
    *
-   * @param {string} filePath path to file
-   * @returns {object} data of deleted object
+   * @param {String} filePath path to file
+   * @returns {Object} data of deleted object
    */
   async delete(params) {
     const { path } = params;

@@ -9,12 +9,12 @@ import FilesDeleter from "../utils/files-deleter.js";
 const { usersModel, customersModel, adminsModel } = models;
 
 /**
- * Add user
- * @param {string} email user email address
- * @param {string} password user password
- * @param {string} phone user phone number
- * @param {string} type user type
- * @returns {object} user data
+ * @description Add user
+ * @param {String} email user email address
+ * @param {String} password user password
+ * @param {String} phone user phone number
+ * @param {String} type user type
+ * @returns {Object} user data
  */
 export const addUser = async (params) => {
   const { email, password, phone, type } = params;
@@ -34,22 +34,22 @@ export const addUser = async (params) => {
 };
 
 /**
- * Update user
- * @param {string} user user id
- * @param {string} email user email address
- * @param {string} phone user phone number
- * @param {string} password user password
- * @param {string} type user type
- * @param {string} status user status
- * @param {boolean} isOnline user connectivity state
- * @param {object} fcm user fcm
- * @param {string} firstName user first name
- * @param {string} lastName user last name
+ * @description Update user
+ * @param {String} user user id
+ * @param {String} email user email address
+ * @param {String} phone user phone number
+ * @param {String} password user password
+ * @param {String} type user type
+ * @param {String} status user status
+ * @param {Boolean} isOnline user connectivity state
+ * @param {Object} fcm user fcm
+ * @param {String} firstName user first name
+ * @param {String} lastName user last name
  * @param {[object]} images user images array
  * @param {[number]} coordinates user location coordinates
- * @param {string} customer customer id
- * @param {string} admin admin id
- * @returns {object} user data
+ * @param {String} customer customer id
+ * @param {String} admin admin id
+ * @returns {Object} user data
  */
 export const updateUser = async (params) => {
   const {
@@ -137,9 +137,9 @@ export const updateUser = async (params) => {
 };
 
 /**
- * Delete user
- * @param {string} user user id
- * @returns {object} user data
+ * @description Delete user
+ * @param {String} user user id
+ * @returns {Object} user data
  */
 export const deleteUser = async (params) => {
   const { user } = params;
@@ -157,9 +157,9 @@ export const deleteUser = async (params) => {
 };
 
 /**
- * Get user
- * @param {string} user user id
- * @returns {object} user data
+ * @description Get user
+ * @param {String} user user id
+ * @returns {Object} user data
  */
 export const getUser = async (params) => {
   const { user, email, phone, googleId, facebookId, twitterId } = params;
@@ -183,13 +183,13 @@ export const getUser = async (params) => {
 };
 
 /**
- * Get users
- * @param {string} q users search keyword
- * @param {string} type users type
- * @param {string} user user id not match
- * @param {number} limit users limit
- * @param {number} page users page number
- * @returns {[object]} array of users
+ * @description Get users
+ * @param {String} q users search keyword
+ * @param {String} type users type
+ * @param {String} user user id not match
+ * @param {Number} limit users limit
+ * @param {Number} page users page number
+ * @returns {[Object]} array of users
  */
 export const getUsers = async (params) => {
   const { q, type, user } = params;
@@ -227,13 +227,13 @@ export const getUsers = async (params) => {
 
 // /**
 //  * Get users data
-//  * @param {string} user user id
-//  * @param {string} q search keyword
-//  * @param {number} limit messages limit
-//  * @param {number} page messages page number
-//  * @param {string} status user status
-//  * @param {string} type user type
-//  * @returns {[object]} array of users
+//  * @param {String} user user id
+//  * @param {String} q search keyword
+//  * @param {Number} limit messages limit
+//  * @param {Number} page messages page number
+//  * @param {String} status user status
+//  * @param {String} type user type
+//  * @returns {[Object]} array of users
 //  */
 // export const getAllUsers = async (params) => {
 //   const { user, q, status, type } = params;

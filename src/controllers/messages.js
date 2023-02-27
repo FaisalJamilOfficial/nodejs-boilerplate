@@ -13,12 +13,12 @@ const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;
 const { READ } = MESSAGE_STATUSES;
 
 /**
- * Add message
- * @param {string} userFrom sender user id
- * @param {string} userTo receiver user id
- * @param {string} text message text
+ * @description Add message
+ * @param {String} userFrom sender user id
+ * @param {String} userTo receiver user id
+ * @param {String} text message text
  * @param {[object]} attachments message attachments
- * @returns {object} message data
+ * @returns {Object} message data
  */
 export const addMessage = async (params) => {
   const { userFrom, userTo, text, attachments, conversation } = params;
@@ -70,13 +70,13 @@ export const addMessage = async (params) => {
 };
 
 /**
- * Get chat messages
- * @param {string} conversation conversation id
- * @param {number} limit messages limit
- * @param {number} page messages page number
- * @param {string} text message text
+ * @description Get chat messages
+ * @param {String} conversation conversation id
+ * @param {Number} limit messages limit
+ * @param {Number} page messages page number
+ * @param {String} text message text
  * @param {[object]} attachments OPTIONAL message attachments
- * @returns {object} message data
+ * @returns {Object} message data
  */
 export const chat = async (params) => {
   const { conversation } = params;
@@ -99,11 +99,11 @@ export const chat = async (params) => {
 };
 
 /**
- * Update message data
- * @param {string} message message id
- * @param {string} text message text
- * @param {string} status message status
- * @returns {object} message data
+ * @description Update message data
+ * @param {String} message message id
+ * @param {String} text message text
+ * @param {String} status message status
+ * @returns {Object} message data
  */
 export const updateMessage = async (params) => {
   const { message, text, status } = params;
@@ -130,9 +130,9 @@ export const updateMessage = async (params) => {
 };
 
 /**
- * Delete message
- * @param {string} message message id
- * @returns {object} message data
+ * @description Delete message
+ * @param {String} message message id
+ * @returns {Object} message data
  */
 export const deleteMessage = async (params) => {
   const { message } = params;
@@ -148,11 +148,11 @@ export const deleteMessage = async (params) => {
 };
 
 /**
- * Get user conversations
- * @param {string} user user id
- * @param {number} limit conversations limit
- * @param {number} page conversations page number
- * @returns {[object]} array of conversations
+ * @description Get user conversations
+ * @param {String} user user id
+ * @param {Number} limit conversations limit
+ * @param {Number} page conversations page number
+ * @returns {[Object]} array of conversations
  */
 export const getConversations = async (params) => {
   const { user } = params;
@@ -178,12 +178,12 @@ export const getConversations = async (params) => {
 };
 
 /**
- * Send message
- * @param {string} userFrom sender user id
- * @param {string} userTo receiver user id
- * @param {string} text message text
+ * @description Send message
+ * @param {String} userFrom sender user id
+ * @param {String} userTo receiver user id
+ * @param {String} text message text
  * @param {[object]} attachments message attachments
- * @returns {object} message data
+ * @returns {Object} message data
  */
 export const send = async (params) => {
   const { userFrom, userTo } = params;
@@ -231,10 +231,10 @@ export const send = async (params) => {
 };
 
 /**
- * read all messages
- * @param {string} conversation message id
- * @param {string} userTo user id
- * @returns {object} message data
+ * @description read all messages
+ * @param {String} conversation message id
+ * @param {String} userTo user id
+ * @returns {Object} message data
  */
 export const readMessages = async (params) => {
   const { conversation, userTo } = params;

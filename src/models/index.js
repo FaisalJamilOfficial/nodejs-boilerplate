@@ -24,7 +24,10 @@ const models = {
 
 function clearModelCacheWhenChanged(model) {
   model.watch().on("change", () => {
-    clearCachedResultsForModel(model.modelName);
+    // clearCachedResultsForModel(model.modelName);
+    Object.values(models).forEach((element) =>
+      clearCachedResultsForModel(element.modelName)
+    );
     console.log(`=> Cache cleared for model <${model.modelName}>`);
   });
 }

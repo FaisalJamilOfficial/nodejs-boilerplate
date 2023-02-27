@@ -19,11 +19,11 @@ class SocketManager {
   }
 
   /**
-   * Emit event
-   * @param {string} to event listener
-   * @param {string} event event title
-   * @param {object} data event data
-   * @returns {object} socket response
+   * @description Emit event
+   * @param {String} to event listener
+   * @param {String} event event title
+   * @param {Object} data event data
+   * @returns {Object} socket response
    */
   async emitEvent(params) {
     const { to, event, data } = params;
@@ -44,10 +44,10 @@ class SocketManager {
   }
 
   /**
-   * Emit event
-   * @param {string} event event title
-   * @param {object} data event data
-   * @returns {object} socket response
+   * @description Emit event
+   * @param {String} event event title
+   * @param {Object} data event data
+   * @returns {Object} socket response
    */
   async emitGroupEvent(params) {
     const { event, data } = params;
@@ -56,7 +56,7 @@ class SocketManager {
   }
 
   /**
-   * @param {Object} httpServer http server instance
+   * @description @param {Object} httpServer http server instance
    * @param {Object} app express app instance
    */
   async initializeSocket(params) {

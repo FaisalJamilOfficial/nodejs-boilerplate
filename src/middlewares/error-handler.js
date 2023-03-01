@@ -13,8 +13,8 @@ const error = (err, req, res, next) => {
   console.error(err);
 
   if (err.name === "CastError") {
-    const message = `Resource not found with id ${err.value}`;
-    error = new ErrorHandler(message, 404);
+    const message = `Cast failed for value ${err.value}`;
+    error = new ErrorHandler(message, 400);
   }
 
   if (err.name === "ValidationError") {

@@ -1,5 +1,4 @@
 // module imports
-import { clearCachedResultsForModel } from "speedgoose";
 
 // file imports
 import admins from "./admins.js";
@@ -21,17 +20,5 @@ const models = {
   usersModel: users,
   userTokensModel: userTokens,
 };
-
-function clearModelCacheWhenChanged(model) {
-  model.watch().on("change", () => {
-    // clearCachedResultsForModel(model.modelName);
-    Object.values(models).forEach((element) =>
-      clearCachedResultsForModel(element.modelName)
-    );
-    console.log(`=> Cache cleared for model <${model.modelName}>`);
-  });
-}
-
-Object.values(models).forEach((element) => clearModelCacheWhenChanged(element));
 
 export default models;

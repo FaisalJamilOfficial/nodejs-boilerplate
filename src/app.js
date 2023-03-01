@@ -9,7 +9,6 @@ import cors from "cors";
 import chalk from "chalk";
 import mongoose from "mongoose";
 import { fileURLToPath } from "url";
-import { applySpeedGooseCacheLayer, SharedCacheStrategies } from "speedgoose";
 
 // file imports
 import "./.bin/www.js";
@@ -43,10 +42,6 @@ const serverFunction = async () => {
 
     connect.then(
       (db) => {
-        applySpeedGooseCacheLayer(mongoose, {
-          sharedCacheStrategy: SharedCacheStrategies.IN_MEMORY,
-          defaultTtl: 60 * 60 * 24,
-        });
         const port = process.env.PORT || "5002";
         server.listen(port, (err) => {
           if (err) console.log(err);

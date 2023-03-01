@@ -35,7 +35,6 @@
     "otp-generator": "^3.0.0",
     "sharp": "^0.30.7",
     "socket.io": "^4.5.1",
-    "speedgoose": "^1.2.23",
     "twilio": "^2.5.2",
     "uuid": "^8.3.2"
   },

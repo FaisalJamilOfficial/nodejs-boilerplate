@@ -223,7 +223,7 @@ export const send = async (params) => {
     data: message,
   });
 
-  await notificationsController.newMessageNotification({
+  await notificationsController.sendNewMessageNotification({
     message: message._id,
   });
 

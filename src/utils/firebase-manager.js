@@ -25,6 +25,7 @@ class FirebaseManager {
   async sendNotifications(params) {
     const { title, body } = params;
     let { data, fcms, fcm } = params;
+    let response = null;
     data = data ?? {};
     fcms = fcms?.length > 0 ? fcms : fcm ? [fcm] : ["null"];
     const payload = {
@@ -38,9 +39,11 @@ class FirebaseManager {
     connection
       .messaging()
       .sendToDevice(fcms, payload)
-      .then((res) => console.log(res))
+      .then((res) => (response = res))
       .catch((error) => console.error(error));
-    return { success: true };
+    console.log("response", response);
+    delete response.results;
+    return { success: true, data: response };
   }
 }
 

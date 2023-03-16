@@ -34,11 +34,11 @@ export const getAllNotifications = async (params) => {
 };
 
 /**
- * @description New message notification
+ * @description send new message notification
  * @param {String} message message id
  * @returns {null}
  */
-export const newMessageNotification = async (params) => {
+export const sendNewMessageNotification = async (params) => {
   const { message } = params;
   const messageExists = await messagesModel
     .findById(message)

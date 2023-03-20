@@ -9,8 +9,9 @@ const { UNREAD, READ, DELETED } = MESSAGE_STATUSES;
 
 // variable initializations
 const Schema = mongoose.Schema;
+const model = mongoose.model;
 
-const attachment = new Schema(
+const attachmentSchema = new Schema(
   {
     path: {
       type: String,
@@ -24,7 +25,7 @@ const attachment = new Schema(
   { timestamps: true }
 );
 
-const messages = new Schema(
+const messageSchema = new Schema(
   {
     conversation: {
       type: Schema.Types.ObjectId,
@@ -48,7 +49,7 @@ const messages = new Schema(
       type: String,
       trim: true,
     },
-    attachments: [attachment],
+    attachments: [attachmentSchema],
     status: {
       type: String,
       enum: [UNREAD, READ, DELETED],
@@ -60,4 +61,4 @@ const messages = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("messages", messages);
+export default model("messages", messageSchema);

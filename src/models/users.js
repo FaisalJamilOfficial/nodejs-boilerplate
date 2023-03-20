@@ -20,13 +20,14 @@ const {
 
 // variable initializations
 const Schema = mongoose.Schema;
+const model = mongoose.model;
 
 const fcm = {
   device: { type: String, required: [true, "Please enter FCM device id!"] },
   token: { type: String, required: [true, "Please enter FCM token!"] },
 };
 
-const users = new Schema(
+const userSchema = new Schema(
   {
     email: {
       type: String,
@@ -158,31 +159,29 @@ const users = new Schema(
   }
 );
 
-users.methods.getSignedjwtToken = function () {
+userSchema.methods.getSignedjwtToken = function () {
   return jwt.sign({ _id: this._id, type: this.type }, process.env.JWT_SECRET);
 };
 
-users.methods.populate = async function (field) {
+userSchema.methods.populate = async function (field) {
   if (field === SUPER_ADMIN || this.type === SUPER_ADMIN) field = "";
-  return await mongoose
-    .model("users", users)
+  return await model("users", userSchema)
     .findById(this._id)
     .populate(field ?? this.type);
 };
 
-users.methods.setPassword = async function (newPassword) {
+userSchema.methods.setPassword = async function (newPassword) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(newPassword, salt);
   this.save();
 };
 
-users.methods.validatePassword = async function (enteredPassword) {
-  const userExists = await mongoose
-    .model("users", users)
+userSchema.methods.validatePassword = async function (enteredPassword) {
+  const userExists = await model("users", userSchema)
     .findById(this._id, { password: 1 })
     .select("+password");
   const isMatched = await bcrypt.compare(enteredPassword, userExists.password);
   return isMatched;
 };
 
-export default mongoose.model("users", users);
+export default model("users", userSchema);

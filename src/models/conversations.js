@@ -9,8 +9,9 @@ const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;
 
 // variable initializations
 const Schema = mongoose.Schema;
+const model = mongoose.model;
 
-const conversations = new Schema(
+const conversationSchema = new Schema(
   {
     userTo: {
       type: Schema.Types.ObjectId,
@@ -35,4 +36,4 @@ const conversations = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("conversations", conversations);
+export default model("conversations", conversationSchema);

@@ -69,7 +69,8 @@ class SocketManager {
     io.on("connection", (socket) => {
       socket.on("join", async (data) => {
         console.log(data);
-        console.log("---------joined------------");
+        socket.join(data);
+        console.log(`${data} joined`);
         try {
           const args = { user: data, isOnline: true };
           await usersController.updateUser(args);
@@ -77,11 +78,11 @@ class SocketManager {
           console.log(error);
         }
       });
-      socket.on("join", socket.join);
-
-      socket.on("exit", async (data) => {
+      socket.on("leave", async (data) => {
         console.log(data);
-        console.log("---------exited------------");
+        socket.leave;
+        // socket.leave(data);
+        console.log(`${data} left`);
         try {
           const args = { user: data, isOnline: false };
           await usersController.updateUser(args);
@@ -89,12 +90,14 @@ class SocketManager {
           console.log(error);
         }
       });
-      socket.on("exit", socket.leave);
       socket.on("disconnect", (reason) => {
         console.log("user disconnected " + reason);
       });
+      // socket.on("exit", socket.leave);
+      // socket.on("join", socket.join);
     });
     global.io = io;
+    // global.io.sockets.emit("event", data);
 
     // attach to app instance
     app.use((req, res, next) => {

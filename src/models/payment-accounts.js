@@ -9,8 +9,9 @@ const { BRAINTREE, STRIPE_ACCOUNT, STRIPE_CUSTOMER } = PAYMENT_ACCOUNT_TYPES;
 
 // variable initializations
 const Schema = mongoose.Schema;
+const model = mongoose.model;
 
-const paymentAccounts = new Schema(
+const paymentAccountSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -34,4 +35,4 @@ const paymentAccounts = new Schema(
   }
 );
 
-export default mongoose.model("paymentAccounts", paymentAccounts);
+export default model("paymentAccounts", paymentAccountSchema);

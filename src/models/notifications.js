@@ -9,8 +9,9 @@ const { NEW_MESSAGE, NEW_CONVERSATION } = NOTIFICATION_TYPES;
 
 // variable initializations
 const Schema = mongoose.Schema;
+const model = mongoose.model;
 
-const notifications = new Schema(
+const notificationSchema = new Schema(
   {
     type: {
       type: String,
@@ -44,4 +45,4 @@ const notifications = new Schema(
   }
 );
 
-export default mongoose.model("notifications", notifications);
+export default model("notifications", notificationSchema);

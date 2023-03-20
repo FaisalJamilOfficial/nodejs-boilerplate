@@ -3,8 +3,9 @@ import mongoose from "mongoose";
 
 // variable initializations
 const Schema = mongoose.Schema;
+const model = mongoose.model;
 
-const admins = new Schema(
+const adminSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -18,4 +19,4 @@ const admins = new Schema(
   }
 );
 
-export default mongoose.model("admins", admins);
+export default model("admins", adminSchema);

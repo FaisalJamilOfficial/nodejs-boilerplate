@@ -3,8 +3,9 @@ import mongoose from "mongoose";
 
 // variable initializations
 const Schema = mongoose.Schema;
+const model = mongoose.model;
 
-const userTokens = new Schema({
+const userTokenSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
     required: true,
@@ -21,6 +22,6 @@ const userTokens = new Schema({
   },
 });
 
-userTokens.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
+userTokenSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 
-export default mongoose.model("userTokens", userTokens);
+export default model("userTokens", userTokenSchema);

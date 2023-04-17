@@ -11,14 +11,14 @@ export const MESSAGE_STATUSES = {
 };
 
 export const NOTIFICATION_TYPES = {
-  NEW_MESSAGE: "new-message",
-  NEW_CONVERSATION: "new-conversation",
+  NEW_MESSAGE: "new_message",
+  NEW_CONVERSATION: "new_conversation",
 };
 
 export const PAYMENT_ACCOUNT_TYPES = {
   BRAINTREE: "braintree",
-  STRIPE_CUSTOMER: "stripe-customer",
-  STRIPE_ACCOUNT: "stripe-account",
+  STRIPE_CUSTOMER: "stripe_customer",
+  STRIPE_ACCOUNT: "stripe_account",
 };
 
 export const GEO_JSON_TYPES = {
@@ -38,13 +38,13 @@ export const USER_STATUSES = {
 export const USER_TYPES = {
   CUSTOMER: "customer",
   ADMIN: "admin",
-  SUPER_ADMIN: "super-admin",
+  SUPER_ADMIN: "super_admin",
   MULTI: "multi",
 };
 
 export const OTP_TYPES = {
   LOGIN: "login",
-  SIGN_UP: "sign-up",
+  SIGN_UP: "sign_up",
   OTHER: "other",
 };
 

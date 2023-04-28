@@ -1,5 +1,5 @@
 // file imports
-import * as models from "../models/index.js";
+import models from "../models/index.js";
 import * as usersController from "./users.js";
 import * as customersController from "./customers.js";
 import * as adminsController from "./admins.js";
@@ -7,6 +7,7 @@ import NodeMailer from "../utils/node-mailer.js";
 import { USER_TYPES, USER_STATUSES } from "../configs/enums.js";
 
 // destructuring assignments
+
 const { usersModel, userTokensModel } = models;
 const { CUSTOMER, ADMIN } = USER_TYPES;
 const { ACTIVE } = USER_STATUSES;

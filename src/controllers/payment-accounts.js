@@ -2,7 +2,7 @@
 import { isValidObjectId } from "mongoose";
 
 // file imports
-import * as models from "../models/index.js";
+import models from "../models/index.js";
 
 // destructuring assignments
 const { paymentAccountsModel, usersModel } = models;
@@ -68,13 +68,34 @@ exports.getPaymentAccounts = async (params) => {
   if (page) page = page - 1;
   const query = {};
   if (user) query.user = user;
-  const paymentAccounts = await paymentAccountsModel
-    .find(query)
-    .select("-createdAt -updatedAt -__v")
-    .sort({ createdAt: -1 })
-    .skip(page * limit)
-    .limit(limit);
-  const totalCount = await paymentAccountsModel.find(query).count();
-  const totalPages = Math.ceil(totalCount / limit);
-  return { success: true, totalCount, totalPages, data: paymentAccounts };
+  const paymentAccounts = await paymentAccountsModel.aggregate([
+    { $match: query },
+    { $sort: { createdAt: -1 } },
+    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $facet: {
+        totalCount: [{ $count: "totalCount" }],
+        data: [{ $skip: page * limit }, { $limit: limit }],
+      },
+    },
+    { $unwind: "$totalCount" },
+    {
+      $project: {
+        totalCount: "$totalCount.totalCount",
+        totalPages: {
+          $ceil: {
+            $divide: ["$totalCount.totalCount", limit],
+          },
+        },
+        data: 1,
+      },
+    },
+  ]);
+  return {
+    success: true,
+    data: [],
+    totalCount: 0,
+    totalPages: 0,
+    ...paymentAccounts[0],
+  };
 };

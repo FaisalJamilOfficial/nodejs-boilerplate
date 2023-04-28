@@ -1,5 +1,5 @@
 // file imports
-import * as models from "../models/index.js";
+import models from "../models/index.js";
 import FirebaseManager from "../utils/firebase-manager.js";
 import { NOTIFICATION_TYPES } from "../configs/enums.js";
 
@@ -21,16 +21,36 @@ export const getAllNotifications = async (params) => {
   if (user) query.user = user;
   if (!limit) limit = 10;
   if (!page) page = 1;
-  const totalCount = await notificationsModel.find(query).count();
-  const notifications = await notificationsModel
-    .find(query)
-    .select("-createdAt -updatedAt -__v")
-    .populate("")
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit);
-  const totalPages = Math.ceil(totalCount / limit);
-  return { success: true, totalCount, totalPages, data: notifications };
+  const notifications = await notificationsModel.aggregate([
+    { $match: query },
+    { $sort: { createdAt: -1 } },
+    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $facet: {
+        totalCount: [{ $count: "totalCount" }],
+        data: [{ $skip: page * limit }, { $limit: limit }],
+      },
+    },
+    { $unwind: "$totalCount" },
+    {
+      $project: {
+        totalCount: "$totalCount.totalCount",
+        totalPages: {
+          $ceil: {
+            $divide: ["$totalCount.totalCount", limit],
+          },
+        },
+        data: 1,
+      },
+    },
+  ]);
+  return {
+    success: true,
+    data: [],
+    totalCount: 0,
+    totalPages: 0,
+    ...notifications[0],
+  };
 };
 
 /**

@@ -4,7 +4,7 @@ import { isValidObjectId } from "mongoose";
 // file imports
 import SocketManager from "../utils/socket-manager.js";
 import * as notificationsController from "./notifications.js";
-import * as models from "../models/index.js";
+import models from "../models/index.js";
 import { CONVERSATION_STATUSES, MESSAGE_STATUSES } from "../configs/enums.js";
 
 // destructuring assignments
@@ -87,15 +87,36 @@ export const chat = async (params) => {
   const query = {};
   if (conversation) query.conversation = conversation;
   else throw new Error("Please enter conversation id!|||400");
-  const messages = await messagesModel
-    .find(query)
-    .select("-createdAt -updatedAt -__v")
-    .sort({ createdAt: -1 })
-    .skip(page * limit)
-    .limit(limit);
-  const totalCount = await messagesModel.find(query).count();
-  const totalPages = Math.ceil(totalCount / limit);
-  return { success: true, totalCount, totalPages, data: messages };
+  const messages = await messagesModel.aggregate([
+    { $match: query },
+    { $sort: { createdAt: -1 } },
+    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $facet: {
+        totalCount: [{ $count: "totalCount" }],
+        data: [{ $skip: page * limit }, { $limit: limit }],
+      },
+    },
+    { $unwind: "$totalCount" },
+    {
+      $project: {
+        totalCount: "$totalCount.totalCount",
+        totalPages: {
+          $ceil: {
+            $divide: ["$totalCount.totalCount", limit],
+          },
+        },
+        data: 1,
+      },
+    },
+  ]);
+  return {
+    success: true,
+    data: [],
+    totalCount: 0,
+    totalPages: 0,
+    ...messages[0],
+  };
 };
 
 /**
@@ -162,18 +183,35 @@ export const getConversations = async (params) => {
   if (page) page = page - 1;
   const query = {};
   if (user) query.$or = [{ userTo: user }, { userFrom: user }];
-  const conversations = await conversationsModel
-    .find(query)
-    .select("-createdAt -updatedAt -__v")
-    .sort({ createdAt: -1 })
-    .skip(page * limit)
-    .limit(limit);
-  const totalCount = await conversationsModel.find(query).count();
+  const conversations = await conversationsModel.aggregate([
+    { $match: query },
+    { $sort: { createdAt: -1 } },
+    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $facet: {
+        totalCount: [{ $count: "totalCount" }],
+        data: [{ $skip: page * limit }, { $limit: limit }],
+      },
+    },
+    { $unwind: "$totalCount" },
+    {
+      $project: {
+        totalCount: "$totalCount.totalCount",
+        totalPages: {
+          $ceil: {
+            $divide: ["$totalCount.totalCount", limit],
+          },
+        },
+        data: 1,
+      },
+    },
+  ]);
   return {
     success: true,
-    totalCount,
-    totalPages: Math.ceil(totalCount / limit),
-    data: conversations,
+    data: [],
+    totalCount: 0,
+    totalPages: 0,
+    ...conversations[0],
   };
 };
 

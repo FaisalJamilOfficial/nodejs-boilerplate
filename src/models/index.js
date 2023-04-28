@@ -20,5 +20,3 @@ export default {
   usersModel: users,
   userTokensModel: userTokens,
 };
-
-// export default models;

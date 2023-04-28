@@ -36,10 +36,12 @@ router.post(
 router.post(
   "/login",
   asyncHandler(async (req, res) => {
+    const { type } = req.query;
     const { email, password } = req.body;
     const args = {
       email,
       password,
+      type,
     };
     const response = await authController.login(args);
     res.json(response);
@@ -117,7 +119,7 @@ router.post(
     const args = {
       email,
       password,
-      type,
+      type: type ?? ADMIN,
       name: type,
     };
     if (secret === SECRET);

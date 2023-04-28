@@ -2,10 +2,12 @@
 import { isValidObjectId } from "mongoose";
 
 // file imports
-import * as models from "../models/index.js";
+import models from "../models/index.js";
 import FilesDeleter from "../utils/files-deleter.js";
+import { USER_TYPES } from "../configs/enums.js";
 
 // destructuring assignments
+const { ADMIN } = USER_TYPES;
 const { usersModel, customersModel, adminsModel } = models;
 
 /**
@@ -199,29 +201,70 @@ export const getUsers = async (params) => {
   if (page) page = page - 1;
   const query = {};
   if (type) query.type = type;
+  else query.type = { $ne: ADMIN };
   if (user) query._id = { $ne: user };
+  let wildcard = {
+    $match: { _id: { $ne: null } },
+  };
   if (q && q.trim() !== "") {
-    query.$or = [
-      { email: { $regex: q, $options: "i" } },
-      { phone: { $regex: q, $options: "i" } },
-      { firstName: { $regex: q, $options: "i" } },
-      { lastName: { $regex: q, $options: "i" } },
-      { name: { $regex: q, $options: "i" } },
-    ];
+    wildcard = {
+      $match: {
+        $expr: {
+          $and: [
+            {
+              $or:
+                [
+                  {
+                    $regexMatch: {
+                      input: "$email",
+                      regex: q,
+                      options: "i",
+                    },
+                  },
+                  {
+                    $regexMatch: {
+                      input: "$name",
+                      regex: q,
+                      options: "i",
+                    },
+                  },
+                ] ?? {},
+            },
+          ],
+        },
+      },
+    };
   }
-  const users = await usersModel
-    .find(query)
-    .populate("customer admin")
-    .select("-createdAt -updatedAt -__v")
-    .sort({ createdAt: -1 })
-    .skip(page * limit)
-    .limit(limit);
-  const totalCount = await usersModel.find(query).count();
+  const users = await usersModel.aggregate([
+    { $match: query },
+    wildcard,
+    { $sort: { createdAt: -1 } },
+    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $facet: {
+        totalCount: [{ $count: "totalCount" }],
+        data: [{ $skip: page * limit }, { $limit: limit }],
+      },
+    },
+    { $unwind: "$totalCount" },
+    {
+      $project: {
+        totalCount: "$totalCount.totalCount",
+        totalPages: {
+          $ceil: {
+            $divide: ["$totalCount.totalCount", limit],
+          },
+        },
+        data: 1,
+      },
+    },
+  ]);
   return {
     success: true,
-    totalCount,
-    totalPages: Math.ceil(totalCount / limit),
-    data: users,
+    data: [],
+    totalCount: 0,
+    totalPages: 0,
+    ...users[0],
   };
 };
 

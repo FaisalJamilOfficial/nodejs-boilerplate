@@ -60,8 +60,10 @@ router
     verifyAdmin,
     asyncHandler(async (req, res) => {
       const { _id: user } = req?.user;
-      const { page, limit } = req.query;
+      const { page, limit, q, type } = req.query;
       const args = {
+        q,
+        type,
         user,
         limit: Number(limit),
         page: Number(page),

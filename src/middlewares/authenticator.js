@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 // file imports
 import { asyncHandler } from "./async-handler.js";
-import * as models from "../models/index.js";
+import models from "../models/index.js";
 import { USER_STATUSES, USER_TYPES } from "../configs/enums.js";
 
 // destructuring assignments

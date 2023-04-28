@@ -94,28 +94,46 @@ export const getAdmin = async (parameters) => {
 
 /**
  * @description Get admins
- * @param {String} q search keyword
  * @param {Number} limit admins limit
  * @param {Number} page admins page number
  * @returns {Object} admin data
  */
 export const getAdmins = async (parameters) => {
-  const { q } = parameters;
   let { limit, page } = parameters;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
   const query = {};
-  if (q) query.q = q;
-  const admins = await adminsModel
-    .find(query)
-    .select("-createdAt -updatedAt -__v")
-    .sort({ createdAt: -1 })
-    .skip(page * limit)
-    .limit(limit);
-  const totalCount = await adminsModel.find(query).count();
-  const totalPages = Math.ceil(totalCount / limit);
-  return { success: true, totalCount, totalPages, data: admins };
+  const admins = await adminsModel.aggregate([
+    { $match: query },
+    { $sort: { createdAt: -1 } },
+    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $facet: {
+        totalCount: [{ $count: "totalCount" }],
+        data: [{ $skip: page * limit }, { $limit: limit }],
+      },
+    },
+    { $unwind: "$totalCount" },
+    {
+      $project: {
+        totalCount: "$totalCount.totalCount",
+        totalPages: {
+          $ceil: {
+            $divide: ["$totalCount.totalCount", limit],
+          },
+        },
+        data: 1,
+      },
+    },
+  ]);
+  return {
+    success: true,
+    data: [],
+    totalCount: 0,
+    totalPages: 0,
+    ...admins[0],
+  };
 };
 
 /**

@@ -10,7 +10,7 @@ import paymentAccounts from "./payment-accounts.js";
 import users from "./users.js";
 import userTokens from "./user-tokens.js";
 
-const models = {
+export default {
   adminsModel: admins,
   conversationsModel: conversations,
   customersModel: customers,
@@ -21,4 +21,4 @@ const models = {
   userTokensModel: userTokens,
 };
 
-export default models;
+// export default models;

@@ -13,10 +13,9 @@ import * as usersController from "../controllers/users.js";
 // });
 
 class SocketManager {
-  constructor() {
-    this.io = global.io;
-    // this.connection = connection;
-  }
+  // constructor() {
+  //   this.connection = connection;
+  // }
 
   /**
    * @description Emit event
@@ -27,7 +26,7 @@ class SocketManager {
    */
   async emitEvent(params) {
     const { to, event, data } = params;
-    const response = await this.io.to(to).emit(event, data);
+    const response = await global.io.to(to).emit(event, data);
     // response = await connection
     // 	.firestore()
     // 	.collection("socket")
@@ -51,7 +50,7 @@ class SocketManager {
    */
   async emitGroupEvent(params) {
     const { event, data } = params;
-    const response = await this.io.emit(event, data);
+    const response = await global.io.emit(event, data);
     return response;
   }
 
@@ -66,9 +65,9 @@ class SocketManager {
         origin: "*",
       },
     });
+    global.io = io;
     io.on("connection", (socket) => {
       socket.on("join", async (data) => {
-        console.log(data);
         socket.join(data);
         console.log(`${data} joined`);
         try {
@@ -79,9 +78,7 @@ class SocketManager {
         }
       });
       socket.on("leave", async (data) => {
-        console.log(data);
-        socket.leave;
-        // socket.leave(data);
+        socket.leave();
         console.log(`${data} left`);
         try {
           const args = { user: data, isOnline: false };
@@ -93,11 +90,7 @@ class SocketManager {
       socket.on("disconnect", (reason) => {
         console.log("user disconnected " + reason);
       });
-      // socket.on("exit", socket.leave);
-      // socket.on("join", socket.join);
     });
-    global.io = io;
-    // global.io.sockets.emit("event", data);
 
     // attach to app instance
     app.use((req, res, next) => {

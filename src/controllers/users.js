@@ -268,16 +268,16 @@ export const getUsers = async (params) => {
   };
 };
 
-// /**
-//  * Get users data
-//  * @param {String} user user id
-//  * @param {String} q search keyword
-//  * @param {Number} limit messages limit
-//  * @param {Number} page messages page number
-//  * @param {String} status user status
-//  * @param {String} type user type
-//  * @returns {[Object]} array of users
-//  */
+/**
+ * Get users data
+ * @param {String} user user id
+ * @param {String} q search keyword
+ * @param {Number} limit messages limit
+ * @param {Number} page messages page number
+ * @param {String} status user status
+ * @param {String} type user type
+ * @returns {[Object]} array of users
+ */
 // export const getAllUsers = async (params) => {
 //   const { user, q, status, type } = params;
 //   let { page, limit } = params;
@@ -287,8 +287,9 @@ export const getUsers = async (params) => {
 //   query._id = { $ne: user };
 //   if (type) query.type = type;
 //   if (status) query.status = status;
+//   let wildcard = {};
 //   if (q && q.trim() !== "") {
-//     var wildcard = [
+//     wildcard = [
 //       {
 //         $regexMatch: {
 //           input: "$firstName",
@@ -328,6 +329,7 @@ export const getUsers = async (params) => {
 //   }
 //   const aggregation = [
 //     { $match: query },
+//     { $sort: { createdAt: -1 } },
 //     { $project: { hash: 0, salt: 0, type: 0 } },
 //     {
 //       $lookup: {
@@ -343,7 +345,7 @@ export const getUsers = async (params) => {
 //         $expr: {
 //           $and: [
 //             {
-//               $or: wildcard ?? {},
+//               $or: wildcard,
 //             },
 //           ],
 //         },
@@ -368,14 +370,13 @@ export const getUsers = async (params) => {
 //       },
 //     },
 //   ];
-//   const users = await usersModel
-//     .aggregate(aggregation)
-//     .sort({ createdAt: -1 })
-//     .skip((page - 1) * limit)
-//     .limit(limit);
+//   const users = await usersModel.aggregate(aggregation);
 
 //   return {
 //     success: true,
+//     data: [],
+//     totalCount: 0,
+//     totalPages: 0,
 //     ...users[0],
 //   };
 // };

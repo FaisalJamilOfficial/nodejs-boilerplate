@@ -31,15 +31,10 @@ class StripeManager {
     const { number, expMonth, expYear, cvc, name } = params;
     const card = {};
     if (number) card.number = number;
-    else throw new Error("Please enter number!");
     if (typeof expMonth === "number") card.expMonth = expMonth;
-    else throw new Error("Please enter expMonth!");
     if (typeof expYear === "number") card.expYear = expYear;
-    else throw new Error("Please enter expYear!");
     if (cvc) card.cvc = cvc;
-    else throw new Error("Please enter cvc!");
     if (name) card.name = name;
-    else throw new Error("Please enter name!");
     return await stripe.tokens.create({ card });
   }
 
@@ -51,7 +46,6 @@ class StripeManager {
   async deleteCustomer(params) {
     const { customerId } = params;
     if (customerId);
-    else throw new Error("Please enter customerId!");
     return await stripe.customers.del(customerId);
   }
 
@@ -64,7 +58,6 @@ class StripeManager {
     const { charge } = params;
     const refundObj = {};
     if (charge) refundObj.charge = charge;
-    else throw new Error("Please enter charge id!");
     return await stripe.refunds.create(refundObj);
   }
 
@@ -113,24 +106,21 @@ class StripeManager {
       if (email) customerObj.email = email;
       if (phone) customerObj.phone = phone;
       const customer = await stripe.customers.create(customerObj);
-      if (customer) userStripeId = customer.id;
-      else throw new Error("Stripe customer creation failed!");
+      userStripeId = customer?.id;
     }
     const card = await stripe.customers.createSource(userStripeId, {
       source,
     });
 
-    if (card) {
-      card.cardHolderName = cardHolderName;
-      const paymentAccountObj = {
-        user,
-        type: STRIPE_CUSTOMER,
-        account: card,
-      };
-      const { data: paymentAccount } =
-        await paymentAccountsController.addPaymentAccount(paymentAccountObj);
-      return paymentAccount;
-    } else throw new Error("Stripe source creation failed!");
+    card.cardHolderName = cardHolderName;
+    const paymentAccountObj = {
+      user,
+      type: STRIPE_CUSTOMER,
+      account: card,
+    };
+    const { data: paymentAccount } =
+      await paymentAccountsController.addPaymentAccount(paymentAccountObj);
+    return paymentAccount;
   }
 
   /**
@@ -171,17 +161,15 @@ class StripeManager {
           },
         },
       });
-      if (account) {
-        const paymentAccountObj = {
-          user,
-          type: STRIPE_ACCOUNT,
-          account,
-        };
+      const paymentAccountObj = {
+        user,
+        type: STRIPE_ACCOUNT,
+        account,
+      };
 
-        const { data: paymentAccount } =
-          await paymentAccountsController.addPaymentAccount(paymentAccountObj);
-        return paymentAccount;
-      } else throw new Error("Stripe account creation failed!");
+      const { data: paymentAccount } =
+        await paymentAccountsController.addPaymentAccount(paymentAccountObj);
+      return paymentAccount;
     }
   }
 
@@ -270,18 +258,6 @@ class StripeManager {
       });
 
     return event;
-  }
-
-  /**
-   * @description Get user payment accounts
-   * @param {String} user user id
-   * @returns {[Object]} array of paymentAccount
-   */
-  async getAllAccounts(params) {
-    const { user } = params;
-    const query = {};
-    if (user) query.user = user;
-    return await paymentAccountsController.getPaymentAccounts(query);
   }
 }
 

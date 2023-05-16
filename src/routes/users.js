@@ -6,9 +6,8 @@ import * as authController from "../controllers/auth.js";
 import * as notificationsController from "../controllers/notifications.js";
 import * as usersController from "../controllers/users.js";
 import TwilioManager from "../utils/twilio-manager.js";
-import { uploadTemporary } from "../middlewares/uploader.js";
-import { resizeImages } from "../middlewares/image-resizer.js";
-import { OTP_TYPES } from "../configs/enums.js";
+import directories from "../configs/directories.js";
+import { upload } from "../middlewares/uploader.js";
 import { asyncHandler } from "../middlewares/async-handler.js";
 import {
   verifyOTP,
@@ -19,16 +18,15 @@ import {
 } from "../middlewares/authenticator.js";
 
 // destructuring assignments
-const { LOGIN } = OTP_TYPES;
+const { IMAGES_DIRECTORY } = directories;
 
 // variable initializations
 const router = express.Router();
 
 router
   .route("/")
+  .all(verifyToken, verifyAdmin)
   .post(
-    verifyToken,
-    verifyAdmin,
     asyncHandler(async (req, res) => {
       const { email, password, phone, type } = req.body;
       const args = {
@@ -42,28 +40,27 @@ router
     })
   )
   .put(
-    verifyToken,
-    verifyAdmin,
-    uploadTemporary.fields([{ name: "images", maxCount: 1 }]),
-    resizeImages,
+    upload(IMAGES_DIRECTORY).single("image"),
     asyncHandler(async (req, res) => {
+      const image = req.file || {};
       const { _id: user } = req?.user;
       const { firstName, lastName } = req.body;
-      const { images } = req.files || {};
-      const args = { user, firstName, lastName, images };
+      const args = {
+        user,
+        firstName,
+        lastName,
+        //   image: image?.key,
+        image: image?.filename,
+      };
       const response = await usersController.updateUser(args);
       res.json(response);
     })
   )
   .get(
-    verifyToken,
-    verifyAdmin,
     asyncHandler(async (req, res) => {
       const { _id: user } = req?.user;
-      const { page, limit, q, type } = req.query;
+      const { page, limit } = req.query;
       const args = {
-        q,
-        type,
         user,
         limit: Number(limit),
         page: Number(page),
@@ -73,8 +70,6 @@ router
     })
   )
   .delete(
-    verifyToken,
-    verifyAdmin,
     asyncHandler(async (req, res) => {
       const { user } = req.query;
       const args = { user };

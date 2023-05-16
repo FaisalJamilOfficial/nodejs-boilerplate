@@ -63,7 +63,7 @@ export const updateUser = async (params) => {
     status,
     firstName,
     lastName,
-    images,
+    image,
     customer,
     admin,
   } = params;
@@ -104,10 +104,10 @@ export const updateUser = async (params) => {
   if (lastName) userExists.lastName = lastName;
   if (firstName || lastName)
     userExists.name = userExists.firstName + " " + userExists.lastName;
-  if (images) {
+  if (image) {
     if (userExists.image)
       new FilesDeleter().deleteImage({ image: userExists.image });
-    userExists.image = images[0].path;
+    userExists.image = image;
   }
   if (coordinates) {
     if (coordinates?.length === 2)

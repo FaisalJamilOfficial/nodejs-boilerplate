@@ -74,9 +74,7 @@ export const updateUser = async (params) => {
   if (isValidObjectId(user));
   else throw new Error("Please enter valid user id!|||400");
 
-  let userExists = await usersModel
-    .findById(user)
-    .select("-createdAt -updatedAt -__v");
+  let userExists = await usersModel.findById(user);
   if (userExists);
   else throw new Error("User not found!|||404");
 
@@ -131,9 +129,11 @@ export const updateUser = async (params) => {
       userExists.isAdmin = true;
     } else throw new Error("Admin not found!|||404");
 
-  userExists = await usersModel.findByIdAndUpdate(userExists._id, userExists, {
-    new: true,
-  });
+  userExists = await usersModel
+    .findByIdAndUpdate(userExists._id, userExists, {
+      new: true,
+    })
+    .select("-createdAt -updatedAt -__v");
   return {
     success: true,
     data: userExists,

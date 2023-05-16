@@ -118,27 +118,17 @@ router
     asyncHandler(async (req, res) => {
       const { _id: user } = req?.user;
       const { phone } = req.body;
-      const args = { user };
-      if (phone) args.phone = phone;
-      else throw new Error("Please enter phone number!|||400");
+      const args = { user, phone };
       const response = await new TwilioManager().sendOTP(args);
       res.json(response);
     })
   )
   .put(
     asyncHandler(async (req, res) => {
-      const { type } = req.query;
       const { phone } = req.body;
-      let userExists;
-      const args = {};
-      if (phone) args.phone = phone;
-      else throw new Error("Please enter phone number!|||400");
-
-      if (type === LOGIN) {
-        const userResponse = await usersController.getUser(args);
-        userExists = userResponse?.user;
-      }
-      args.user = userExists?._id;
+      const args = { phone };
+      const { user } = await usersController.getUser(args);
+      args.user = user;
       const response = await new TwilioManager().sendOTP(args);
       res.json(response);
     })

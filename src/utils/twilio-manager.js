@@ -26,6 +26,9 @@ class TwilioManager {
   async sendOTP(params) {
     const { user, phone } = params;
 
+    if (phone);
+    else throw new Error("Please enter phone number!|||400");
+
     const response = await usersController.getUser({ phone });
     const userExists = response?.data;
 

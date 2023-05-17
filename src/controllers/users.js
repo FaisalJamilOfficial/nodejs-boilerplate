@@ -174,11 +174,11 @@ export const getUser = async (params) => {
   if (facebookId) query.facebookId = facebookId;
   if (twitterId) query.twitterId = twitterId;
   if (phone) query.phone = phone;
-  else query._id = null;
+  if (JSON.stringify(query) === "{}") query._id = null;
 
   let userExists = await usersModel
     .findOne(query)
-    .select("-createdAt -updatedAt -__v");
+    .select("-createdAt -updatedAt -__v -fcms");
   if (userExists) userExists = await userExists.populate(userExists.type);
   return {
     success: !!userExists,

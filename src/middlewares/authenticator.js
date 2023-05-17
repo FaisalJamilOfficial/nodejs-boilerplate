@@ -46,7 +46,7 @@ export const verifyToken = async (
       }
       const user = await usersModel
         .findOne({ _id: verificationObject._id })
-        .select("-createdAt -updatedAt -__v");
+        .select("-createdAt -updatedAt -__v -fcms");
       if (user) {
         if (user.status === DELETED)
           next(new Error("User account deleted!|||403"));

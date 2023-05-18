@@ -2,7 +2,7 @@
 import _stripe from "stripe";
 
 // file imports
-import * as paymentAccountsController from "../controllers/paymentAccounts.js";
+import * as paymentAccountsController from "../controllers/payment-accounts.js";
 import { PAYMENT_ACCOUNT_TYPES } from "../configs/enums.js";
 
 // destructuring assignments
@@ -125,14 +125,14 @@ class StripeManager {
 
   /**
    * @description Create stripe customer
-   * @param {String} user OPTIONAL user id
+   * @param {String} id OPTIONAL user id
    * @param {String} email OPTIONAL user email address
    * @param {String} phone OPTIONAL user phone number
    * @returns {Object} stripe customer data
    */
   async createCustomer(params) {
-    const { user, email, phone } = params;
-    const customerObj = { user, email, phone };
+    const { id, email, phone } = params;
+    const customerObj = { id, email, phone };
     return await stripe.customers.create(customerObj);
   }
 
@@ -236,6 +236,81 @@ class StripeManager {
   }
 
   /**
+   * Create stripe payment intent
+   * @param {string} amount payment amount
+   * @param {string} currency payment currency
+   * @param {[string]} payment_method_types payment method types
+   * @returns {object} stripe payment intent object
+   */
+  async createPaymentIntent(parameters) {
+    const { amount, currency, paymentMethodTypes, customer, paymentMethod } =
+      parameters;
+    const paymentIntentObj = {
+      amount: amount * 100,
+      currency: currency ?? "usd",
+      // confirmation_method: "manual",
+      capture_method: "manual",
+      setup_future_usage: "on_session",
+      customer,
+    };
+    if (paymentMethod) {
+      paymentIntentObj.payment_method = paymentMethod;
+      paymentIntentObj.confirm = true;
+      paymentIntentObj.off_session = true;
+    }
+    if (paymentMethodTypes)
+      paymentIntentObj.payment_method_types = paymentMethodTypes;
+    return await stripe.paymentIntents.create(paymentIntentObj);
+  }
+
+  /**
+   * Capture payment intent
+   * @param {string} paymentIntent payment intent id
+   * @param {string} amount payment amount
+   * @returns {object} capture payment intent object
+   */
+  async capturePaymentIntent(parameters) {
+    const { paymentIntent, amount } = parameters;
+    const paymentIntentObj = {
+      amount_to_capture: amount * 100,
+    };
+    return await stripe.paymentIntents.capture(paymentIntent, paymentIntentObj);
+  }
+
+  /**
+   * Cancel payment intent
+   * @param {string} paymentIntent payment intent id
+   * @returns {object} cancel payment intent object
+   */
+  async cancelPaymentIntent(parameters) {
+    const { paymentIntent } = parameters;
+    return await stripe.paymentIntents.cancel(paymentIntent);
+  }
+
+  /**
+   * Refund payment intent
+   * @param {string} paymentIntent payment intent id
+   * @returns {object} refund payment intent object
+   */
+  async refundPaymentIntent(parameters) {
+    const { paymentIntent } = parameters;
+    return await stripe.refunds.create({ payment_intent: paymentIntent });
+  }
+
+  /**
+   * Get customer sources
+   * @param {string} customer customer id
+   * @returns {[object]} stripe customer sources
+   */
+  async getCustomerSources(parameters) {
+    const { customer } = parameters;
+    return await stripe.paymentMethods.list({
+      customer,
+      type: "card",
+    });
+  }
+
+  /**
    * @description Construct stripe webhook event
    * @param {String} rawBody body from stripe request
    * @param {String} signature stripe signature from request headers
@@ -261,7 +336,7 @@ class StripeManager {
   }
 }
 
-exports.constructWebhooksEvent = async (req, res, next) => {
+export const constructWebhooksEvent = async (req, res, next) => {
   try {
     const endpointSecret = STRIPE_ENDPOINT_SECRET;
     const signature = req.headers["stripe-signature"];

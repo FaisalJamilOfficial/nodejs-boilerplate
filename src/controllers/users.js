@@ -174,7 +174,7 @@ export const getUser = async (params) => {
   if (facebookId) query.facebookId = facebookId;
   if (twitterId) query.twitterId = twitterId;
   if (phone) query.phone = phone;
-  if (JSON.stringify(query) === "{}") query._id = null;
+  if (Object.keys(query).length === 0) query._id = null;
 
   let userExists = await usersModel
     .findOne(query)

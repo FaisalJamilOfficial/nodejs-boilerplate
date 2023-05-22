@@ -1,5 +1,4 @@
 // module imports
-// import dotenv from "dotenv";
 import http from "http";
 import express from "express";
 import path from "path";
@@ -15,11 +14,9 @@ import "./.bin/www.js";
 import indexRouter from "./routes/index.js";
 import SocketManager from "./utils/socket-manager.js";
 import errorHandler from "./middlewares/error-handler.js";
-// import { ENVIRONMENTS } from "./configs/enums.js";
 
 // destructuring assignments
 const { NODE_ENV, MONGO_URL } = process.env;
-// const { PRODUCTION } = ENVIRONMENTS;
 
 // variable initializations
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -70,12 +67,11 @@ const serverFunction = async () => {
 
     app.use("/api/v1", indexRouter);
 
-    // app.use(express.static(path.join(__dirname, "client/build")));
-    app.get("/reset-password", (req, res, next) => {
+    app.get("/reset-password", (req, res) => {
       res.sendFile(path.join(__dirname, "public/reset-password.html"));
     });
 
-    app.get("/", (req, res, next) => {
+    app.get("/", (req, res) => {
       res.sendFile(path.join(__dirname, "/public/image.png"));
     });
 
@@ -90,14 +86,6 @@ const serverFunction = async () => {
     console.log(error);
   }
 };
-
-// dotenv.config();
-// dotenv.config({
-//   path:
-//     NODE_ENV === PRODUCTION
-//       ? ".env.production"
-//       : ".env.development",
-// });
 
 serverFunction();
 console.log(chalk.hex("#607070")(chalk.underline(NODE_ENV.toUpperCase())));

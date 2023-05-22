@@ -237,10 +237,10 @@ class StripeManager {
 
   /**
    * Create stripe payment intent
-   * @param {string} amount payment amount
-   * @param {string} currency payment currency
-   * @param {[string]} payment_method_types payment method types
-   * @returns {object} stripe payment intent object
+   * @param {String} amount payment amount
+   * @param {String} currency payment currency
+   * @param {[String]} payment_method_types payment method types
+   * @returns {Object} stripe payment intent object
    */
   async createPaymentIntent(parameters) {
     const { amount, currency, paymentMethodTypes, customer, paymentMethod } =
@@ -265,9 +265,9 @@ class StripeManager {
 
   /**
    * Capture payment intent
-   * @param {string} paymentIntent payment intent id
-   * @param {string} amount payment amount
-   * @returns {object} capture payment intent object
+   * @param {String} paymentIntent payment intent id
+   * @param {String} amount payment amount
+   * @returns {Object} capture payment intent object
    */
   async capturePaymentIntent(parameters) {
     const { paymentIntent, amount } = parameters;
@@ -279,8 +279,8 @@ class StripeManager {
 
   /**
    * Cancel payment intent
-   * @param {string} paymentIntent payment intent id
-   * @returns {object} cancel payment intent object
+   * @param {String} paymentIntent payment intent id
+   * @returns {Object} cancel payment intent object
    */
   async cancelPaymentIntent(parameters) {
     const { paymentIntent } = parameters;
@@ -289,8 +289,8 @@ class StripeManager {
 
   /**
    * Refund payment intent
-   * @param {string} paymentIntent payment intent id
-   * @returns {object} refund payment intent object
+   * @param {String} paymentIntent payment intent id
+   * @returns {Object} refund payment intent object
    */
   async refundPaymentIntent(parameters) {
     const { paymentIntent } = parameters;
@@ -299,7 +299,7 @@ class StripeManager {
 
   /**
    * Get customer sources
-   * @param {string} customer customer id
+   * @param {String} customer customer id
    * @returns {[object]} stripe customer sources
    */
   async getCustomerSources(parameters) {

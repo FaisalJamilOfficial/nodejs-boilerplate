@@ -208,18 +208,6 @@ class BraintreeManager {
     const { transactionId } = params;
     return await gateway.transaction.releaseFromEscrow(transactionId);
   }
-
-  /**
-   * @description Get user payment accounts
-   * @param {String} user user id
-   * @returns {[Object]} array of paymentAccount
-   */
-  async getAllAccounts(params) {
-    const { user } = params;
-    const query = {};
-    if (user) query.user = user;
-    return await paymentAccountsController.getPaymentAccounts(query);
-  }
 }
 
 export default BraintreeManager;

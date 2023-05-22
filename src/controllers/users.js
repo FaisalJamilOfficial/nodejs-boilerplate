@@ -63,7 +63,7 @@ export const updateUser = async (params) => {
     status,
     firstName,
     lastName,
-    images,
+    image,
     customer,
     admin,
   } = params;
@@ -74,9 +74,7 @@ export const updateUser = async (params) => {
   if (isValidObjectId(user));
   else throw new Error("Please enter valid user id!|||400");
 
-  const userExists = await usersModel
-    .findById(user)
-    .select("-createdAt -updatedAt -__v");
+  let userExists = await usersModel.findById(user);
   if (userExists);
   else throw new Error("User not found!|||404");
 
@@ -106,10 +104,10 @@ export const updateUser = async (params) => {
   if (lastName) userExists.lastName = lastName;
   if (firstName || lastName)
     userExists.name = userExists.firstName + " " + userExists.lastName;
-  if (images) {
+  if (image) {
     if (userExists.image)
       new FilesDeleter().deleteImage({ image: userExists.image });
-    userExists.image = images[0].path;
+    userExists.image = image;
   }
   if (coordinates) {
     if (coordinates?.length === 2)
@@ -131,7 +129,11 @@ export const updateUser = async (params) => {
       userExists.isAdmin = true;
     } else throw new Error("Admin not found!|||404");
 
-  await usersModel.updateOne({ _id: userExists._id }, userExists);
+  userExists = await usersModel
+    .findByIdAndUpdate(userExists._id, userExists, {
+      new: true,
+    })
+    .select("-createdAt -updatedAt -__v");
   return {
     success: true,
     data: userExists,
@@ -176,7 +178,7 @@ export const getUser = async (params) => {
 
   let userExists = await usersModel
     .findOne(query)
-    .select("-createdAt -updatedAt -__v");
+    .select("-createdAt -updatedAt -__v -fcms");
   if (userExists) userExists = await userExists.populate(userExists.type);
   return {
     success: !!userExists,
@@ -268,16 +270,16 @@ export const getUsers = async (params) => {
   };
 };
 
-// /**
-//  * Get users data
-//  * @param {String} user user id
-//  * @param {String} q search keyword
-//  * @param {Number} limit messages limit
-//  * @param {Number} page messages page number
-//  * @param {String} status user status
-//  * @param {String} type user type
-//  * @returns {[Object]} array of users
-//  */
+/**
+ * Get users data
+ * @param {String} user user id
+ * @param {String} q search keyword
+ * @param {Number} limit messages limit
+ * @param {Number} page messages page number
+ * @param {String} status user status
+ * @param {String} type user type
+ * @returns {[Object]} array of users
+ */
 // export const getAllUsers = async (params) => {
 //   const { user, q, status, type } = params;
 //   let { page, limit } = params;
@@ -287,8 +289,9 @@ export const getUsers = async (params) => {
 //   query._id = { $ne: user };
 //   if (type) query.type = type;
 //   if (status) query.status = status;
+//   let wildcard = {};
 //   if (q && q.trim() !== "") {
-//     var wildcard = [
+//     wildcard = [
 //       {
 //         $regexMatch: {
 //           input: "$firstName",
@@ -328,6 +331,7 @@ export const getUsers = async (params) => {
 //   }
 //   const aggregation = [
 //     { $match: query },
+//     { $sort: { createdAt: -1 } },
 //     { $project: { hash: 0, salt: 0, type: 0 } },
 //     {
 //       $lookup: {
@@ -343,7 +347,7 @@ export const getUsers = async (params) => {
 //         $expr: {
 //           $and: [
 //             {
-//               $or: wildcard ?? {},
+//               $or: wildcard,
 //             },
 //           ],
 //         },
@@ -368,11 +372,7 @@ export const getUsers = async (params) => {
 //       },
 //     },
 //   ];
-//   const users = await usersModel
-//     .aggregate(aggregation)
-//     .sort({ createdAt: -1 })
-//     .skip((page - 1) * limit)
-//     .limit(limit);
+//   const users = await usersModel.aggregate(aggregation);
 
 //   return {
 //     success: true,

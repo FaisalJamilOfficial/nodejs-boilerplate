@@ -18,13 +18,11 @@ router
   .route("/")
   .all(verifyToken, verifyUser)
   .post(
-    upload(ATTACHMENTS_DIRECTORY).fields([
-      { name: "attachments", maxCount: 10 },
-    ]),
+    upload(ATTACHMENTS_DIRECTORY).array("attachments", 8),
     asyncHandler(async (req, res) => {
       const { _id } = req?.user;
       const { user, text } = req.body;
-      const { attachments } = req.files || {};
+      const attachments = req.files || [];
       const args = {
         userFrom: _id,
         userTo: user,

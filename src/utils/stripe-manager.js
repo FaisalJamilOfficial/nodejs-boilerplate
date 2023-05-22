@@ -2,7 +2,7 @@
 import _stripe from "stripe";
 
 // file imports
-import * as paymentAccountsController from "../controllers/paymentAccounts.js";
+import * as paymentAccountsController from "../controllers/payment-accounts.js";
 import { PAYMENT_ACCOUNT_TYPES } from "../configs/enums.js";
 
 // destructuring assignments
@@ -31,15 +31,10 @@ class StripeManager {
     const { number, expMonth, expYear, cvc, name } = params;
     const card = {};
     if (number) card.number = number;
-    else throw new Error("Please enter number!");
     if (typeof expMonth === "number") card.expMonth = expMonth;
-    else throw new Error("Please enter expMonth!");
     if (typeof expYear === "number") card.expYear = expYear;
-    else throw new Error("Please enter expYear!");
     if (cvc) card.cvc = cvc;
-    else throw new Error("Please enter cvc!");
     if (name) card.name = name;
-    else throw new Error("Please enter name!");
     return await stripe.tokens.create({ card });
   }
 
@@ -51,7 +46,6 @@ class StripeManager {
   async deleteCustomer(params) {
     const { customerId } = params;
     if (customerId);
-    else throw new Error("Please enter customerId!");
     return await stripe.customers.del(customerId);
   }
 
@@ -64,7 +58,6 @@ class StripeManager {
     const { charge } = params;
     const refundObj = {};
     if (charge) refundObj.charge = charge;
-    else throw new Error("Please enter charge id!");
     return await stripe.refunds.create(refundObj);
   }
 
@@ -113,36 +106,33 @@ class StripeManager {
       if (email) customerObj.email = email;
       if (phone) customerObj.phone = phone;
       const customer = await stripe.customers.create(customerObj);
-      if (customer) userStripeId = customer.id;
-      else throw new Error("Stripe customer creation failed!");
+      userStripeId = customer?.id;
     }
     const card = await stripe.customers.createSource(userStripeId, {
       source,
     });
 
-    if (card) {
-      card.cardHolderName = cardHolderName;
-      const paymentAccountObj = {
-        user,
-        type: STRIPE_CUSTOMER,
-        account: card,
-      };
-      const { data: paymentAccount } =
-        await paymentAccountsController.addPaymentAccount(paymentAccountObj);
-      return paymentAccount;
-    } else throw new Error("Stripe source creation failed!");
+    card.cardHolderName = cardHolderName;
+    const paymentAccountObj = {
+      user,
+      type: STRIPE_CUSTOMER,
+      account: card,
+    };
+    const { data: paymentAccount } =
+      await paymentAccountsController.addPaymentAccount(paymentAccountObj);
+    return paymentAccount;
   }
 
   /**
    * @description Create stripe customer
-   * @param {String} user OPTIONAL user id
+   * @param {String} id OPTIONAL user id
    * @param {String} email OPTIONAL user email address
    * @param {String} phone OPTIONAL user phone number
    * @returns {Object} stripe customer data
    */
   async createCustomer(params) {
-    const { user, email, phone } = params;
-    const customerObj = { user, email, phone };
+    const { id, email, phone } = params;
+    const customerObj = { id, email, phone };
     return await stripe.customers.create(customerObj);
   }
 
@@ -171,17 +161,15 @@ class StripeManager {
           },
         },
       });
-      if (account) {
-        const paymentAccountObj = {
-          user,
-          type: STRIPE_ACCOUNT,
-          account,
-        };
+      const paymentAccountObj = {
+        user,
+        type: STRIPE_ACCOUNT,
+        account,
+      };
 
-        const { data: paymentAccount } =
-          await paymentAccountsController.addPaymentAccount(paymentAccountObj);
-        return paymentAccount;
-      } else throw new Error("Stripe account creation failed!");
+      const { data: paymentAccount } =
+        await paymentAccountsController.addPaymentAccount(paymentAccountObj);
+      return paymentAccount;
     }
   }
 
@@ -248,6 +236,81 @@ class StripeManager {
   }
 
   /**
+   * Create stripe payment intent
+   * @param {string} amount payment amount
+   * @param {string} currency payment currency
+   * @param {[string]} payment_method_types payment method types
+   * @returns {object} stripe payment intent object
+   */
+  async createPaymentIntent(parameters) {
+    const { amount, currency, paymentMethodTypes, customer, paymentMethod } =
+      parameters;
+    const paymentIntentObj = {
+      amount: amount * 100,
+      currency: currency ?? "usd",
+      // confirmation_method: "manual",
+      capture_method: "manual",
+      setup_future_usage: "on_session",
+      customer,
+    };
+    if (paymentMethod) {
+      paymentIntentObj.payment_method = paymentMethod;
+      paymentIntentObj.confirm = true;
+      paymentIntentObj.off_session = true;
+    }
+    if (paymentMethodTypes)
+      paymentIntentObj.payment_method_types = paymentMethodTypes;
+    return await stripe.paymentIntents.create(paymentIntentObj);
+  }
+
+  /**
+   * Capture payment intent
+   * @param {string} paymentIntent payment intent id
+   * @param {string} amount payment amount
+   * @returns {object} capture payment intent object
+   */
+  async capturePaymentIntent(parameters) {
+    const { paymentIntent, amount } = parameters;
+    const paymentIntentObj = {
+      amount_to_capture: amount * 100,
+    };
+    return await stripe.paymentIntents.capture(paymentIntent, paymentIntentObj);
+  }
+
+  /**
+   * Cancel payment intent
+   * @param {string} paymentIntent payment intent id
+   * @returns {object} cancel payment intent object
+   */
+  async cancelPaymentIntent(parameters) {
+    const { paymentIntent } = parameters;
+    return await stripe.paymentIntents.cancel(paymentIntent);
+  }
+
+  /**
+   * Refund payment intent
+   * @param {string} paymentIntent payment intent id
+   * @returns {object} refund payment intent object
+   */
+  async refundPaymentIntent(parameters) {
+    const { paymentIntent } = parameters;
+    return await stripe.refunds.create({ payment_intent: paymentIntent });
+  }
+
+  /**
+   * Get customer sources
+   * @param {string} customer customer id
+   * @returns {[object]} stripe customer sources
+   */
+  async getCustomerSources(parameters) {
+    const { customer } = parameters;
+    return await stripe.paymentMethods.list({
+      customer,
+      type: "card",
+    });
+  }
+
+  /**
    * @description Construct stripe webhook event
    * @param {String} rawBody body from stripe request
    * @param {String} signature stripe signature from request headers
@@ -271,21 +334,9 @@ class StripeManager {
 
     return event;
   }
-
-  /**
-   * @description Get user payment accounts
-   * @param {String} user user id
-   * @returns {[Object]} array of paymentAccount
-   */
-  async getAllAccounts(params) {
-    const { user } = params;
-    const query = {};
-    if (user) query.user = user;
-    return await paymentAccountsController.getPaymentAccounts(query);
-  }
 }
 
-exports.constructWebhooksEvent = async (req, res, next) => {
+export const constructWebhooksEvent = async (req, res, next) => {
   try {
     const endpointSecret = STRIPE_ENDPOINT_SECRET;
     const signature = req.headers["stripe-signature"];

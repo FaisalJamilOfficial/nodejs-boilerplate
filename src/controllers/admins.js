@@ -12,8 +12,8 @@ const { usersModel, adminsModel } = models;
  * @param {String} user user id
  * @returns {Object} admin data
  */
-export const addAdmin = async (parameters) => {
-  const { user } = parameters;
+export const addAdmin = async (params) => {
+  const { user } = params;
   const adminObj = {};
 
   if (user);
@@ -32,8 +32,8 @@ export const addAdmin = async (parameters) => {
  * @param {String} user user id
  * @returns {Object} admin data
  */
-export const updateAdmin = async (parameters) => {
-  const { user } = parameters;
+export const updateAdmin = async (params) => {
+  const { user } = params;
   const adminObj = {};
   if (user);
   else throw new Error("Please enter user id!|||400");
@@ -55,8 +55,8 @@ export const updateAdmin = async (parameters) => {
  * @param {String} user user id
  * @returns {Object} admin data
  */
-export const deleteAdmin = async (parameters) => {
-  const { user } = parameters;
+export const deleteAdmin = async (params) => {
+  const { user } = params;
   if (user);
   else throw new Error("Please enter user id!|||400");
   if (isValidObjectId(user));
@@ -75,8 +75,8 @@ export const deleteAdmin = async (parameters) => {
  * @param {String} user user id
  * @returns {Object} admin data
  */
-export const getAdmin = async (parameters) => {
-  const { user } = parameters;
+export const getAdmin = async (params) => {
+  const { user } = params;
   if (user);
   else throw new Error("Please enter user id!");
   if (isValidObjectId(user));
@@ -98,8 +98,8 @@ export const getAdmin = async (parameters) => {
  * @param {Number} page admins page number
  * @returns {Object} admin data
  */
-export const getAdmins = async (parameters) => {
-  let { limit, page } = parameters;
+export const getAdmins = async (params) => {
+  let { limit, page } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;

@@ -78,7 +78,7 @@ export const deleteAdmin = async (params) => {
 export const getAdmin = async (params) => {
   const { user } = params;
   if (user);
-  else throw new Error("Please enter user id!");
+  else throw new Error("Please enter user id!|||400");
   if (isValidObjectId(user));
   else throw new Error("Please enter valid user id!|||400");
   const adminExists = await adminsModel

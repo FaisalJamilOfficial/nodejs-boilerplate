@@ -17,11 +17,11 @@ export const addPaymentAccount = async (params) => {
   const paymentAccountObj = {};
 
   if (user);
-  else throw new Error("Please enter user id!");
+  else throw new Error("Please enter user id!|||400");
   if (isValidObjectId(user));
-  else throw new Error("Please enter valid user id!");
+  else throw new Error("Please enter valid user id!|||400");
   if (await usersModel.exists({ _id: user })) paymentAccountObj.user = user;
-  else throw new Error("user not found!");
+  else throw new Error("user not found!|||404");
   if (account) paymentAccountObj.account = account;
   if (type) paymentAccountObj.type = type;
 

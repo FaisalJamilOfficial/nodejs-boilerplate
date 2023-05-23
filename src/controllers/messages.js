@@ -158,10 +158,10 @@ export const updateMessage = async (params) => {
 export const deleteMessage = async (params) => {
   const { message } = params;
   if (message);
-  else throw new Error("Please enter message id!");
+  else throw new Error("Please enter message id!|||400");
   const messageExists = await messagesModel.findByIdAndDelete(message);
   if (messageExists);
-  else throw new Error("Please enter valid message id!");
+  else throw new Error("Please enter valid message id!|||400");
   return {
     success: true,
     data: messageExists,
@@ -242,7 +242,7 @@ export const send = async (params) => {
         await conversationExists.save();
       }
     } else if (conversationExists.status === REJECTED)
-      throw new Error("Conversation request rejected!");
+      throw new Error("Conversation request rejected!|||400");
   } else {
     const conversationObj = {};
     conversationObj.userTo = userTo;
@@ -278,13 +278,13 @@ export const readMessages = async (params) => {
   const { conversation, userTo } = params;
   const messageObj = { status: READ };
   if (userTo);
-  else throw new Error("Please enter userTo id!");
+  else throw new Error("Please enter userTo id!|||400");
   if (await usersModel.exists({ _id: userTo }));
-  else throw new Error("Please enter valid userTo id!");
+  else throw new Error("Please enter valid userTo id!|||400");
   if (conversation);
-  else throw new Error("Please enter conversation id!");
+  else throw new Error("Please enter conversation id!|||400");
   if (await conversationsModel.exists({ _id: conversation }));
-  else throw new Error("Please enter valid conversation id!");
+  else throw new Error("Please enter valid conversation id!|||400");
   await messagesModel.updateMany({ conversation, userTo }, messageObj);
   return {
     success: true,

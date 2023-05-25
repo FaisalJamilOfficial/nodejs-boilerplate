@@ -1,20 +1,41 @@
 // file imports
 import models from "../models/index.js";
-import FirebaseManager from "../utils/firebase-manager.js";
-import { NOTIFICATION_TYPES } from "../configs/enums.js";
 
 // destructuring assignments
-const { messagesModel, notificationsModel } = models;
-const { NEW_MESSAGE } = NOTIFICATION_TYPES;
+const { notificationsModel } = models;
 
 /**
- * @description Get user notifications
+ * Add notification
+ * @param {String} title title
+ * @param {String} description description
+ * @param {String} value value
+ * @returns {Object} notification data
+ */
+export const addNotification = async (parameters) => {
+  const { user, type, message, messenger, order, launderer, customer } =
+    parameters;
+  const notificationObj = {};
+
+  if (user) notificationObj.user = user;
+  if (type) notificationObj.type = type;
+  if (message) notificationObj.message = message;
+  if (messenger) notificationObj.messenger = messenger;
+  if (order) notificationObj.order = order;
+  if (launderer) notificationObj.launderer = launderer;
+  if (customer) notificationObj.customer = customer;
+
+  const notification = await notificationsModel.create(notificationObj);
+  return { success: true, data: notification };
+};
+
+/**
+ * @description Get notifications
  * @param {String} user user id
  * @param {Number} limit notifications limit
  * @param {Number} page notifications page number
  * @returns {[Object]} array of notifications
  */
-export const getAllNotifications = async (params) => {
+export const getNotifications = async (params) => {
   const { user } = params;
   let { page, limit } = params;
   const query = {};
@@ -51,43 +72,4 @@ export const getAllNotifications = async (params) => {
     totalPages: 0,
     ...notifications[0],
   };
-};
-
-/**
- * @description send new message notification
- * @param {String} message message id
- * @returns {null}
- */
-export const sendNewMessageNotification = async (params) => {
-  const { message } = params;
-  const messageExists = await messagesModel
-    .findById(message)
-    .populate(["userTo", "userFrom"]);
-  if (messageExists);
-  else throw new Error("Message not found!|||404");
-
-  const title = "New Message";
-  let body = `New message from {"user":"${messageExists.userFrom._id}"} !`;
-  await notificationsModel.create({
-    type: NEW_MESSAGE,
-    text: body,
-    message: messageExists._id,
-    messenger: messageExists.userFrom,
-    user: messageExists.userTo,
-  });
-  body = `New message from ${messageExists.userFrom.name}!`;
-  const fcms = [];
-  messageExists.userTo.fcms.forEach(async (element) => {
-    fcms.push(element.token);
-  });
-  await new FirebaseManager().sendNotification({
-    fcms,
-    title,
-    body,
-    data: {
-      type: NEW_MESSAGE,
-      // message: JSON.stringify(messageExists)
-    },
-  });
-  return { success: true, message: "Message notification sent successfully!" };
 };

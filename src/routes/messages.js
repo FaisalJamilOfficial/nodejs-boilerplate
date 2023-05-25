@@ -41,7 +41,7 @@ router
         limit: Number(limit),
         page: Number(page),
       };
-      const response = await messagesController.chat(args);
+      const response = await messagesController.getMessages(args);
       res.json(response);
     })
   )

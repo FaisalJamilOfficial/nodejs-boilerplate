@@ -20,9 +20,8 @@ class FirebaseManager {
    * @param {String} title notification title
    * @param {String} body notification body
    * @param {Object} data notification data
-   * @returns {null}
    */
-  async sendNotifications(params) {
+  async notify(params) {
     const { title, body } = params;
     let { data, fcms, fcm } = params;
     let response = null;
@@ -42,8 +41,6 @@ class FirebaseManager {
       .then((res) => (response = res))
       .catch((error) => console.error(error));
     console.log("response", response);
-    delete response.results;
-    return { success: true, data: response };
   }
 }
 

@@ -3,13 +3,19 @@ import { isValidObjectId } from "mongoose";
 
 // file imports
 import SocketManager from "../utils/socket-manager.js";
+import FirebaseManager from "../utils/firebase-manager.js";
 import * as notificationsController from "./notifications.js";
 import models from "../models/index.js";
-import { CONVERSATION_STATUSES, MESSAGE_STATUSES } from "../configs/enums.js";
+import {
+  CONVERSATION_STATUSES,
+  MESSAGE_STATUSES,
+  NOTIFICATION_TYPES,
+} from "../configs/enums.js";
 
 // destructuring assignments
 const { usersModel, messagesModel, conversationsModel } = models;
 const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;
+const { NEW_MESSAGE } = NOTIFICATION_TYPES;
 const { READ } = MESSAGE_STATUSES;
 
 /**
@@ -78,7 +84,7 @@ export const addMessage = async (params) => {
  * @param {[object]} attachments OPTIONAL message attachments
  * @returns {Object} message data
  */
-export const chat = async (params) => {
+export const getMessages = async (params) => {
   const { conversation } = params;
   let { page, limit } = params;
   if (!limit) limit = 10;
@@ -224,7 +230,7 @@ export const getConversations = async (params) => {
  * @returns {Object} message data
  */
 export const send = async (params) => {
-  const { userFrom, userTo } = params;
+  const { userFrom, userTo, userFromName } = params;
   let conversation;
   const query = {
     $or: [
@@ -252,13 +258,41 @@ export const send = async (params) => {
   }
 
   const args = { ...params, conversation };
-  const responseMessage = await this.addMessage(args);
-  const message = responseMessage.message;
+  const { data: message } = await addMessage(args);
 
+  // socket event emission
   await new SocketManager().emitEvent({
-    to: message.userTo,
+    to: message.userTo.toString(),
     event: "newMessage_" + message._id,
     data: message,
+  });
+
+  const notificationObj = {
+    user: message.userTo,
+    message: message._id,
+    messenger: message.userFrom,
+    type: NEW_MESSAGE,
+  };
+
+  // database notification addition
+  await notificationsController.addNotification(notificationObj);
+
+  const userToExists = await usersModel.findById(message.userTo).select("fcms");
+  const fcms = [];
+  userToExists.fcms.forEach((element) => fcms.push(element.token));
+
+  const title = "New Message";
+  const body = `New message from ${userFromName}`;
+  const type = NEW_MESSAGE;
+
+  // firebase notification emission
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: {
+      type,
+    },
   });
 
   await notificationsController.sendNewMessageNotification({

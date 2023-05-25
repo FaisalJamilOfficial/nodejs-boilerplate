@@ -295,10 +295,6 @@ export const send = async (params) => {
     },
   });
 
-  await notificationsController.sendNewMessageNotification({
-    message: message._id,
-  });
-
   return { success: true, data: message };
 };
 

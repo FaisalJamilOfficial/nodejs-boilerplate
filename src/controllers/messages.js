@@ -230,7 +230,7 @@ export const getConversations = async (params) => {
  * @returns {Object} message data
  */
 export const send = async (params) => {
-  const { userFrom, userTo, userFromName } = params;
+  const { userFrom, userTo, username } = params;
   let conversation;
   const query = {
     $or: [
@@ -260,9 +260,11 @@ export const send = async (params) => {
   const args = { ...params, conversation };
   const { data: message } = await addMessage(args);
 
+  const user = message.userTo;
+
   // socket event emission
   await new SocketManager().emitEvent({
-    to: message.userTo.toString(),
+    to: user.toString(),
     event: "newMessage_" + message._id,
     data: message,
   });
@@ -277,12 +279,12 @@ export const send = async (params) => {
   // database notification addition
   await notificationsController.addNotification(notificationObj);
 
-  const userToExists = await usersModel.findById(message.userTo).select("fcms");
+  const userExists = await usersModel.findById(user).select("fcms");
   const fcms = [];
-  userToExists.fcms.forEach((element) => fcms.push(element.token));
+  userExists.fcms.forEach((element) => fcms.push(element.token));
 
   const title = "New Message";
-  const body = `New message from ${userFromName}`;
+  const body = `New message from ${username}`;
   const type = NEW_MESSAGE;
 
   // firebase notification emission

@@ -52,3 +52,8 @@ export const ENVIRONMENTS = {
   PRODUCTION: "production",
   DEVELOPMENT: "development",
 };
+
+export const NOTIFICATION_STATUSES = {
+  UNREAD: "unread",
+  READ: "read",
+};

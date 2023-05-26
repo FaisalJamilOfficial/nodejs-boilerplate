@@ -2,10 +2,11 @@
 import mongoose from "mongoose";
 
 // file imports
-import { NOTIFICATION_TYPES } from "../configs/enums.js";
+import { NOTIFICATION_TYPES, NOTIFICATION_STATUSES } from "../configs/enums.js";
 
 // destructuring assignments
 const { NEW_MESSAGE, NEW_CONVERSATION } = NOTIFICATION_TYPES;
+const { UNREAD, READ } = NOTIFICATION_STATUSES;
 
 // variable initializations
 const Schema = mongoose.Schema;
@@ -19,7 +20,6 @@ const notificationSchema = new Schema(
       required: true,
       index: true,
     },
-
     text: {
       type: String,
       default: "",
@@ -38,6 +38,11 @@ const notificationSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
       index: true,
+    },
+    status: {
+      type: String,
+      enum: [READ, UNREAD],
+      default: UNREAD,
     },
   },
   {

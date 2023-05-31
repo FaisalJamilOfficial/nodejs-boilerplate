@@ -165,17 +165,70 @@ export const deleteMessage = async (params) => {
  * @returns {[Object]} array of conversations
  */
 export const getConversations = async (params) => {
-  const { user } = params;
+  const { user, q } = params;
   let { limit, page } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
   const query = {};
   if (user) query.$or = [{ userTo: user }, { userFrom: user }];
+  const keyword = q ? q.toString().trim() : "";
+
   const conversations = await conversationsModel.aggregate([
     { $match: query },
-    { $sort: { createdAt: -1 } },
-    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $lookup: {
+        from: "messages",
+        localField: "lastMessage",
+        foreignField: "_id",
+        as: "lastMessage",
+        pipeline: [
+          {
+            $project: {
+              text: 1,
+              createdAt: 1,
+              "attachments.type": 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: { path: "$lastMessage" },
+    },
+    { $sort: { "lastMessage.createdAt": -1 } },
+    {
+      $project: {
+        user: {
+          $cond: {
+            if: { $eq: ["$userTo", user] },
+            then: "$userFrom",
+            else: "$userTo",
+          },
+        },
+        lastMessage: 1,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+        pipeline: [
+          { $match: { name: { $regex: keyword, $options: "i" } } },
+          {
+            $project: {
+              name: 1,
+              image: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: { path: "$user" },
+    },
     {
       $facet: {
         totalCount: [{ $count: "totalCount" }],

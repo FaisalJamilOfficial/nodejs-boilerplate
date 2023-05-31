@@ -1,5 +1,5 @@
 // module imports
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, Types } from "mongoose";
 
 // file imports
 import SocketManager from "../utils/socket-manager.js";
@@ -17,6 +17,7 @@ const { usersModel, messagesModel, conversationsModel } = models;
 const { PENDING, ACCEPTED, REJECTED } = CONVERSATION_STATUSES;
 const { NEW_MESSAGE } = NOTIFICATION_TYPES;
 const { READ } = MESSAGE_STATUSES;
+const { ObjectId } = Types;
 
 /**
  * @description Add message
@@ -91,13 +92,15 @@ export const getMessages = async (params) => {
   if (!page) page = 0;
   if (page) page = page - 1;
   const query = {};
-  if (conversation) query.conversation = conversation;
-  else if (user1 && user2)
+  if (conversation) query.conversation = ObjectId(conversation);
+  else if (user1 && user2) {
+    user1 = ObjectId(user1);
+    user2 = ObjectId(user2);
     query.$or = [
       { $and: [{ userTo: user1 }, { userFrom: user2 }] },
-      { $and: [{ userFrom: user2 }, { userTo: user1 }] },
+      { $and: [{ userFrom: user1 }, { userTo: user2 }] },
     ];
-  else throw new Error("Please enter conversation id!|||400");
+  } else throw new Error("Please enter conversation id!|||400");
   const messages = await messagesModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },

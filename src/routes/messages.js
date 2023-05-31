@@ -35,9 +35,12 @@ router
   )
   .get(
     asyncHandler(async (req, res) => {
-      const { conversation, limit, page } = req.query;
+      const { _id: user1 } = req.user;
+      const { conversation, limit, page, user: user2 } = req.query;
       const args = {
         conversation,
+        user1,
+        user2,
         limit: Number(limit),
         page: Number(page),
       };

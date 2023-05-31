@@ -31,33 +31,9 @@ export const addMessage = async (params) => {
   const { userFrom, userTo, text, attachments, conversation } = params;
   const messageObj = {};
 
-  if (userTo);
-  else throw new Error("Please enter userTo id!|||400");
-  if (isValidObjectId(userTo));
-  else throw new Error("Please enter valid userTo id!|||400");
-  if (await usersModel.exists({ _id: userTo })) messageObj.userTo = userTo;
-  else throw new Error("userTo not found!|||404");
-
-  if (userFrom);
-  else throw new Error("Please enter userFrom id!|||400");
-  if (isValidObjectId(userFrom));
-  else throw new Error("Please enter valid userFrom id!|||400");
-  if (await usersModel.exists({ _id: userFrom }))
-    messageObj.userFrom = userFrom;
-  else throw new Error("userFrom not found!|||404");
-
-  if (conversation);
-  else throw new Error("Please enter conversation id!|||400");
-  if (isValidObjectId(conversation));
-  else throw new Error("Please enter valid conversation id!|||400");
-  if (
-    await conversationsModel.exists({
-      _id: conversation,
-    })
-  )
-    messageObj.conversation = conversation;
-  else throw new Error("conversation not found!|||404");
-
+  if (userFrom) messageObj.userFrom = userFrom;
+  if (userTo) messageObj.userTo = userTo;
+  if (conversation) messageObj.conversation = conversation;
   if (text) messageObj.text = text;
 
   if (attachments) {
@@ -72,7 +48,6 @@ export const addMessage = async (params) => {
   }
 
   const message = await messagesModel.create(messageObj);
-
   return { success: true, data: message };
 };
 
@@ -86,8 +61,8 @@ export const addMessage = async (params) => {
  * @returns {Object} message data
  */
 export const getMessages = async (params) => {
-  const { conversation, user1, user2 } = params;
-  let { page, limit } = params;
+  const { conversation } = params;
+  let { page, limit, user1, user2 } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
@@ -190,17 +165,70 @@ export const deleteMessage = async (params) => {
  * @returns {[Object]} array of conversations
  */
 export const getConversations = async (params) => {
-  const { user } = params;
+  const { user, q } = params;
   let { limit, page } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
   const query = {};
   if (user) query.$or = [{ userTo: user }, { userFrom: user }];
+  const keyword = q ? q.toString().trim() : "";
+
   const conversations = await conversationsModel.aggregate([
     { $match: query },
-    { $sort: { createdAt: -1 } },
-    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $lookup: {
+        from: "messages",
+        localField: "lastMessage",
+        foreignField: "_id",
+        as: "lastMessage",
+        pipeline: [
+          {
+            $project: {
+              text: 1,
+              createdAt: 1,
+              "attachments.type": 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: { path: "$lastMessage" },
+    },
+    { $sort: { "lastMessage.createdAt": -1 } },
+    {
+      $project: {
+        user: {
+          $cond: {
+            if: { $eq: ["$userTo", user] },
+            then: "$userFrom",
+            else: "$userTo",
+          },
+        },
+        lastMessage: 1,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+        pipeline: [
+          { $match: { name: { $regex: keyword, $options: "i" } } },
+          {
+            $project: {
+              name: 1,
+              image: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: { path: "$user" },
+    },
     {
       $facet: {
         totalCount: [{ $count: "totalCount" }],
@@ -268,12 +296,13 @@ export const send = async (params) => {
   const args = { ...params, conversation };
   const { data: message } = await addMessage(args);
 
-  const user = message.userTo;
+  conversationExists.lastMessage = message._id;
+  await conversationExists.save();
 
   // socket event emission
   await new SocketManager().emitEvent({
-    to: user.toString(),
-    event: "newMessage_" + message._id,
+    to: message.userTo.toString(),
+    event: "newMessage_" + message.conversation,
     data: message,
   });
 
@@ -287,9 +316,9 @@ export const send = async (params) => {
   // database notification addition
   await notificationsController.addNotification(notificationObj);
 
-  const userExists = await usersModel.findById(user).select("fcms");
+  const userToExists = await usersModel.findById(message.userTo).select("fcms");
   const fcms = [];
-  userExists.fcms.forEach((element) => fcms.push(element.token));
+  userToExists.fcms.forEach((element) => fcms.push(element.token));
 
   const title = "New Message";
   const body = `New message from ${username}`;

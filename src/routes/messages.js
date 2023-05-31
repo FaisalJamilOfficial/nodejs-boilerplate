@@ -20,12 +20,13 @@ router
   .post(
     upload(ATTACHMENTS_DIRECTORY).array("attachments", 8),
     asyncHandler(async (req, res) => {
-      const { _id } = req?.user;
-      const { user, text } = req.body;
+      const { _id: userFrom, name: username } = req?.user;
+      const { user: userTo, text } = req.body;
       const attachments = req.files || [];
       const args = {
-        userFrom: _id,
-        userTo: user,
+        userFrom,
+        username,
+        userTo,
         text,
         attachments,
       };
@@ -72,11 +73,12 @@ router.get(
   verifyUser,
   asyncHandler(async (req, res) => {
     const { _id: user } = req?.user;
-    const { limit, page } = req.query;
+    const { limit, page, q } = req.query;
     const args = {
       user,
       limit: Number(limit),
       page: Number(page),
+      q,
     };
     const response = await messagesController.getConversations(args);
     res.json(response);

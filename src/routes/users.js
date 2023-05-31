@@ -148,23 +148,32 @@ router
     })
   );
 
-router.get(
-  "/notifications",
-  verifyToken,
-  verifyUser,
-  asyncHandler(async (req, res) => {
-    const { _id: user } = req?.user;
-    const { q, page, limit } = req.query;
-    const args = {
-      user,
-      q,
-      limit: Number(limit),
-      page: Number(page),
-    };
-    const response = await notificationsController.getAllNotifications(args);
-    res.json(response);
-  })
-);
+router
+  .route("/notifications")
+  .all(verifyToken, verifyUser)
+  .get(
+    asyncHandler(async (req, res) => {
+      const { _id: user } = req?.user;
+      const { page, limit } = req.query;
+      const args = {
+        user,
+        limit: Number(limit),
+        page: Number(page),
+      };
+      const response = await notificationsController.getNotifications(args);
+      res.json(response);
+    })
+  )
+  .patch(
+    asyncHandler(async (req, res) => {
+      const { _id: user } = req?.user;
+      const args = {
+        user,
+      };
+      const response = await notificationsController.readNotifications(args);
+      res.json(response);
+    })
+  );
 
 router.get(
   "/me",

@@ -85,13 +85,18 @@ export const addMessage = async (params) => {
  * @returns {Object} message data
  */
 export const getMessages = async (params) => {
-  const { conversation } = params;
+  const { conversation, user1, user2 } = params;
   let { page, limit } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
   const query = {};
   if (conversation) query.conversation = conversation;
+  else if (user1 && user2)
+    query.$or = [
+      { $and: [{ userTo: user1 }, { userFrom: user2 }] },
+      { $and: [{ userFrom: user2 }, { userTo: user1 }] },
+    ];
   else throw new Error("Please enter conversation id!|||400");
   const messages = await messagesModel.aggregate([
     { $match: query },

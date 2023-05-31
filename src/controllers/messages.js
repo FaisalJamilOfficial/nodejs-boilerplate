@@ -186,6 +186,7 @@ export const getConversations = async (params) => {
           {
             $project: {
               text: 1,
+              userFrom: 1,
               createdAt: 1,
               "attachments.type": 1,
             },

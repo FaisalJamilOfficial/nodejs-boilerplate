@@ -15,7 +15,7 @@ router.use("/auth", auth);
 router.use("/messages", messages);
 router.use("/users", users);
 
-router.use("/docs", (req, res, next) =>
+router.use("/docs", (_req, res) =>
   res.redirect("https://documenter.getpostman.com/view/14185057/UVkqruXK")
 );
 

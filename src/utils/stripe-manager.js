@@ -3,6 +3,7 @@ import _stripe from "stripe";
 
 // file imports
 import * as paymentAccountsController from "../controllers/payment-accounts.js";
+import * as usersController from "../controllers/users.js";
 import { PAYMENT_ACCOUNT_TYPES } from "../configs/enums.js";
 
 // destructuring assignments
@@ -180,12 +181,35 @@ class StripeManager {
    * @param {String} returnUrl redirect url for completion or incompletion linked flow
    * @returns {Object} stripe account link
    */
-  async createAccountLink(params) {
-    const { account, refreshUrl, returnUrl } = params;
+  async createAccountLink(parameters) {
+    const { account, refreshURL, returnURL, email, user } = parameters;
+
+    const { data: paymentAccountExists } =
+      await paymentAccountsController.getPaymentAccount({ user });
+
+    let accountObj;
+    if (paymentAccountExists) accountObj = paymentAccountExists.account;
+    else {
+      accountObj = await stripe.accounts.create({
+        type: "custom",
+        country: "US",
+        email,
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+      });
+      const paymentAccountObj = {
+        user,
+        account: accountObj,
+        type: STRIPE_CUSTOMER,
+      };
+      await paymentAccountsController.addPaymentAccount(paymentAccountObj);
+    }
     const accountLinkObj = {
-      account,
-      refreshUrl, // "https://example.com/reauth"
-      returnUrl, // "https://example.com/return"
+      account: account ?? accountObj.id,
+      refresh_url: refreshURL ?? "https://app.page.link/stripefailed",
+      return_url: returnURL ?? "https://app.page.link/stripesuccess",
       type: "account_onboarding",
     };
     return await stripe.accountLinks.create(accountLinkObj);
@@ -237,14 +261,15 @@ class StripeManager {
 
   /**
    * Create stripe payment intent
+   * @param {String} customer customer id
    * @param {String} amount payment amount
    * @param {String} currency payment currency
    * @param {[String]} payment_method_types payment method types
    * @returns {Object} stripe payment intent object
    */
-  async createPaymentIntent(parameters) {
+  async createPaymentIntent(params) {
     const { amount, currency, paymentMethodTypes, customer, paymentMethod } =
-      parameters;
+      params;
     const paymentIntentObj = {
       amount: amount * 100,
       currency: currency ?? "usd",
@@ -269,8 +294,8 @@ class StripeManager {
    * @param {String} amount payment amount
    * @returns {Object} capture payment intent object
    */
-  async capturePaymentIntent(parameters) {
-    const { paymentIntent, amount } = parameters;
+  async capturePaymentIntent(params) {
+    const { paymentIntent, amount } = params;
     const paymentIntentObj = {
       amount_to_capture: amount * 100,
     };
@@ -282,8 +307,8 @@ class StripeManager {
    * @param {String} paymentIntent payment intent id
    * @returns {Object} cancel payment intent object
    */
-  async cancelPaymentIntent(parameters) {
-    const { paymentIntent } = parameters;
+  async cancelPaymentIntent(params) {
+    const { paymentIntent } = params;
     return await stripe.paymentIntents.cancel(paymentIntent);
   }
 
@@ -292,8 +317,8 @@ class StripeManager {
    * @param {String} paymentIntent payment intent id
    * @returns {Object} refund payment intent object
    */
-  async refundPaymentIntent(parameters) {
-    const { paymentIntent } = parameters;
+  async refundPaymentIntent(params) {
+    const { paymentIntent } = params;
     return await stripe.refunds.create({ payment_intent: paymentIntent });
   }
 
@@ -302,11 +327,14 @@ class StripeManager {
    * @param {String} customer customer id
    * @returns {[object]} stripe customer sources
    */
-  async getCustomerSources(parameters) {
-    const { customer } = parameters;
+  async getCustomerSources(params) {
+    const { customer, limit, startingAfter, endingBefore } = params;
     return await stripe.paymentMethods.list({
       customer,
       type: "card",
+      limit,
+      starting_after: startingAfter,
+      ending_before: endingBefore,
     });
   }
 
@@ -317,49 +345,52 @@ class StripeManager {
    * @param {String} endpointSecret stripe CLI webhook secret
    * @returns {Object} stripe webhook event
    */
-  async constructWebhooksEvent(params) {
-    const { rawBody, signature, account } = params;
+  async constructWebhooksEvent(parameters) {
+    const { rawBody, signature } = parameters;
+
+    const rawBodyString = JSON.stringify(rawBody, null, 2);
+
+    const header = stripe.webhooks.generateTestHeaderString({
+      payload: rawBodyString,
+      secret: STRIPE_ENDPOINT_SECRET,
+    });
+
     const event = stripe.webhooks.constructEvent(
-      rawBody,
-      signature,
+      rawBodyString,
+      signature ?? header,
       STRIPE_ENDPOINT_SECRET
     );
 
-    if (event.type === "account.external_account.created")
-      // const { data: paymentAccountExists } =
-      await paymentAccountsController.getPaymentAccount({
-        key: "account.id",
-        value: account,
-      });
+    if (event.type === "account.external_account.created") {
+      console.log("EVENT: ", JSON.stringify(event));
 
+      const { data: paymentAccountExists } =
+        await paymentAccountsController.getPaymentAccount({
+          key: "account.id",
+          value: rawBody.account,
+        });
+      await usersController.updateUser({
+        user: paymentAccountExists.user,
+        isStripeConnected: true,
+      });
+    }
     return event;
   }
 }
 
 export const constructWebhooksEvent = async (req, res, next) => {
-  try {
-    const endpointSecret = STRIPE_ENDPOINT_SECRET;
-    const signature = req.headers["stripe-signature"];
+  const signature = req.headers["stripe-signature"];
+  console.log("SIGNATURE: ", JSON.stringify(signature));
 
-    const args = { rawBody: req.body, signature, endpointSecret };
-    const event = await new StripeManager().constructWebhooksEvent(args);
+  const args = { rawBody: req.body };
 
-    console.log("EVENT TYPE: ", JSON.stringify(event.type));
-    if (event.type === "account.external_account.created")
-      // const { data: paymentAccountExists } =
-      await paymentAccountsController.getPaymentAccount({
-        key: "account.id",
-        value: req?.body?.account,
-      });
-    return res.status(200).send({
-      success: true,
-      message: "Done",
-      event,
-    });
-  } catch (error) {
-    console.log(JSON.stringify(error));
-    next(error);
-  }
+  const event = await new StripeManager().constructWebhooksEvent(args);
+
+  return {
+    success: true,
+    message: "Done",
+    event,
+  };
 };
 
 export default StripeManager;

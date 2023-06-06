@@ -40,7 +40,7 @@ export const getPaymentAccount = async (params) => {
   const query = {};
   if (paymentAccount) query._id = paymentAccount;
   if (user) query.user = user;
-  if (key) query.key = value;
+  if (key) query[key] = value;
   else query._id = null;
   const paymentAccountExists = await paymentAccountsModel
     .findOne(query)

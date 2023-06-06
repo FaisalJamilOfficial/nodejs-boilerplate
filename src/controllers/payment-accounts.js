@@ -45,8 +45,8 @@ export const getPaymentAccount = async (params) => {
   const paymentAccountExists = await paymentAccountsModel
     .findOne(query)
     .select("-createdAt -updatedAt -__v");
-  if (paymentAccountExists);
-  else throw new Error("PaymentAccount not found!|||404");
+  // if (paymentAccountExists);
+  // else throw new Error("PaymentAccount not found!|||404");
   return {
     success: true,
     data: paymentAccountExists,

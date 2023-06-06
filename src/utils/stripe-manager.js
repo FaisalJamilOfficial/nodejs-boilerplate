@@ -378,11 +378,12 @@ class StripeManager {
   }
 }
 
-export const constructWebhooksEvent = async (req, res, next) => {
-  const signature = req.headers["stripe-signature"];
+export const constructWebhooksEvent = async (params) => {
+  const { request } = params;
+  const signature = request.headers["stripe-signature"];
   console.log("SIGNATURE: ", JSON.stringify(signature));
 
-  const args = { rawBody: req.body };
+  const args = { rawBody: request.body };
 
   const event = await new StripeManager().constructWebhooksEvent(args);
 

@@ -299,12 +299,12 @@ export const send = async (params) => {
 
   conversationExists.lastMessage = message._id;
   await conversationExists.save();
-
+  conversationExists.lastMessage = message;
   // socket event emission
   await new SocketManager().emitEvent({
     to: message.userTo.toString(),
     event: "newMessage_" + message.conversation,
-    data: message,
+    data: conversationExists,
   });
 
   const notificationObj = {
@@ -319,7 +319,8 @@ export const send = async (params) => {
 
   const userToExists = await usersModel.findById(message.userTo).select("fcms");
   const fcms = [];
-  userToExists.fcms.forEach((element) => fcms.push(element.token));
+  if (userToExists)
+    userToExists.fcms.forEach((element) => fcms.push(element.token));
 
   const title = "New Message";
   const body = `New message from ${username}`;

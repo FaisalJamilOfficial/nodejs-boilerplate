@@ -25,6 +25,11 @@ const conversationSchema = new Schema(
       required: true,
       index: true,
     },
+    lastMessage: {
+      type: Schema.Types.ObjectId,
+      ref: "messages",
+      index: true,
+    },
     status: {
       type: String,
       enum: [PENDING, ACCEPTED, REJECTED],

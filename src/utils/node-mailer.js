@@ -84,9 +84,9 @@ class NodeMailer {
     const { user, token } = params;
     const link = `${BASE_URL}reset-password/reset?user=${user}&token=${token}`;
     return `
-To reset your password, click on this link 
+Please click on the link below to reset your password, 
 ${link}
-Link will expire in 10 minutes.
+Please note that this link will expire after 10 minutes.
 
 If you didn't do this, contact us here ${EMAIL_USER}`;
   }
@@ -101,11 +101,11 @@ If you didn't do this, contact us here ${EMAIL_USER}`;
     const { user, token } = params;
     const link = `${process.env.BASE_URL}api/v1/users/emails?user=${user}&token=${token}`;
     return `
-  To verify your email address, click on this link 
-  ${link}
-  Link will expire in 10 minutes.
+Please click on the link below to verify your email address, 
+${link}
+Please note that this link will expire after 10 minutes.
 
-  If you didn't do this, contact us here ${EMAIL_USER}`;
+If you didn't do this, contact us here ${EMAIL_USER}`;
   }
 
   /**
@@ -133,8 +133,8 @@ If you didn't do this, contact us here ${EMAIL_USER}`;
   getOTPSendingEmailTemplate(params) {
     const { name, otp } = params;
     return `Dear ${name},
-Your One Time Password (OTP) is ${otp}. Please note that this password will expire after 2 minutes.
-Please do not share this password with anyone.
+Your One Time Password (OTP) is ${otp}. Please do not share this password with anyone.
+Please note that this password will expire after 10 minutes.
   
 If you didn't do this, contact us here ${EMAIL_USER}`;
   }

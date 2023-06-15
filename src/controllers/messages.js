@@ -160,19 +160,29 @@ export const deleteMessage = async (params) => {
 /**
  * @description Get user conversations
  * @param {String} user user id
+ * @param {String} keyword search keyword
  * @param {Number} limit conversations limit
  * @param {Number} page conversations page number
  * @returns {[Object]} array of conversations
  */
 export const getConversations = async (params) => {
-  const { user, q } = params;
-  let { limit, page } = params;
+  const { user } = params;
+  let { limit, page, keyword } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
   const query = {};
+  const queryRegex = {};
+
   if (user) query.$or = [{ userTo: user }, { userFrom: user }];
-  const keyword = q ? q.toString().trim() : "";
+  if (keyword) {
+    keyword = keyword.trim();
+    if (keyword !== "")
+      queryRegex.$or = [
+        { "lastMessage.text": { $regex: keyword, $options: "i" } },
+        { "user.name": { $regex: keyword, $options: "i" } },
+      ];
+  }
 
   const conversations = await conversationsModel.aggregate([
     { $match: query },
@@ -217,7 +227,6 @@ export const getConversations = async (params) => {
         foreignField: "_id",
         as: "user",
         pipeline: [
-          { $match: { name: { $regex: keyword, $options: "i" } } },
           {
             $project: {
               name: 1,
@@ -230,6 +239,7 @@ export const getConversations = async (params) => {
     {
       $unwind: { path: "$user" },
     },
+    { $match: queryRegex },
     {
       $facet: {
         totalCount: [{ $count: "totalCount" }],

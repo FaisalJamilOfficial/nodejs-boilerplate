@@ -189,6 +189,7 @@ export const getUser = async (params) => {
 /**
  * @description Get users
  * @param {String} q users search keyword
+ * @param {String} keyword search keyword
  * @param {String} type users type
  * @param {String} user user id not match
  * @param {Number} limit users limit
@@ -196,50 +197,26 @@ export const getUser = async (params) => {
  * @returns {[Object]} array of users
  */
 export const getUsers = async (params) => {
-  const { q, type, user } = params;
-  let { page, limit } = params;
+  const { type, user } = params;
+  let { page, limit, keyword } = params;
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
   const query = {};
+
   if (type) query.type = type;
   else query.type = { $ne: ADMIN };
   if (user) query._id = { $ne: user };
-  let wildcard = {
-    $match: { _id: { $ne: null } },
-  };
-  if (q && q.trim() !== "") {
-    wildcard = {
-      $match: {
-        $expr: {
-          $and: [
-            {
-              $or:
-                [
-                  {
-                    $regexMatch: {
-                      input: "$email",
-                      regex: q,
-                      options: "i",
-                    },
-                  },
-                  {
-                    $regexMatch: {
-                      input: "$name",
-                      regex: q,
-                      options: "i",
-                    },
-                  },
-                ] ?? {},
-            },
-          ],
-        },
-      },
-    };
+  if (keyword) {
+    keyword = keyword.trim();
+    if (keyword !== "")
+      query.$or = [
+        { email: { $regex: keyword, $options: "i" } },
+        { name: { $regex: keyword, $options: "i" } },
+      ];
   }
   const users = await usersModel.aggregate([
     { $match: query },
-    wildcard,
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
     {
@@ -269,116 +246,3 @@ export const getUsers = async (params) => {
     ...users[0],
   };
 };
-
-/**
- * Get users data
- * @param {String} user user id
- * @param {String} q search keyword
- * @param {Number} limit messages limit
- * @param {Number} page messages page number
- * @param {String} status user status
- * @param {String} type user type
- * @returns {[Object]} array of users
- */
-// export const getAllUsers = async (params) => {
-//   const { user, q, status, type } = params;
-//   let { page, limit } = params;
-//   const query = {};
-//   if (!limit) limit = 10;
-//   if (!page) page = 1;
-//   query._id = { $ne: user };
-//   if (type) query.type = type;
-//   if (status) query.status = status;
-//   let wildcard = {};
-//   if (q && q.trim() !== "") {
-//     wildcard = [
-//       {
-//         $regexMatch: {
-//           input: "$firstName",
-//           regex: q,
-//           options: "i",
-//         },
-//       },
-//       {
-//         $regexMatch: {
-//           input: "$lastName",
-//           regex: q,
-//           options: "i",
-//         },
-//       },
-//       {
-//         $regexMatch: {
-//           input: "$name",
-//           regex: q,
-//           options: "i",
-//         },
-//       },
-//       {
-//         $regexMatch: {
-//           input: "$phone",
-//           regex: q,
-//           options: "i",
-//         },
-//       },
-//       {
-//         $regexMatch: {
-//           input: "$email",
-//           regex: q,
-//           options: "i",
-//         },
-//       },
-//     ];
-//   }
-//   const aggregation = [
-//     { $match: query },
-//     { $sort: { createdAt: -1 } },
-//     { $project: { hash: 0, salt: 0, type: 0 } },
-//     {
-//       $lookup: {
-//         from: "customers",
-//         localField: "customer",
-//         foreignField: "_id",
-//         as: "customer",
-//       },
-//     },
-//     { $unwind: { path: "$customer" } },
-//     {
-//       $match: {
-//         $expr: {
-//           $and: [
-//             {
-//               $or: wildcard,
-//             },
-//           ],
-//         },
-//       },
-//     },
-//     {
-//       $facet: {
-//         totalCount: [{ $count: "totalCount" }],
-//         data: [{ $skip: page * limit }, { $limit: limit }],
-//       },
-//     },
-//     { $unwind: "$totalCount" },
-//     {
-//       $project: {
-//         totalCount: "$totalCount.totalCount",
-//         totalPages: {
-//           $ceil: {
-//             $divide: ["$totalCount.totalCount", limit],
-//           },
-//         },
-//         data: 1,
-//       },
-//     },
-//   ];
-//   const users = await usersModel.aggregate(aggregation);
-
-//   return {
-//     success: true,
-//     data: [],
-//     totalCount: 0,
-//     totalPages: 0,
-//     ...users[0],
-//   };
-// };

@@ -108,6 +108,11 @@ If you didn't do this, contact us here ${EMAIL_USER}`;
   If you didn't do this, contact us here ${EMAIL_USER}`;
   }
 
+  /**
+   * @description Get user welcome email template
+   * @param {String} name user name
+   * @returns {Object} email template
+   */
   getWelcomeUserEmailTemplate(params) {
     const { name } = params;
     return `Hi ${name},
@@ -117,6 +122,21 @@ If you didn't do this, contact us here ${EMAIL_USER}`;
   Like us on Facebook / Follow us on Instagram
   Best,
   Doctor of Computer 😇`;
+  }
+
+  /**
+   * @description Get reset password email template
+   * @param {String} name user name
+   * @param {String} otp otp code
+   * @returns {Object} email template
+   */
+  getOTPSendingEmailTemplate(params) {
+    const { name, otp } = params;
+    return `Dear ${name},
+Your One Time Password (OTP) is ${otp}. Please note that this password will expire after 2 minutes.
+Please do not share this password with anyone.
+  
+If you didn't do this, contact us here ${EMAIL_USER}`;
   }
 }
 

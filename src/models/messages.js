@@ -11,19 +11,10 @@ const { UNREAD, READ, DELETED } = MESSAGE_STATUSES;
 const Schema = mongoose.Schema;
 const model = mongoose.model;
 
-const attachmentSchema = new Schema(
-  {
-    path: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String,
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
+const attachmentSchema = new Schema({
+  path: { type: String, required: true },
+  type: { type: String, required: true },
+});
 
 const messageSchema = new Schema(
   {

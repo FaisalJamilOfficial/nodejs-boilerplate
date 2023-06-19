@@ -10,7 +10,7 @@ import mongoose from "mongoose";
 import { fileURLToPath } from "url";
 
 // file imports
-import "./.bin/www.js";
+import "./bin/www.js";
 import indexRouter from "./routes/index.js";
 import SocketManager from "./utils/socket-manager.js";
 import errorHandler from "./middlewares/error-handler.js";

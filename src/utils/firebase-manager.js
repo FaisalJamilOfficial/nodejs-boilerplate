@@ -22,7 +22,7 @@ class FirebaseManager {
    * @param {Object} data notification data
    */
   async notify(params) {
-    const { title, body } = params;
+    const { title, body, imageUrl } = params;
     let { data, fcms, fcm } = params;
     data = data ?? {};
     fcms = fcms?.length > 0 ? fcms : fcm ? [fcm] : ["null"];

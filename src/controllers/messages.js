@@ -337,7 +337,7 @@ export const send = async (params) => {
   const type = NEW_MESSAGE;
 
   // firebase notification emission
-  await new FirebaseManager().notify({
+  await new FirebaseManager().multicast({
     fcms,
     title,
     body,

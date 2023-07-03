@@ -30,6 +30,7 @@ class FirebaseManager {
       notification: {
         title,
         body,
+        image: imageUrl ?? "https://nodejs.org/static/images/logo.svg",
         sound: "default",
       },
       data,
@@ -42,6 +43,58 @@ class FirebaseManager {
         console.log("response.results", response.results);
       })
       .catch((error) => console.error(error));
+  }
+
+  /**
+   * Send multicast firebase notification
+   * @param {[string]} fcms firebase cloud messaging user token
+   * @param {string} title notification title
+   * @param {string} body notification body
+   * @param {object} data notification data
+   * @param {String} topicName notification topic
+   * @param {String} imageUrl notification image url
+   * @returns {null}
+   */
+  async multicast(parameters) {
+    const { topicName, title, body, imageUrl } = parameters;
+    let { fcms, data } = parameters;
+    if (fcms && fcms.length > 0);
+    else fcms = ["null"];
+    data = data ?? {};
+    const message = {
+      tokens: fcms,
+      notification: {
+        title,
+        body,
+      },
+      android: {
+        notification: {
+          imageUrl: imageUrl ?? "https://nodejs.org/static/images/logo.svg",
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            "mutable-content": 1,
+          },
+        },
+        fcm_options: {
+          image: imageUrl ?? "https://nodejs.org/static/images/logo.svg",
+        },
+      },
+      webpush: {
+        headers: {
+          image: imageUrl ?? "https://nodejs.org/static/images/logo.svg",
+        },
+      },
+      topic: topicName,
+    };
+    connection
+      .messaging()
+      .sendMulticast(message)
+      .then((res) => console.log(res))
+      .catch((error) => console.error(error));
+    return;
   }
 }
 

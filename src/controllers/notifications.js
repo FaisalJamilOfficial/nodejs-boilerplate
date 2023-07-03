@@ -141,7 +141,7 @@ export const notifyUsers = async (params) => {
   }
   if (useFirebase)
     // firebase notification emission
-    await new FirebaseManager().notify({
+    await new FirebaseManager().multicast({
       fcms,
       title,
       body,

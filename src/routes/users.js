@@ -123,8 +123,6 @@ router
     asyncHandler(async (req, res) => {
       const { phone } = req.body;
       const args = { phone };
-      const { user } = await usersController.getUser(args);
-      args.user = user;
       const response = await new TwilioManager().sendOTP(args);
       res.json(response);
     })

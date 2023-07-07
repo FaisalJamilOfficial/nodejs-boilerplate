@@ -52,11 +52,11 @@ router.post(
   "/login/phone",
   verifyToken,
   verifyOTP,
-  verifyUserToken,
   asyncHandler(async (req, res) => {
-    const { _id: user } = req?.user;
-    const args = { user };
-    const response = await usersController.getUser(args);
+    const { phone } = req?.user;
+    const args = { phone };
+    const { data, ...response } = await usersController.getUser(args);
+    response.token = data.getSignedjwtToken();
     res.json(response);
   })
 );

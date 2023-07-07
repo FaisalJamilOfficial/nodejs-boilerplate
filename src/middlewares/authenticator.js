@@ -70,9 +70,14 @@ export const verifyToken = async (
 
 export const verifyOTP = async (req, res, next) => {
   try {
-    const { otp } = req?.user;
     const { code } = req.body;
-    if (Number(code) === Number(otp)) next();
+
+    const query = {};
+    if (req?.user?._id) query._id = req.user._id;
+    else if (req?.user?.phone) query.phone = req.user.phone;
+    else query._id = null;
+    const userExists = await usersModel.findOne(query).select("+otp");
+    if (code === userExists?.otp) next();
     else return next(new Error("Invalid Code!|||400"));
   } catch (error) {
     return next(error);

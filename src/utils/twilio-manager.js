@@ -37,13 +37,15 @@ class TwilioManager {
       specialChars: false,
     });
     console.log("OTP -->", otp);
-
-    // await client.messages.create({
-    // 	body: "Backend Boilerplate verification code is: " + otp,
-    // 	from: "+19105438838",
-    // 	to: phone,
-    // });
-
+    try {
+      await client.messages.create({
+        body: "Backend Boilerplate verification code is: " + otp,
+        from: "+19105438838",
+        to: phone,
+      });
+    } catch (error) {
+      console.log("Twilio Error", error);
+    }
     const token = getToken({
       _id: user,
       phone,

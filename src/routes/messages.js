@@ -67,8 +67,8 @@ router.get(
   verifyUser,
   exceptionHandler(async (req, res) => {
     const { _id: user } = req?.user;
-    const { limit, page, q } = req.query;
-    const args = { user, limit: Number(limit), page: Number(page), q };
+    const { limit, page, keyword } = req.query;
+    const args = { user, limit: Number(limit), page: Number(page), keyword };
     const response = await messagesController.getConversations(args);
     res.json(response);
   })

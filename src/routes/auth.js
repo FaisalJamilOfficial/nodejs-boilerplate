@@ -54,7 +54,7 @@ router.post(
     const { googleId } = req.body;
     const args = { googleId };
     const response = await usersController.getUser(args);
-    res.json({ data: response });
+    res.json({ token: response.getSignedjwtToken() });
   })
 );
 
@@ -64,7 +64,7 @@ router.post(
     const { facebookId } = req.body;
     const args = { facebookId };
     const response = await usersController.getUser(args);
-    res.json({ data: response });
+    res.json({ token: response.getSignedjwtToken() });
   })
 );
 
@@ -74,7 +74,7 @@ router.post(
     const { twitterId } = req.body;
     const args = { twitterId };
     const response = await usersController.getUser(args);
-    res.json({ data: response });
+    res.json({ token: response.getSignedjwtToken() });
   })
 );
 

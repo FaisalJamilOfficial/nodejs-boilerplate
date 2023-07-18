@@ -51,7 +51,7 @@ export const getPaymentAccount = async (params) => {
 
 /**
  * @description Get paymentAccounts
- * @param {String} q search keyword
+ * @param {String} keyword search keyword
  * @param {Number} limit paymentAccounts limit
  * @param {Number} page paymentAccounts page number
  * @returns {Object} paymentAccount data
@@ -87,10 +87,5 @@ export const getPaymentAccounts = async (params) => {
       },
     },
   ]);
-  return {
-    data: [],
-    totalCount: 0,
-    totalPages: 0,
-    ...paymentAccounts[0],
-  };
+  return { data: [], totalCount: 0, totalPages: 0, ...paymentAccounts[0] };
 };

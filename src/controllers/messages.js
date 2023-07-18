@@ -98,12 +98,7 @@ export const getMessages = async (params) => {
       },
     },
   ]);
-  return {
-    data: [],
-    totalCount: 0,
-    totalPages: 0,
-    ...messages[0],
-  };
+  return { data: [], totalCount: 0, totalPages: 0, ...messages[0] };
 };
 
 /**
@@ -253,12 +248,7 @@ export const getConversations = async (params) => {
       },
     },
   ]);
-  return {
-    data: [],
-    totalCount: 0,
-    totalPages: 0,
-    ...conversations[0],
-  };
+  return { data: [], totalCount: 0, totalPages: 0, ...conversations[0] };
 };
 
 /**

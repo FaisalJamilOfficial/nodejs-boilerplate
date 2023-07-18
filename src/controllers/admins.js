@@ -117,16 +117,16 @@ export const getAdmins = async (params) => {
       },
     },
   ]);
-  return {
-    data: [],
-    totalCount: 0,
-    totalPages: 0,
-    ...admins[0],
-  };
+  return { data: [], totalCount: 0, totalPages: 0, ...admins[0] };
 };
 
 /**
  * @description Clean DB
  * @returns {Object} success status
  */
-export const cleanDB = async () => {};
+export const cleanDB = async () => {
+  const models = [];
+  Promise.all(models.map((model) => model.remove())).then((res) =>
+    res.map((element) => console.log(element.status))
+  );
+};

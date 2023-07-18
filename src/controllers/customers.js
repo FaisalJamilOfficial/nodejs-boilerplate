@@ -91,7 +91,7 @@ export const getCustomer = async (params) => {
 
 /**
  * @description Get customers
- * @param {String} q search keyword
+ * @param {String} keyword search keyword
  * @param {Number} limit customers limit
  * @param {Number} page customers page number
  * @returns {Object} customer data
@@ -125,10 +125,5 @@ export const getCustomers = async (params) => {
       },
     },
   ]);
-  return {
-    data: [],
-    totalCount: 0,
-    totalPages: 0,
-    ...customers[0],
-  };
+  return { data: [], totalCount: 0, totalPages: 0, ...customers[0] };
 };

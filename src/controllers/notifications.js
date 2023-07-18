@@ -66,12 +66,7 @@ export const getNotifications = async (params) => {
       },
     },
   ]);
-  return {
-    data: [],
-    totalCount: 0,
-    totalPages: 0,
-    ...notifications[0],
-  };
+  return { data: [], totalCount: 0, totalPages: 0, ...notifications[0] };
 };
 
 /**

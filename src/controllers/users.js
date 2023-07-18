@@ -175,7 +175,7 @@ export const getUser = async (params) => {
 
 /**
  * @description Get users
- * @param {String} q users search keyword
+ * @param {String} keyword users search keyword
  * @param {String} keyword search keyword
  * @param {String} type users type
  * @param {String} user user id not match
@@ -225,10 +225,5 @@ export const getUsers = async (params) => {
       },
     },
   ]);
-  return {
-    data: [],
-    totalCount: 0,
-    totalPages: 0,
-    ...users[0],
-  };
+  return { data: [], totalCount: 0, totalPages: 0, ...users[0] };
 };

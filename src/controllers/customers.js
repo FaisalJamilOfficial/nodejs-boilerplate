@@ -23,8 +23,7 @@ export const addCustomer = async (params) => {
   if (await usersModel.exists({ _id: user })) customerObj.user = user;
   else throw new Error("user not found!|||404");
 
-  const customer = await customersModel.create(customerObj);
-  return { success: true, data: customer };
+  return await customersModel.create(customerObj);
 };
 
 /**
@@ -48,10 +47,8 @@ export const updateCustomer = async (params) => {
   );
   if (customerExists);
   else throw new Error("Customer not found!|||404");
-  return {
-    success: true,
-    data: customerExists,
-  };
+
+  return customerExists;
 };
 
 /**
@@ -68,10 +65,8 @@ export const deleteCustomer = async (params) => {
   const customerExists = await customersModel.findOneAndDelete({ user });
   if (customerExists);
   else throw new Error("Customer not found!|||404");
-  return {
-    success: true,
-    data: customerExists,
-  };
+
+  return customerExists;
 };
 
 /**
@@ -90,10 +85,8 @@ export const getCustomer = async (params) => {
     .select("-createdAt -updatedAt -__v");
   if (customerExists);
   else throw new Error("Customer not found!|||404");
-  return {
-    success: true,
-    data: customerExists,
-  };
+
+  return customerExists;
 };
 
 /**
@@ -133,7 +126,6 @@ export const getCustomers = async (params) => {
     },
   ]);
   return {
-    success: true,
     data: [],
     totalCount: 0,
     totalPages: 0,

@@ -53,10 +53,7 @@ class TwilioManager {
     });
     userExists.otp = otp;
     await userExists.save();
-    return {
-      success: true,
-      token,
-    };
+    return token;
   }
 }
 

@@ -2,7 +2,7 @@
 import jwt from "jsonwebtoken";
 
 // file imports
-import { asyncHandler } from "./async-handler.js";
+import { exceptionHandler } from "./exception-handler.js";
 import models from "../models/index.js";
 import { USER_STATUSES, USER_TYPES } from "../configs/enums.js";
 
@@ -113,7 +113,7 @@ export const verifyUserToken = async (req, res, next) => {
   else return next(new Error("Invalid user token!|||400"));
 };
 
-export const checkUserPhoneExists = asyncHandler(async (req, res, next) => {
+export const checkUserPhoneExists = exceptionHandler(async (req, res, next) => {
   const userExists = await usersModel.exists({ phone: req.body.phone });
   if (userExists) next();
   else next(new Error("User not found!|||404"));

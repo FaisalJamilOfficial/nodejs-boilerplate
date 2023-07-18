@@ -47,8 +47,7 @@ export const addMessage = async (params) => {
     });
   }
 
-  const message = await messagesModel.create(messageObj);
-  return { success: true, data: message };
+  return await messagesModel.create(messageObj);
 };
 
 /**
@@ -100,7 +99,6 @@ export const getMessages = async (params) => {
     },
   ]);
   return {
-    success: true,
     data: [],
     totalCount: 0,
     totalPages: 0,
@@ -133,10 +131,8 @@ export const updateMessage = async (params) => {
   );
   if (messageExists);
   else throw new Error("Message not found!|||404");
-  return {
-    success: true,
-    data: messageExists,
-  };
+
+  return messageExists;
 };
 
 /**
@@ -151,10 +147,8 @@ export const deleteMessage = async (params) => {
   const messageExists = await messagesModel.findByIdAndDelete(message);
   if (messageExists);
   else throw new Error("Please enter valid message id!|||400");
-  return {
-    success: true,
-    data: messageExists,
-  };
+
+  return messageExists;
 };
 
 /**
@@ -260,7 +254,6 @@ export const getConversations = async (params) => {
     },
   ]);
   return {
-    success: true,
     data: [],
     totalCount: 0,
     totalPages: 0,
@@ -305,7 +298,7 @@ export const send = async (params) => {
   }
 
   const args = { ...params, conversation };
-  const { data: message } = await addMessage(args);
+  const message = await addMessage(args);
 
   conversationExists.lastMessage = message._id;
   await conversationExists.save();
@@ -346,7 +339,7 @@ export const send = async (params) => {
     },
   });
 
-  return { success: true, data: message };
+  return message;
 };
 
 /**
@@ -367,8 +360,4 @@ export const readMessages = async (params) => {
   if (await conversationsModel.exists({ _id: conversation }));
   else throw new Error("Please enter valid conversation id!|||400");
   await messagesModel.updateMany({ conversation, userTo }, messageObj);
-  return {
-    success: true,
-    message: "messages read successfully!",
-  };
 };

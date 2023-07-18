@@ -23,8 +23,7 @@ export const addAdmin = async (params) => {
   if (await usersModel.exists({ _id: user })) adminObj.user = user;
   else throw new Error("User not found!|||404");
 
-  const admin = await adminsModel.create(adminObj);
-  return { success: true, data: admin };
+  return await adminsModel.create(adminObj);
 };
 
 /**
@@ -44,10 +43,7 @@ export const updateAdmin = async (params) => {
   });
   if (adminExists);
   else throw new Error("Admin not found!|||404");
-  return {
-    success: true,
-    data: adminExists,
-  };
+  return adminExists;
 };
 
 /**
@@ -64,10 +60,7 @@ export const deleteAdmin = async (params) => {
   const adminExists = await adminsModel.findOneAndDelete({ user });
   if (adminExists);
   else throw new Error("Admin not found!|||404");
-  return {
-    success: true,
-    data: adminExists,
-  };
+  return adminExists;
 };
 
 /**
@@ -86,10 +79,7 @@ export const getAdmin = async (params) => {
     .select("-createdAt -updatedAt -__v");
   if (adminExists);
   else throw new Error("Admin not found!|||404");
-  return {
-    success: true,
-    data: adminExists,
-  };
+  return adminExists;
 };
 
 /**
@@ -128,7 +118,6 @@ export const getAdmins = async (params) => {
     },
   ]);
   return {
-    success: true,
     data: [],
     totalCount: 0,
     totalPages: 0,
@@ -140,9 +129,4 @@ export const getAdmins = async (params) => {
  * @description Clean DB
  * @returns {Object} success status
  */
-export const cleanDB = async () => {
-  return {
-    success: true,
-    message: "Operation completed successfully!",
-  };
-};
+export const cleanDB = async () => {};

@@ -27,33 +27,21 @@ const {
  * @returns {Object} user data with token
  */
 export const register = async (params) => {
-  let user;
   const { type } = params;
-  const userResponse = await usersController.addUser({ ...params });
-  if (userResponse?.success) user = userResponse?.data;
-  else throw new Error("User creation failed!");
+  const user = await usersController.addUser({ ...params });
 
   const profileObj = { user: user._id };
-  let profileResponse;
   const userObj = {};
   userObj.user = user._id;
-  userObj.type = type;
 
-  if (type === CUSTOMER) {
-    profileResponse = await customersController.addCustomer(profileObj);
-    userObj.customer = profileResponse?.data._id;
-  } else if (type === ADMIN) {
-    profileResponse = await adminsController.addAdmin(profileObj);
-    userObj.admin = profileResponse?.data._id;
-  }
-  if (profileResponse?.success) await usersController.updateUser(userObj);
-  else throw new Error("User profile creation failed!");
+  if (type === CUSTOMER)
+    userObj.customer = (await customersController.addCustomer(profileObj))._id;
+  else if (type === ADMIN)
+    userObj.admin = (await adminsController.addAdmin(profileObj))._id;
 
-  const token = user.getSignedjwtToken();
-  return {
-    success: true,
-    token,
-  };
+  await usersController.updateUser(userObj);
+
+  return user.getSignedjwtToken();
 };
 
 /**
@@ -76,7 +64,7 @@ export const login = async (params) => {
   else throw new Error("User not registered!|||404");
 
   if (userExists.type === type);
-  else throw new Error("Invalid type login credentials!|||401");
+  else throw new Error("User not found!|||404");
 
   if (await userExists.validatePassword(password));
   else throw new Error("Invalid password!|||401");
@@ -89,11 +77,7 @@ export const login = async (params) => {
     { lastLogin: new Date() }
   );
 
-  const token = userExists.getSignedjwtToken();
-  return {
-    success: true,
-    token,
-  };
+  return userExists.getSignedjwtToken();
 };
 
 /**
@@ -105,20 +89,15 @@ export const emailResetPassword = async (params) => {
   const { email } = params;
   const tokenExpirationTime = new Date();
   tokenExpirationTime.setMinutes(tokenExpirationTime.getMinutes() + 10);
-  const emailTokenResponse = await this.generateEmailToken({
+  const { user, token } = await generateEmailToken({
     email,
     tokenExpirationTime,
   });
-  const { user, token } = emailTokenResponse?.data;
   const args = {};
   args.to = email;
   args.subject = "Password reset";
   args.text = getResetPasswordEmailTemplate({ user, token });
-  await sendEmail(args);
-  return {
-    success: true,
-    message: "Password reset link sent to your email address!",
-  };
+  return await sendEmail(args);
 };
 
 /**
@@ -130,21 +109,15 @@ export const emailVerifyEmail = async (params) => {
   const { email } = params;
   const tokenExpirationTime = new Date();
   tokenExpirationTime.setMinutes(tokenExpirationTime.getMinutes() + 10);
-  const emailTokenResponse = await this.generateEmailToken({
+  const { user, token } = await generateEmailToken({
     email,
     tokenExpirationTime,
   });
-  const { user, token } = emailTokenResponse?.data;
   const args = {};
   args.to = email;
   args.subject = "Email verification";
   args.text = getEmailVerificationEmailTemplate({ user, token });
-  await new NodeMailer().sendEmail(args);
-
-  return {
-    success: true,
-    message: "Email verification link sent to your email address!",
-  };
+  return await sendEmail(args);
 };
 
 /**
@@ -159,11 +132,7 @@ export const emailWelcomeUser = async (params) => {
   args.to = email;
   args.subject = "Greetings";
   args.text = getWelcomeUserEmailTemplate({ name });
-  await new NodeMailer().sendEmail(args);
-  return {
-    success: true,
-    message: "Welcome email to your email address!",
-  };
+  return await sendEmail(args);
 };
 
 /**
@@ -189,10 +158,7 @@ export const generateEmailToken = async (params) => {
     const UserTokensModel = userTokensModel;
     userTokenExists = await new UserTokensModel(userTokenObj).save();
   }
-  return {
-    success: true,
-    data: userTokenExists,
-  };
+  return userTokenExists;
 };
 
 /**
@@ -218,8 +184,6 @@ export const resetPassword = async (params) => {
 
   await userExists.setPassword(password);
   await userTokenExists.delete();
-
-  return { success: true, message: "Password reset successfully!" };
 };
 
 /**
@@ -245,8 +209,6 @@ export const verifyUserEmail = async (params) => {
   userExists.isEmailVerified = true;
   await userExists.save();
   await userTokenExists.delete();
-
-  return { success: true, message: "Email verified successfully!" };
 };
 
 /**
@@ -263,12 +225,6 @@ export const addAdmin = async (params) => {
   if (email) userObj.email = email;
   if (password) userObj.password = password;
   if (type) userObj.type = type;
-  const userResponse = await usersController.addUser(userObj);
-  const user = userResponse?.data;
-  const token = user.getSignedjwtToken();
-  return {
-    success: true,
-    // data: user,
-    token,
-  };
+  const user = await usersController.addUser(userObj);
+  return user.getSignedjwtToken();
 };

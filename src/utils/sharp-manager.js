@@ -63,7 +63,7 @@ class SharpManager {
         });
       }
       return array;
-    } else return { success: true };
+    }
   }
 
   /**
@@ -125,7 +125,7 @@ class SharpManager {
         });
       }
       return array;
-    } else return { success: true };
+    }
   }
 }
 

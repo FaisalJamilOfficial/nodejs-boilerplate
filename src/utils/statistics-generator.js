@@ -100,10 +100,7 @@ class StatisticsGenerator {
         },
       },
     ]);
-    return {
-      success: true,
-      data,
-    };
+    return data;
   }
 
   /**
@@ -183,10 +180,7 @@ class StatisticsGenerator {
         },
       },
     ]);
-    return {
-      success: true,
-      data,
-    };
+    return data;
   }
 
   /**
@@ -255,10 +249,7 @@ class StatisticsGenerator {
         },
       },
     ]);
-    return {
-      success: true,
-      data,
-    };
+    return data;
   }
 }
 

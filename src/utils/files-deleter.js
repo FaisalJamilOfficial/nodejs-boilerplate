@@ -24,7 +24,6 @@ class FilesDeleter {
     array.push({ path: PATH + image });
     array.push({ path: PATH + "thumbnails/" + image });
     this.deleteFiles({ files: array });
-    return { success: true };
   }
 
   /**
@@ -38,7 +37,6 @@ class FilesDeleter {
     const PATH = ATTACHMENTS_DIRECTORY;
     array.push({ path: PATH + attachment });
     this.deleteFiles({ files: array });
-    return { success: true };
   }
 
   /**
@@ -58,7 +56,6 @@ class FilesDeleter {
         }
       }
     }
-    return { success: true };
   }
 }
 

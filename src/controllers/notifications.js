@@ -25,8 +25,7 @@ export const addNotification = async (params) => {
   if (message) notificationObj.message = message;
   if (messenger) notificationObj.messenger = messenger;
 
-  const notification = await notificationsModel.create(notificationObj);
-  return { success: true, data: notification };
+  return await notificationsModel.create(notificationObj);
 };
 
 /**
@@ -68,7 +67,6 @@ export const getNotifications = async (params) => {
     },
   ]);
   return {
-    success: true,
     data: [],
     totalCount: 0,
     totalPages: 0,
@@ -166,8 +164,4 @@ export const readNotifications = async (params) => {
   if (await usersModel.exists({ _id: user }));
   else throw new Error("Please enter valid user id!|||400");
   await notificationsModel.updateMany({ user }, notificationObj);
-  return {
-    success: true,
-    message: "notifications read successfully!",
-  };
 };

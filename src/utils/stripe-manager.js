@@ -273,7 +273,7 @@ class StripeManager {
     const paymentIntentObj = {
       amount: amount * 100,
       currency: currency ?? "usd",
-      // confirmation_method: "manual",
+      confirmation_method: "manual",
       capture_method: "manual",
       setup_future_usage: "on_session",
       customer,
@@ -388,7 +388,6 @@ export const constructWebhooksEvent = async (params) => {
   const event = await new StripeManager().constructWebhooksEvent(args);
 
   return {
-    success: true,
     message: "Done",
     event,
   };

@@ -3,7 +3,6 @@ import braintree from "braintree";
 
 // file imports
 import { ENVIRONMENTS } from "../configs/enums.js";
-import * as paymentAccountsController from "../controllers/paymentAccounts.js";
 
 // destructuring assignments
 const { DEVELOPMENT } = ENVIRONMENTS;

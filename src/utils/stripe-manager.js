@@ -95,7 +95,7 @@ class StripeManager {
   async createCustomerSourceWithCheck(params) {
     const { source, cardHolderName, user, email, phone } = params;
 
-    const { data: paymentAccountExists } =
+    const paymentAccountExists =
       await paymentAccountsController.getPaymentAccount({ user });
 
     let userStripeId;
@@ -119,8 +119,9 @@ class StripeManager {
       type: STRIPE_CUSTOMER,
       account: card,
     };
-    const { data: paymentAccount } =
-      await paymentAccountsController.addPaymentAccount(paymentAccountObj);
+    const paymentAccount = await paymentAccountsController.addPaymentAccount(
+      paymentAccountObj
+    );
     return paymentAccount;
   }
 
@@ -145,7 +146,7 @@ class StripeManager {
    */
   async createAccountWithCheck(params) {
     const { user, email } = params;
-    const { data: paymentAccountExists } =
+    const paymentAccountExists =
       await paymentAccountsController.getPaymentAccount({ user });
 
     if (paymentAccountExists) return paymentAccountExists;
@@ -168,8 +169,9 @@ class StripeManager {
         account,
       };
 
-      const { data: paymentAccount } =
-        await paymentAccountsController.addPaymentAccount(paymentAccountObj);
+      const paymentAccount = await paymentAccountsController.addPaymentAccount(
+        paymentAccountObj
+      );
       return paymentAccount;
     }
   }
@@ -184,7 +186,7 @@ class StripeManager {
   async createAccountLink(parameters) {
     const { account, refreshURL, returnURL, email, user } = parameters;
 
-    const { data: paymentAccountExists } =
+    const paymentAccountExists =
       await paymentAccountsController.getPaymentAccount({ user });
 
     let accountObj;
@@ -245,7 +247,7 @@ class StripeManager {
    */
   async createTransfer(params) {
     const { user, amount, currency, description } = params;
-    const { data: paymentAccountExists } =
+    const paymentAccountExists =
       await paymentAccountsController.getPaymentAccount({ user });
     const transferObj = {
       amount,
@@ -273,7 +275,7 @@ class StripeManager {
     const paymentIntentObj = {
       amount: amount * 100,
       currency: currency ?? "usd",
-      confirmation_method: "manual",
+      // confirmation_method: "manual",
       capture_method: "manual",
       setup_future_usage: "on_session",
       customer,
@@ -364,7 +366,7 @@ class StripeManager {
     if (event.type === "account.external_account.created") {
       console.log("EVENT: ", JSON.stringify(event));
 
-      const { data: paymentAccountExists } =
+      const paymentAccountExists =
         await paymentAccountsController.getPaymentAccount({
           key: "account.id",
           value: rawBody.account,

@@ -29,7 +29,7 @@ class TwilioManager {
     if (phone);
     else throw new Error("Please enter phone number!|||400");
 
-    const { data: userExists } = await usersController.getUser({ phone });
+    const userExists = await usersController.getUser({ phone });
 
     const otp = otpGenerator.generate(6, {
       alphabets: false,

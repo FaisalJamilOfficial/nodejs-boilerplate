@@ -64,14 +64,13 @@ class NodeMailer {
    */
   async sendEmail(params) {
     const { to, subject, text, html } = params;
-    const response = await transporter.sendMail({
+    return await transporter.sendMail({
       from: `BACKEND BOILERPLATE <${EMAIL_USER}>`,
       to,
       subject,
       text,
       html,
     });
-    return response;
   }
 
   /**

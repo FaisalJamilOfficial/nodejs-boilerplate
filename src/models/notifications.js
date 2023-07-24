@@ -37,6 +37,7 @@ const notificationSchema = new Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
+      required: true,
       index: true,
     },
     status: {

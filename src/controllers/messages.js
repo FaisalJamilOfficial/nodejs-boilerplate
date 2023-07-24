@@ -35,17 +35,7 @@ export const addMessage = async (params) => {
   if (userTo) messageObj.userTo = userTo;
   if (conversation) messageObj.conversation = conversation;
   if (text) messageObj.text = text;
-
-  if (attachments) {
-    messageObj.attachments = [];
-    attachments.forEach((attachment) => {
-      if (attachment.path)
-        messageObj.attachments.push({
-          path: attachment.filename,
-          type: attachment.mimetype,
-        });
-    });
-  }
+  if (attachments) messageObj.attachments = attachments;
 
   return await messagesModel.create(messageObj);
 };
@@ -144,6 +134,39 @@ export const deleteMessage = async (params) => {
   else throw new Error("Please enter valid message id!|||400");
 
   return messageExists;
+};
+
+/**
+ * @description Add conversation
+ * @param {String} userFrom sender user id
+ * @param {String} userTo receiver user id
+ * @returns {Object} conversation data
+ */
+export const addConversation = async (params) => {
+  const { userFrom, userTo } = params;
+  const query = {
+    $or: [
+      { $and: [{ userTo: userFrom }, { userFrom: userTo }] },
+      { $and: [{ userFrom }, { userTo }] },
+    ],
+  };
+
+  let conversationExists = await conversationsModel.findOne(query);
+  if (conversationExists) {
+    if (conversationExists.status === PENDING) {
+      if (userFrom.equals(conversationExists.userTo)) {
+        conversationExists.status = ACCEPTED;
+        await conversationExists.save();
+      }
+    } else if (conversationExists.status === REJECTED)
+      throw new Error("Conversation request rejected!|||400");
+  } else {
+    const conversationObj = {};
+    conversationObj.userTo = userTo;
+    conversationObj.userFrom = userFrom;
+    conversationExists = await conversationsModel.create(conversationObj);
+  }
+  return conversationExists;
 };
 
 /**
@@ -260,73 +283,44 @@ export const getConversations = async (params) => {
  * @returns {Object} message data
  */
 export const send = async (params) => {
-  const { userFrom, userTo, username } = params;
-  let conversation;
-  const query = {
-    $or: [
-      { $and: [{ userTo: userFrom }, { userFrom: userTo }] },
-      { $and: [{ userFrom }, { userTo }] },
-    ],
-  };
+  const { username } = params;
 
-  let conversationExists = await conversationsModel.findOne(query);
-  if (conversationExists) {
-    conversation = conversationExists._id;
-    if (conversationExists.status === PENDING) {
-      if (userFrom.equals(conversationExists.userTo)) {
-        conversationExists.status = ACCEPTED;
-        await conversationExists.save();
-      }
-    } else if (conversationExists.status === REJECTED)
-      throw new Error("Conversation request rejected!|||400");
-  } else {
-    const conversationObj = {};
-    conversationObj.userTo = userTo;
-    conversationObj.userFrom = userFrom;
-    conversationExists = await conversationsModel.create(conversationObj);
-    conversation = conversationExists._id;
-  }
+  const conversation = await addConversation(params);
 
-  const args = { ...params, conversation };
-  const message = await addMessage(args);
-
-  conversationExists.lastMessage = message._id;
-  await conversationExists.save();
-  conversationExists.lastMessage = message;
-  // socket event emission
-  await new SocketManager().emitEvent({
-    to: message.userTo.toString(),
-    event: "newMessage_" + message.conversation,
-    data: conversationExists,
+  const message = await addMessage({
+    ...params,
+    conversation: conversation._id,
   });
 
-  const notificationObj = {
+  conversation.lastMessage = message._id;
+  await conversation.save();
+  conversation.lastMessage = message;
+
+  const user = message.userTo;
+
+  const notificationData = {
     user: message.userTo,
     message: message._id,
     messenger: message.userFrom,
-    type: NEW_MESSAGE,
   };
 
-  // database notification addition
-  await notificationsController.addNotification(notificationObj);
-
-  const userToExists = await usersModel.findById(message.userTo).select("fcms");
-  const fcms = [];
-  if (userToExists)
-    userToExists.fcms.forEach((element) => fcms.push(element.token));
-
-  const title = "New Message";
-  const body = `New message from ${username}`;
-  const type = NEW_MESSAGE;
-
-  // firebase notification emission
-  await new FirebaseManager().multicast({
-    fcms,
-    title,
-    body,
-    data: {
-      type,
-    },
+  await notificationsController.notifyUsers({
+    user,
+    type: NEW_MESSAGE,
+    useSocket: true,
+    event: "newMessage_" + message.conversation,
+    socketData: message,
+    useFirebase: true,
+    title: "New Message",
+    body: `New message from ${username}`,
+    useDatabase: true,
+    notificationData,
+  });
+  await notificationsController.notifyUsers({
+    useSocket: true,
+    event: "conversationsUpdated",
+    socketData: conversation,
+    user,
   });
 
   return message;

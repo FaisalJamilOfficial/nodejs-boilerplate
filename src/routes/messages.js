@@ -23,7 +23,15 @@ router
       const { _id: userFrom, name: username } = req?.user;
       const { user: userTo, text } = req.body;
       const attachments = req.files || [];
-      const args = { userFrom, username, userTo, text, attachments };
+      const args = { userFrom, username, userTo, text, attachments: [] };
+      if (attachments)
+        attachments.forEach((attachment) =>
+          args.attachments.push({
+            path: attachment.filename,
+            type: attachment.mimetype,
+          })
+        );
+
       const response = await messagesController.send(args);
       res.json({ data: response });
     })

@@ -18,8 +18,8 @@ const router = express.Router();
 router.post(
   "/register",
   exceptionHandler(async (req, res) => {
-    const { email, password, name } = req.body;
-    const args = { email, password, name };
+    const { email, password, name, type } = req.body;
+    const args = { email, password, name, type };
     const response = await authController.register(args);
     res.json({ token: response });
   })

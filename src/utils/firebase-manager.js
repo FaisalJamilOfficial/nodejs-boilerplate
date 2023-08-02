@@ -67,6 +67,7 @@ class FirebaseManager {
         title,
         body,
       },
+      data,
       android: {
         notification: {
           imageUrl: imageUrl ?? "https://nodejs.org/static/images/logo.svg",

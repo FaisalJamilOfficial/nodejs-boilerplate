@@ -68,21 +68,16 @@ export const verifyToken = async (
   }
 };
 
-export const verifyOTP = async (req, res, next) => {
-  try {
-    const { code } = req.body;
-
-    const query = {};
-    if (req?.user?._id) query._id = req.user._id;
-    else if (req?.user?.phone) query.phone = req.user.phone;
-    else query._id = null;
-    const userExists = await usersModel.findOne(query).select("+otp");
-    if (code === userExists?.otp) next();
-    else return next(new Error("Invalid Code!|||400"));
-  } catch (error) {
-    return next(error);
-  }
-};
+export const verifyOTP = exceptionHandler(async (req, res, next) => {
+  const { code } = req.body;
+  const query = {};
+  if (req?.user?._id) query._id = req.user._id;
+  else if (req?.user?.phone) query.phone = req.user.phone;
+  else query._id = null;
+  const userExists = await usersModel.findOne(query).select("+otp");
+  if (code === userExists?.otp) next();
+  else return next(new Error("Invalid Code!|||400"));
+});
 
 export const verifyAdmin = (req, res, next) => {
   if (

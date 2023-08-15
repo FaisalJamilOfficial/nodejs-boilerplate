@@ -25,7 +25,10 @@ class SocketManager {
    * @returns {Object} socket response
    */
   async emitEvent(params) {
-    const { to, event, data } = params;
+    const { data } = params;
+    let { to, event } = params;
+    to = to.toString();
+    event = event.toString();
     return await global.io.to(to).emit(event, data);
     // return await connection
     //   .firestore()
@@ -49,7 +52,7 @@ class SocketManager {
    */
   async emitGroupEvent(params) {
     const { event, data } = params;
-    return await global.io.emit(event, data);
+    return await global.io.emit(event.toString(), data);
   }
 
   /**

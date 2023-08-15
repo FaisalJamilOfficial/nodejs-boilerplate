@@ -127,7 +127,7 @@ export const notifyUsers = async (params) => {
     if (useSocket)
       // socket event emission
       await new SocketManager().emitEvent({
-        to: user.toString(),
+        to: user,
         event,
         data: socketData,
       });

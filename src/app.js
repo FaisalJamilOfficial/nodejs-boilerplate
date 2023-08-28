@@ -2,7 +2,6 @@
 import http from "http";
 import express from "express";
 import path from "path";
-import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cors from "cors";
 import chalk from "chalk";
@@ -43,7 +42,7 @@ const serverFunction = async () => {
     });
 
     connect.then(
-      (db) => {
+      (_db) => {
         const port = process.env.PORT || "5002";
         server.listen(port, (err) => {
           if (err) console.log(err);
@@ -62,21 +61,20 @@ const serverFunction = async () => {
     app.use(logger("dev"));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
-    app.use(cookieParser());
     app.use("/public/", express.static(path.join(__dirname, "public/")));
 
     app.use("/api/v1", indexRouter);
 
-    app.get("/reset-password", (req, res) => {
+    app.get("/reset-password", (_req, res) => {
       res.sendFile(path.join(__dirname, "public/reset-password.html"));
     });
 
-    app.get("/", (req, res) => {
+    app.get("/", (_req, res) => {
       res.sendFile(path.join(__dirname, "/public/image.png"));
     });
 
     // catch 404 and forward to error handler
-    app.use(function (req, res, next) {
+    app.use(function (_req, _res, next) {
       next(new Error("Not Found|||404"));
     });
 

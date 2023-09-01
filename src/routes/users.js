@@ -119,25 +119,6 @@ router
   );
 
 router
-  .route("/password/email")
-  .post(
-    exceptionHandler(async (req, res) => {
-      const { email } = req.body;
-      const args = { email };
-      await authController.emailResetPassword(args);
-      res.json({ message: "Password reset link sent to your email address!" });
-    })
-  )
-  .put(
-    exceptionHandler(async (req, res) => {
-      const { password, user, token } = req.body;
-      const args = { password, user, token };
-      await authController.resetPassword(args);
-      res.json({ message: "Password reset successfully!" });
-    })
-  );
-
-router
   .route("/notifications")
   .all(verifyToken, verifyUser)
   .get(

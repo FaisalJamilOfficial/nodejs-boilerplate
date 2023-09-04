@@ -43,7 +43,7 @@ export const getNotifications = async (params) => {
   if (!limit) limit = 10;
   if (!page) page = 0;
   if (page) page = page - 1;
-  const notifications = await notificationsModel.aggregate([
+  const [result] = await notificationsModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
@@ -66,7 +66,7 @@ export const getNotifications = async (params) => {
       },
     },
   ]);
-  return { data: [], totalCount: 0, totalPages: 0, ...notifications[0] };
+  return { data: [], totalCount: 0, totalPages: 0, ...result };
 };
 
 /**

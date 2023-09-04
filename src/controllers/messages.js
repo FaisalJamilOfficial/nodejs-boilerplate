@@ -65,7 +65,7 @@ export const getMessages = async (params) => {
       { $and: [{ userFrom: user1 }, { userTo: user2 }] },
     ];
   } else throw new Error("Please enter conversation id!|||400");
-  const messages = await messagesModel.aggregate([
+  const [result] = await messagesModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
@@ -88,7 +88,7 @@ export const getMessages = async (params) => {
       },
     },
   ]);
-  return { data: [], totalCount: 0, totalPages: 0, ...messages[0] };
+  return { data: [], totalCount: 0, totalPages: 0, ...result };
 };
 
 /**
@@ -196,7 +196,7 @@ export const getConversations = async (params) => {
       ];
   }
 
-  const conversations = await conversationsModel.aggregate([
+  const [result] = await conversationsModel.aggregate([
     { $match: query },
     {
       $lookup: {
@@ -271,7 +271,7 @@ export const getConversations = async (params) => {
       },
     },
   ]);
-  return { data: [], totalCount: 0, totalPages: 0, ...conversations[0] };
+  return { data: [], totalCount: 0, totalPages: 0, ...result };
 };
 
 /**

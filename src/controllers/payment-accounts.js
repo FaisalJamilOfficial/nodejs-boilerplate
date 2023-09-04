@@ -64,7 +64,7 @@ export const getPaymentAccounts = async (params) => {
   if (page) page = page - 1;
   const query = {};
   if (user) query.user = user;
-  const paymentAccounts = await paymentAccountsModel.aggregate([
+  const [result] = await paymentAccountsModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
@@ -87,5 +87,5 @@ export const getPaymentAccounts = async (params) => {
       },
     },
   ]);
-  return { data: [], totalCount: 0, totalPages: 0, ...paymentAccounts[0] };
+  return { data: [], totalCount: 0, totalPages: 0, ...result };
 };

@@ -11,11 +11,13 @@ import mime from "mime-types";
 import path from "path";
 
 // destructuring assignments
-const { AWS_BUCKET_NAME, AWS_ACCESS_KEY, AWS_SECRET_KEY } = process.env;
+const { AWS_BUCKET_NAME, AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_REGION } =
+  process.env;
 
 // variable initializations
 const s3 = new S3Client({
   credentials: { accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY },
+  region: AWS_REGION,
 });
 
 class S3BucketManager {

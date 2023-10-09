@@ -32,6 +32,7 @@ class S3BucketManager {
   upload = multer({
     storage: multerS3({
       s3,
+      contentType: multerS3.AUTO_CONTENT_TYPE,
       bucket: AWS_BUCKET_NAME,
       metadata: (req, file, cb) => {
         cb(null);

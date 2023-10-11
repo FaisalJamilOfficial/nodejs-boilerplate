@@ -101,7 +101,7 @@ const userSchema = new Schema(
     status: {
       type: String,
       enum: [ACTIVE, DELETED],
-      default: "active",
+      default: ACTIVE,
       index: true,
     },
     isOnline: {

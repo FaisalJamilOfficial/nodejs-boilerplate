@@ -99,7 +99,8 @@ export const updateUser = async (params) => {
   if (firstName) userExists.firstName = firstName;
   if (lastName) userExists.lastName = lastName;
   if (firstName || lastName)
-    userExists.name = userExists.firstName + " " + userExists.lastName;
+    userExists.name =
+      (userExists.firstName ?? "") + " " + (userExists.lastName ?? "");
   if (image) {
     if (userExists.image)
       new FilesDeleter().deleteImage({ image: userExists.image });

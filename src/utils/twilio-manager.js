@@ -52,8 +52,10 @@ class TwilioManager {
       phone,
       shouldValidateOTP: !user,
     });
-    userExists.otp = otp;
-    await userExists.save();
+    if (userExists) {
+      userExists.otp = otp;
+      await userExists.save();
+    }
     return token;
   }
 }

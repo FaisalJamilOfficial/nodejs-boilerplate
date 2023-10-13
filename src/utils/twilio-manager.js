@@ -47,16 +47,16 @@ class TwilioManager {
     } catch (error) {
       console.log("Twilio Error", error);
     }
-    const token = getToken({
+    const tokenObj = {
       _id: user,
       phone,
       shouldValidateOTP: !user,
-    });
+    };
     if (userExists) {
       userExists.otp = otp;
       await userExists.save();
-    }
-    return token;
+    } else tokenObj.otp = otp;
+    return getToken(tokenObj);
   }
 }
 

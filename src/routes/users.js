@@ -48,7 +48,7 @@ router
         image: image?.filename,
       };
       const response = await usersController.updateUser(args);
-      res.json({ data: response });
+      res.json(response);
     })
   )
   .get(
@@ -65,7 +65,7 @@ router
       const { user } = req.query;
       const args = { user };
       const response = await usersController.deleteUser(args);
-      res.json({ data: response });
+      res.json(response);
     })
   );
 
@@ -78,7 +78,7 @@ router.put(
     const { _id: user, phone } = req?.user;
     const args = { user, phone };
     const response = await usersController.updateUser(args);
-    res.json({ data: response });
+    res.json(response);
   })
 );
 router.put(
@@ -92,7 +92,7 @@ router.put(
     await authController.login(args);
     args.password = args.newPassword;
     const response = await usersController.updateUser(args);
-    res.json({ data: response });
+    res.json(response);
   })
 );
 
@@ -156,7 +156,7 @@ router.get(
     const { user } = req.params;
     const args = { user };
     const response = await usersController.getUser(args);
-    res.json({ data: response });
+    res.json(response);
   })
 );
 

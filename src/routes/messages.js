@@ -34,7 +34,7 @@ router
         );
 
       const response = await messagesController.send(args);
-      res.json({ data: response });
+      res.json(response);
     })
   )
   .get(
@@ -57,7 +57,7 @@ router
       const { message, text, status } = req.body;
       const args = { message, text, status };
       const response = await messagesController.updateMessage(args);
-      res.json({ data: response });
+      res.json(response);
     })
   )
   .patch(

@@ -8,16 +8,16 @@ class NodeScheduler {
 
   /**
    * @description Schedule job
-   * @param {Date} date job date time
+   * @param {Date} time job date time
    * @param {Object} rule job pattern rule
    * @param {Function} func function
    * @returns {Object} scheduler response
    */
   async schedule(params) {
-    const { date, rule, func } = params;
+    const { time, rule, func } = params;
     let response;
-    if (date)
-      response = nodeSchedule.scheduleJob(date, async function () {
+    if (time)
+      response = nodeSchedule.scheduleJob(time, async function () {
         await func();
       });
     if (rule)

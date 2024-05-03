@@ -2,7 +2,7 @@
 import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
 
 // file imports
-import { ENVIRONMENTS } from "../configs/enums.js";
+import { ENVIRONMENTS } from "../configs/enum.js";
 
 // destructuring assignments
 const { NODE_ENV, PLAID_CLIENT_ID, PLAID_SECRET } = process.env;
@@ -40,7 +40,7 @@ class PlaidManager {
    * @param {[string]} countryCodes country codes
    * @returns {object} link token
    */
-  async generateLinkToken(parameters) {
+  async generateLinkToken(params) {
     const {
       clientUserId,
       clientName,
@@ -49,7 +49,7 @@ class PlaidManager {
       webhook,
       redirectURI,
       countryCodes,
-    } = parameters;
+    } = params;
     const request = {
       user: {
         // This should correspond to a unique id for the current user.
@@ -70,10 +70,8 @@ class PlaidManager {
    * @param {string} publicToken public token
    * @returns {object} link token
    */
-  async exchangePublicToken(parameters) {
-    const { publicToken } = parameters;
-    const linkTokenObj = { public_token: publicToken };
-    return await client.itemPublicTokenExchange(linkTokenObj);
+  async exchangePublicToken(publicToken) {
+    return await client.itemPublicTokenExchange({ public_token: publicToken });
   }
 
   /**
@@ -81,8 +79,8 @@ class PlaidManager {
    * @param {string} token public token
    * @returns {object} link token
    */
-  async createProcessorToken(parameters) {
-    const { accessToken, accountID, processor } = parameters;
+  async createProcessorToken(params) {
+    const { accessToken, accountID, processor } = params;
     const request = {
       access_token: accessToken,
       account_id: accountID,

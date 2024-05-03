@@ -1,57 +1,24 @@
 // module imports
-import nodemailer from "nodemailer";
+// import nodemailer from "nodemailer";
 // import { google } from "googleapis";
 
 // destructuring assignments
-const {
-  BASE_URL,
-  EMAIL_USER,
-  // CLIENT_ID,
-  // CLIENT_SECRET,
-  // REFRESH_TOKEN,
-  PASS_APP,
-  APP_TITLE,
-} = process.env;
+const { BASE_URL, EMAIL_USER, PASS_APP, APP_TITLE } = process.env;
 
 // variable initializations
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: EMAIL_USER,
-    pass: PASS_APP,
-  },
-});
-// const OAuth2 = google.auth.OAuth2;
-// const oauth2Client = new OAuth2(
-//   CLIENT_ID, // ClientID
-//   CLIENT_SECRET, // Client Secret
-//   "https://developers.google.com/oauthplayground" // Redirect URL
-// ).setCredentials({
-//   refresh_token: process.env.REFRESH_TOKEN,
-// });
-// const accessToken = oauth2Client.getAccessToken();
 // const transporter = nodemailer.createTransport({
 //   host: "smtp.gmail.com",
-//   port: 465,
-//   secure: true,
+//   port: 587,
+//   secure: false, // true for 465, false for other ports
 //   auth: {
-//     type: "OAuth2",
 //     user: EMAIL_USER,
-//     clientId: CLIENT_ID,
-//     clientSecret: CLIENT_SECRET,
-//     refreshToken: REFRESH_TOKEN,
-//     accessToken,
-//   },
-//   tls: {
-//     rejectUnauthorized: false,
+//     pass: PASS_APP,
 //   },
 // });
 
 class NodeMailer {
   constructor() {
-    this.transporter = transporter;
+    // this.transporter = transporter;
   }
 
   /**
@@ -64,13 +31,13 @@ class NodeMailer {
    */
   async sendEmail(params) {
     const { to, subject, text, html } = params;
-    return await transporter.sendMail({
-      from: `BACKEND BOILERPLATE <${EMAIL_USER}>`,
-      to,
-      subject,
-      text,
-      html,
-    });
+    // return await transporter.sendMail({
+    //   from: `BACKEND BOILERPLATE <${EMAIL_USER}>`,
+    //   to,
+    //   subject,
+    //   text,
+    //   html,
+    // });
   }
 
   /**
@@ -98,7 +65,7 @@ If you didn't do this, contact us here ${EMAIL_USER}`;
    */
   getEmailVerificationEmailTemplate(params) {
     const { user, token } = params;
-    const link = `${process.env.BASE_URL}api/v1/users/emails?user=${user}&token=${token}`;
+    const link = `${BASE_URL}api/v1/users/emails?user=${user}&token=${token}`;
     return `
 Please click on the link below to verify your email address, 
 ${link}
@@ -140,3 +107,42 @@ If you didn't do this, contact us here ${EMAIL_USER}`;
 }
 
 export default NodeMailer;
+
+// Google oAuth Setup
+
+// module imports
+// import { google } from "googleapis";
+
+// destructuring assignments
+// const {
+//   CLIENT_ID,
+//   CLIENT_SECRET,
+//   REFRESH_TOKEN,
+// } = process.env;
+
+// variable initializations
+// const OAuth2 = google.auth.OAuth2;
+// const oauth2Client = new OAuth2(
+//   CLIENT_ID, // ClientID
+//   CLIENT_SECRET, // Client Secret
+//   "https://developers.google.com/oauthplayground" // Redirect URL
+// ).setCredentials({
+//   refresh_token: process.env.REFRESH_TOKEN,
+// });
+// const accessToken = oauth2Client.getAccessToken();
+// const transporter = nodemailer.createTransport({
+//   host: "smtp.gmail.com",
+//   port: 465,
+//   secure: true,
+//   auth: {
+//     type: "OAuth2",
+//     user: EMAIL_USER,
+//     clientId: CLIENT_ID,
+//     clientSecret: CLIENT_SECRET,
+//     refreshToken: REFRESH_TOKEN,
+//     accessToken,
+//   },
+//   tls: {
+//     rejectUnauthorized: false,
+//   },
+// });

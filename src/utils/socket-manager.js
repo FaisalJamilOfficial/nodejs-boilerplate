@@ -3,7 +3,8 @@
 import { Server } from "socket.io";
 
 // file imports
-import * as usersController from "../controllers/users.js";
+import * as userController from "../modules/user/controller.js";
+
 // import serviceAccount from "../services/backend-boilerplate-official-firebase-adminsdk-o1ajl-593da86247.json" assert { type: "json" };
 
 // variable initializations
@@ -12,10 +13,11 @@ import * as usersController from "../controllers/users.js";
 //   databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`,
 // });
 
+let socketIO;
 class SocketManager {
-  // constructor() {
-  //   this.connection = connection;
-  // }
+  constructor() {
+    // this.connection = connection;
+  }
 
   /**
    * @description Emit event
@@ -29,7 +31,7 @@ class SocketManager {
     let { to, event } = params;
     to = to.toString();
     event = event.toString();
-    return await global.io.to(to).emit(event, data);
+    return await socketIO.to(to).emit(event, data);
     // return await connection
     //   .firestore()
     //   .collection("socket")
@@ -52,7 +54,7 @@ class SocketManager {
    */
   async emitGroupEvent(params) {
     const { event, data } = params;
-    return await global.io.emit(event.toString(), data);
+    return await socketIO.emit(event.toString(), data);
   }
 
   /**
@@ -63,17 +65,17 @@ class SocketManager {
     const { server, app } = params;
     const io = new Server(server, {
       cors: {
-        origin: "*",
+        origin: ["http://localhost:3000", "https://admin.app.com"],
       },
     });
-    global.io = io;
+    socketIO = io;
     io.on("connection", (socket) => {
       socket.on("join", async (data) => {
         socket.join(data);
         console.log(`${data} joined`);
         try {
-          const args = { user: data, isOnline: true };
-          await usersController.updateUser(args);
+          const args = { isOnline: true };
+          await userController.updateElementById(data, args);
         } catch (error) {
           console.log(error);
         }
@@ -83,7 +85,7 @@ class SocketManager {
         console.log(`${data} left`);
         try {
           const args = { user: data, isOnline: false };
-          await usersController.updateUser(args);
+          await userController.updateElementById(data, args);
         } catch (error) {
           console.log(error);
         }
@@ -94,7 +96,7 @@ class SocketManager {
     });
 
     // attach to app instance
-    app.use((req, res, next) => {
+    app.use((req, _res, next) => {
       req.io = io;
       next();
     });

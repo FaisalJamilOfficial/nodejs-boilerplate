@@ -1,7 +1,7 @@
 {
   "name": "backend-boilerplate",
-  "version": "1.0.0",
-  "description": "mongo express nodejs backend boilerplate",
+  "version": "1.2.3",
+  "description": "NodeJS Backend Boilerplate",
   "main": "./src/app.js",
   "type": "module",
   "scripts": {
@@ -11,29 +11,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FaisalJamilOfficial/backend-boilerplate.git"
+    "url": "git+https://github.com/FaisalJamilOfficial/nodejs-boilerplate.git"
   },
   "keywords": [],
   "author": "FaisalJamilOfficial",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/FaisalJamilOfficial/backend-boilerplate/issues"
+    "url": "https://github.com/FaisalJamilOfficial/nodejs-boilerplate/issues"
   },
-  "homepage": "https://github.com/FaisalJamilOfficial/backend-boilerplate#readme",
+  "homepage": "https://github.com/FaisalJamilOfficial/nodejs-boilerplate#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.17.1",
-    "firebase-admin": "^11.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.5.0",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.7.5",
-    "otp-generator": "^4.0.1",
     "socket.io": "^4.7.2",
-    "twilio": "^4.16.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

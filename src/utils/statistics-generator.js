@@ -18,18 +18,17 @@ class StatisticsGenerator {
 
     if (!model) return null;
 
-    if (query);
-    else query = {};
+    if (!query) query = {};
 
     const date = new Date();
     if (!year) year = date.getFullYear();
     if (!month) month = date.getMonth() + 1;
-    if (!week)
+    if (!week) {
+      const initialDate = new Date(date.getFullYear(), 0, 1);
       week = Math.ceil(
-        Math.floor(
-          (date - new Date(date.getFullYear(), 0, 1)) / (24 * 60 * 60 * 1000)
-        ) / 7
+        Math.floor((date - initialDate) / (24 * 60 * 60 * 1000)) / 7
       );
+    }
     const queryTime = [
       {
         $eq: [
@@ -117,16 +116,14 @@ class StatisticsGenerator {
 
     if (!model) return null;
 
-    if (query);
-    else query = {};
+    if (!query) query = {};
 
     const date = new Date();
     if (!year) year = date.getFullYear();
     if (!month) month = date.getMonth() + 1;
 
     let queryTime = [];
-    if (isCustom);
-    else
+    if (!isCustom)
       queryTime = [
         {
           $eq: [
@@ -198,8 +195,7 @@ class StatisticsGenerator {
 
     if (!model) return null;
 
-    if (query);
-    else query = {};
+    if (query) query = {};
 
     const date = new Date();
     if (!year) year = date.getFullYear();

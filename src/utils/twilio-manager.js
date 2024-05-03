@@ -1,20 +1,21 @@
 // module imports
-import twilio from "twilio";
-import otpGenerator from "otp-generator";
+// import twilio from "twilio";
+// import otpGenerator from "otp-generator";
 
 // file imports
-import * as usersController from "../controllers/users.js";
+import * as userController from "../modules/user/controller.js";
 import { getToken } from "../middlewares/authenticator.js";
+import { ErrorHandler } from "../middlewares/error-handler.js";
 
 // destructuring assignments
-const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = process.env;
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, APP_TITLE } = process.env;
 
 // variable initializations
-const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+// const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 class TwilioManager {
   constructor() {
-    this.client = client;
+    // this.client = client;
   }
 
   /**
@@ -24,39 +25,56 @@ class TwilioManager {
    * @returns {Object} token
    */
   async sendOTP(params) {
-    const { user, phone } = params;
+    const { user, phone, phoneCode } = params;
 
-    if (phone);
-    else throw new Error("Please enter phone number!|||400");
+    if (!phone) throw new ErrorHandler("Please enter phone number!", 400);
 
-    const userExists = await usersController.getUser({ phone });
+    const query = {};
+    if (user) query.user = user;
+    else query.phone = phone;
+
+    const userExists = await userController.getElement(query);
 
     const otp = "111111";
-    otpGenerator.generate(6, {
-      alphabets: false,
-      upperCase: false,
-      specialChars: false,
-    });
+    // const otp = otpGenerator.generate(6, {
+    //   specialChars: false,
+    //   lowerCaseAlphabets: false,
+    //   upperCaseAlphabets: false,
+    // });
     console.log("OTP -->", otp);
-    try {
-      await client.messages.create({
-        body: "Backend Boilerplate verification code is: " + otp,
-        from: "+19105438838",
-        to: phone,
-      });
-    } catch (error) {
-      console.log("Twilio Error", error);
-    }
+    const message = `${APP_TITLE} verification code is: ${otp}`;
+    await this.send({ phone, message });
     const tokenObj = {
-      _id: user?? userExists?._id,
+      _id: user ?? userExists?._id,
       phone,
-      shouldValidateOTP: !user,
+      phoneCode,
+      shouldValidateOTP: true,
     };
     if (userExists) {
       userExists.otp = otp;
       await userExists.save();
     } else tokenObj.otp = otp;
     return getToken(tokenObj);
+  }
+
+  /**
+   * @description Send OTP to phone number
+   * @param {String} phone user phone number in INTERNATIONAL format
+   * @param {String} message message text
+   * @returns {Object} token
+   */
+  async send(params) {
+    const { phone, message } = params;
+    if (!phone) throw new ErrorHandler("Please enter phone number!", 400);
+    try {
+      // await client.messages.create({
+      //   body: message,
+      //   from: "+19105438838",
+      //   to: phone,
+      // });
+    } catch (error) {
+      console.log("Twilio Error =>", error);
+    }
   }
 }
 

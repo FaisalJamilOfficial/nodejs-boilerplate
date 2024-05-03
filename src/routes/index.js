@@ -1,23 +1,25 @@
 // module imports
-import express from "express";
+import { Router } from "express";
 
 // file imports
-import admins from "./admins.js";
-import auth from "./auth.js";
-import messages from "./messages.js";
-import users from "./users.js";
+import admin from "../modules/admin/route.js";
+import auth from "../modules/auth/route.js";
+import element from "../modules/element/route.js";
+import message from "../modules/message/route.js";
+import user from "../modules/user/route.js";
 
 // destructuring assignments
 const { POSTMAN_URL } = process.env;
 
 // variable initializations
-const router = express.Router();
+const router = Router();
 
-router.use("/admins", admins);
+router.use("/admin", admin);
 router.use("/auth", auth);
-router.use("/messages", messages);
-router.use("/users", users);
+router.use("/element", element);
+router.use("/message", message);
+router.use("/user", user);
 
-router.use("/docs", (_req, res) => res.redirect(POSTMAN_URL));
+router.use("/docs", (req, res) => res.redirect(POSTMAN_URL || ""));
 
 export default router;

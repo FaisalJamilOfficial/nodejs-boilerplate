@@ -2,7 +2,7 @@
 import dotenv from "dotenv";
 
 // file imports
-import { ENVIRONMENTS } from "../configs/enums.js";
+import { ENVIRONMENTS } from "../configs/enum.js";
 
 // destructuring assignments
 const { PRODUCTION } = ENVIRONMENTS;

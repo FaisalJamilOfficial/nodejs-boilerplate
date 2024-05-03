@@ -3,11 +3,13 @@ import sharp from "sharp";
 import { v4 } from "uuid";
 
 // file imports
-import FilesUploader from "./files_uploader.js";
-import directories from "../configs/directories.js";
+import FilesUploader from "./files-uploader.js";
+import { PUBLIC_DIRECTORY } from "../configs/directories.js";
 
 // destructuring assignments
-const { ATTACHMENTS_DIRECTORY } = directories;
+
+// variable initializations
+const { uploadFile } = new FilesUploader();
 
 class SharpManager {
   constructor() {
@@ -20,9 +22,7 @@ class SharpManager {
    * @param {String} path directory to save resized images
    * @returns {[Object]} array of resized images
    */
-  async resizeImages(params) {
-    const { images, path } = params;
-
+  async resizeImages(images) {
     const array = [];
     if (images) {
       // const imagesMimeRegex = new RegExp("image/(.*)");
@@ -30,7 +30,6 @@ class SharpManager {
       for (let i = 0; i < images.length; i++) {
         const buffer = images[i].buffer;
         let id;
-
         if (imagesMimeRegex.test(images[i].mimetype)) {
           // const fileExtension = mime.extension(images[i].mimetype);
           id = v4() + ".png";
@@ -48,15 +47,11 @@ class SharpManager {
                   : 65,
               // background: "white",
             })
-            .toFile(path + id);
+            .toFile(PUBLIC_DIRECTORY + id);
         } else {
-          const file = await new FilesUploader().uploadFile({
-            file: images[i],
-            directory: ATTACHMENTS_DIRECTORY,
-          });
+          const file = await uploadFile(images[i]);
           id = file.filename;
         }
-
         array.push({
           ...images[i],
           path: id,
@@ -72,12 +67,10 @@ class SharpManager {
    * @param {String} path directory to save resized images
    * @returns {[Object]} array of resized images
    */
-  async resizeImagesWithThumbnails(params) {
-    const { images, path } = params;
-
+  async resizeImagesWithThumbnails(images) {
     const array = [];
     if (images) {
-      if (path);
+      // if (path);
       // const imagesMimeRegex = new RegExp("image/(.*)");
       const imagesMimeRegex = /image\/(.*)/;
       for (let i = 0; i < images.length; i++) {
@@ -95,7 +88,7 @@ class SharpManager {
             })
             // .jpeg({ mozjpeg: true })
             .png({ palette: true })
-            .toFile(path + "thumbnails/" + id);
+            .toFile(PUBLIC_DIRECTORY + "thumbnails/" + id);
           await sharp(buffer)
             .png({
               // mozjpeg: true,
@@ -110,12 +103,9 @@ class SharpManager {
                   : 65,
               // background: "white",
             })
-            .toFile(path + id);
+            .toFile(PUBLIC_DIRECTORY + id);
         } else {
-          const file = await new FilesUploader().uploadFile({
-            file: images[i],
-            directory: ATTACHMENTS_DIRECTORY,
-          });
+          const file = await uploadFile(images[i]);
           id = file.filename;
         }
 

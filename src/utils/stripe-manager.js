@@ -1,17 +1,17 @@
 // module imports
-import _stripe from "stripe";
+import Stripe from "stripe";
 
 // file imports
-import * as paymentAccountsController from "../controllers/payment-accounts.js";
-import * as usersController from "../controllers/users.js";
-import { PAYMENT_ACCOUNT_TYPES } from "../configs/enums.js";
+import * as paymentAccountController from "../modules/payment-account/controller.js";
+import * as userController from "../modules/user/controller.js";
+import { PAYMENT_ACCOUNT_TYPES } from "../configs/enum.js";
 
 // destructuring assignments
 const { STRIPE_SECRET_KEY, STRIPE_ENDPOINT_SECRET } = process.env;
 const { STRIPE_ACCOUNT, STRIPE_CUSTOMER } = PAYMENT_ACCOUNT_TYPES;
 
 // variable initializations
-const stripe = _stripe(STRIPE_SECRET_KEY);
+const stripe = new Stripe(STRIPE_SECRET_KEY || "");
 const CURRENCY = "usd";
 
 class StripeManager {
@@ -44,10 +44,41 @@ class StripeManager {
    * @param {String} customerId stripe customer id
    * @returns {Object} stripe customer deletion response
    */
-  async deleteCustomer(params) {
-    const { customerId } = params;
-    if (customerId);
+  async deleteCustomer(customerId) {
     return await stripe.customers.del(customerId);
+  }
+
+  /**
+   * @description Delete stripe customers
+   * @returns {Object} stripe customers deletion response
+   */
+  async deleteAllCustomers() {
+    const customersObj = await stripe.customers.list({ limit: 500 });
+    const customers = customersObj.data;
+    for (let index = 0; index < customers.length; index++) {
+      const element = customers[index];
+      try {
+        this.deleteCustomer(element.id);
+      } catch (e) {
+        console.log("e =>", e);
+      }
+    }
+  }
+
+  /**
+   * @description Create stripe customers
+   * @returns {Object} stripe customers creation response
+   */
+  async createAllCustomers() {
+    const query = { limit: Math.pow(2, 32) };
+    const { data: users } = await userController.getElements(query);
+    for (let index = 0; index < users.length; index++) {
+      const element = users[index];
+      await this.createCustomer({
+        id: element?._id.toString(),
+        email: element?.email,
+      });
+    }
   }
 
   /**
@@ -55,11 +86,8 @@ class StripeManager {
    * @param {String} charge stripe charge id
    * @returns {Object} stripe charge refund response
    */
-  async createRefund(params) {
-    const { charge } = params;
-    const refundObj = {};
-    if (charge) refundObj.charge = charge;
-    return await stripe.refunds.create(refundObj);
+  async createRefund(charge) {
+    return await stripe.refunds.create({ charge });
   }
 
   /**
@@ -95,8 +123,9 @@ class StripeManager {
   async createCustomerSourceWithCheck(params) {
     const { source, cardHolderName, user, email, phone } = params;
 
-    const paymentAccountExists =
-      await paymentAccountsController.getPaymentAccount({ user });
+    const paymentAccountExists = await paymentAccountController.getElement(
+      user
+    );
 
     let userStripeId;
 
@@ -119,7 +148,7 @@ class StripeManager {
       type: STRIPE_CUSTOMER,
       account: card,
     };
-    const paymentAccount = await paymentAccountsController.addPaymentAccount(
+    const paymentAccount = await paymentAccountController.addPaymentAccount(
       paymentAccountObj
     );
     return paymentAccount;
@@ -146,34 +175,33 @@ class StripeManager {
    */
   async createAccountWithCheck(params) {
     const { user, email } = params;
-    const paymentAccountExists =
-      await paymentAccountsController.getPaymentAccount({ user });
+    const paymentAccountExists = await paymentAccountController.getElement(
+      user
+    );
 
     if (paymentAccountExists) return paymentAccountExists;
-    else {
-      const account = await stripe.accounts.create({
-        email,
-        type: "express",
-        capabilities: {
-          card_payments: {
-            requested: true,
-          },
-          transfers: {
-            requested: true,
-          },
-        },
-      });
-      const paymentAccountObj = {
-        user,
-        type: STRIPE_ACCOUNT,
-        account,
-      };
 
-      const paymentAccount = await paymentAccountsController.addPaymentAccount(
-        paymentAccountObj
-      );
-      return paymentAccount;
-    }
+    const account = await stripe.accounts.create({
+      email,
+      type: "express",
+      capabilities: {
+        card_payments: {
+          requested: true,
+        },
+        transfers: {
+          requested: true,
+        },
+      },
+    });
+    const paymentAccountObj = {
+      user,
+      type: STRIPE_ACCOUNT,
+      account,
+    };
+    const paymentAccount = await paymentAccountController.addPaymentAccount(
+      paymentAccountObj
+    );
+    return paymentAccount;
   }
 
   /**
@@ -183,11 +211,12 @@ class StripeManager {
    * @param {String} returnUrl redirect url for completion or incompletion linked flow
    * @returns {Object} stripe account link
    */
-  async createAccountLink(parameters) {
-    const { account, refreshURL, returnURL, email, user } = parameters;
+  async createAccountLink(params) {
+    const { account, refreshURL, returnURL, email, user } = params;
 
-    const paymentAccountExists =
-      await paymentAccountsController.getPaymentAccount({ user });
+    const paymentAccountExists = await paymentAccountController.getElement(
+      user
+    );
 
     let accountObj;
     if (paymentAccountExists) accountObj = paymentAccountExists.account;
@@ -206,7 +235,7 @@ class StripeManager {
         account: accountObj,
         type: STRIPE_CUSTOMER,
       };
-      await paymentAccountsController.addPaymentAccount(paymentAccountObj);
+      await paymentAccountController.addElement(paymentAccountObj);
     }
     const accountLinkObj = {
       account: account ?? accountObj.id,
@@ -247,8 +276,9 @@ class StripeManager {
    */
   async createTransfer(params) {
     const { user, amount, currency, description } = params;
-    const paymentAccountExists =
-      await paymentAccountsController.getPaymentAccount({ user });
+    const paymentAccountExists = await paymentAccountController.getElement(
+      user
+    );
     const transferObj = {
       amount,
       currency: currency ?? CURRENCY,
@@ -273,20 +303,15 @@ class StripeManager {
     const { amount, currency, paymentMethodTypes, customer, paymentMethod } =
       params;
     const paymentIntentObj = {
-      amount: amount * 100,
+      amount: Number(amount * 100).toFixed(0),
       currency: currency ?? "usd",
-      // confirmation_method: "manual",
-      capture_method: "manual",
       setup_future_usage: "on_session",
       customer,
     };
-    if (paymentMethod) {
-      paymentIntentObj.payment_method = paymentMethod;
-      paymentIntentObj.confirm = true;
-      paymentIntentObj.off_session = true;
-    }
+    if (paymentMethod) paymentIntentObj.payment_method = paymentMethod;
     if (paymentMethodTypes)
       paymentIntentObj.payment_method_types = paymentMethodTypes;
+
     return await stripe.paymentIntents.create(paymentIntentObj);
   }
 
@@ -309,8 +334,7 @@ class StripeManager {
    * @param {String} paymentIntent payment intent id
    * @returns {Object} cancel payment intent object
    */
-  async cancelPaymentIntent(params) {
-    const { paymentIntent } = params;
+  async cancelPaymentIntent(paymentIntent) {
     return await stripe.paymentIntents.cancel(paymentIntent);
   }
 
@@ -319,8 +343,7 @@ class StripeManager {
    * @param {String} paymentIntent payment intent id
    * @returns {Object} refund payment intent object
    */
-  async refundPaymentIntent(params) {
-    const { paymentIntent } = params;
+  async refundPaymentIntent(paymentIntent) {
     return await stripe.refunds.create({ payment_intent: paymentIntent });
   }
 
@@ -347,8 +370,8 @@ class StripeManager {
    * @param {String} endpointSecret stripe CLI webhook secret
    * @returns {Object} stripe webhook event
    */
-  async constructWebhooksEvent(parameters) {
-    const { rawBody, signature } = parameters;
+  async constructWebhooksEvent(params) {
+    const { rawBody, signature } = params;
 
     const rawBodyString = JSON.stringify(rawBody, null, 2);
 
@@ -367,12 +390,12 @@ class StripeManager {
       console.log("EVENT: ", JSON.stringify(event));
 
       const paymentAccountExists =
-        await paymentAccountsController.getPaymentAccount({
+        await paymentAccountController.getPaymentAccount({
           key: "account.id",
           value: rawBody.account,
         });
-      await usersController.updateUser({
-        user: paymentAccountExists.user,
+      await userController.updateUser({
+        user: paymentAccountExists?.user,
         isStripeConnected: true,
       });
     }

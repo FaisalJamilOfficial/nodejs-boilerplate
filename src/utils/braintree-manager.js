@@ -2,7 +2,7 @@
 import braintree from "braintree";
 
 // file imports
-import { ENVIRONMENTS } from "../configs/enums.js";
+import { ENVIRONMENTS } from "../configs/enum.js";
 
 // destructuring assignments
 const { PRODUCTION } = ENVIRONMENTS;
@@ -34,10 +34,8 @@ class BraintreeManager {
    * @param {String} customerId OPTIONAL braintree customer id
    * @returns {Object} client token
    */
-  async generateClientToken(params) {
-    const { customerId } = params;
-    const clientTokenObj = { customerId };
-    return await gateway.clientToken.generate(clientTokenObj);
+  async generateClientToken(customerId) {
+    return await gateway.clientToken.generate({ customerId });
   }
 
   /**
@@ -67,9 +65,7 @@ class BraintreeManager {
       creditCard,
       paymentMethodNonce,
     };
-    const response = await gateway.customer.create(customerObj);
-    if (response.success) return response;
-    else throw new Error(response?.message);
+    return await gateway.customer.create(customerObj);
   }
 
   /**
@@ -77,8 +73,7 @@ class BraintreeManager {
    * @param {String} customerId braintree customer id
    * @returns {Object} customer data
    */
-  async deleteCustomer(params) {
-    const { customerId } = params;
+  async deleteCustomer(customerId) {
     return await gateway.customer.delete(customerId);
   }
 
@@ -91,9 +86,7 @@ class BraintreeManager {
   async createPaymentMethod(params) {
     const { customerId, paymentMethodNonce } = params;
     const paymentMethodObj = { customerId, paymentMethodNonce };
-    const response = await gateway.paymentMethod.create(paymentMethodObj);
-    if (response.success) return response;
-    else throw new Error(response?.message);
+    return await gateway.paymentMethod.create(paymentMethodObj);
   }
 
   /**
@@ -101,8 +94,7 @@ class BraintreeManager {
    * @param {String} token payment method token
    * @returns {Object} payment method data
    */
-  async removePaymentMethod(params) {
-    const { token } = params;
+  async removePaymentMethod(token) {
     return await gateway.paymentMethod.delete(token);
   }
 
@@ -155,8 +147,7 @@ class BraintreeManager {
    * @param {String} transactionId braintree transaction id
    * @returns {Object} transaction
    */
-  async submitTransaction(params) {
-    const { transactionId } = params;
+  async submitTransaction(transactionId) {
     return await gateway.transaction.submitForSettlement(transactionId);
   }
 
@@ -165,8 +156,7 @@ class BraintreeManager {
    * @param {String} transactionId braintree transaction id
    * @returns {Object} transaction
    */
-  async voidTransaction(params) {
-    const { transactionId } = params;
+  async voidTransaction(transactionId) {
     return await gateway.transaction.void(transactionId);
   }
 
@@ -175,8 +165,7 @@ class BraintreeManager {
    * @param {String} transactionId braintree transaction id
    * @returns {Object} transaction hold data
    */
-  async holdTransaction(params) {
-    const { transactionId } = params;
+  async holdTransaction(transactionId) {
     return await gateway.transaction.holdInEscrow(transactionId);
   }
 
@@ -185,8 +174,7 @@ class BraintreeManager {
    * @param {String} transactionId braintree transaction id
    * @returns {Object} transaction refund data
    */
-  async refundTransaction(params) {
-    const { transactionId } = params;
+  async refundTransaction(transactionId) {
     return await gateway.transaction.refund(transactionId);
   }
 
@@ -195,8 +183,7 @@ class BraintreeManager {
    * @param {String} transactionId braintree transaction id
    * @returns {Object} transaction refund data
    */
-  async releaseTransaction(params) {
-    const { transactionId } = params;
+  async releaseTransaction(transactionId) {
     return await gateway.transaction.releaseFromEscrow(transactionId);
   }
 }

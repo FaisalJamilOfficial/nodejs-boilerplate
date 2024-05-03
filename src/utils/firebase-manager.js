@@ -1,17 +1,17 @@
 // module imports
-import admin from "firebase-admin";
+// import admin from "firebase-admin";
 
 // file imports
-import serviceAccount from "../services/backend-boilerplate-official-firebase-adminsdk-o1ajl-593da86247.json" assert { type: "json" };
+// import serviceAccount from "../services/backend-boilerplate-official-firebase-adminsdk-o1ajl-593da86247.json" assert { type: "json" };
 
 // variable initializations
-const connection = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+// const connection = admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+// });
 
 class FirebaseManager {
   constructor() {
-    this.connection = connection;
+    // this.connection = connection;
   }
 
   /**
@@ -35,14 +35,17 @@ class FirebaseManager {
       },
       data,
     };
-    connection
-      .messaging()
-      .sendToDevice(fcms, payload)
-      .then((response) => {
-        console.log("response", response);
-        console.log("response.results", response.results);
-      })
-      .catch((error) => console.error(error));
+    // connection
+    //   .messaging()
+    //   .sendToDevice(fcms, payload)
+    //   .then((response) => {
+    //     console.log("response =>", JSON.stringify(response, null, 4));
+    //     console.log(
+    //       "response.results =>",
+    //       JSON.stringify(response.results, null, 4)
+    //     );
+    //   })
+    //   .catch((error) => console.error(error));
   }
 
   /**
@@ -58,8 +61,7 @@ class FirebaseManager {
   async multicast(parameters) {
     const { topicName, title, body, imageUrl } = parameters;
     let { fcms, data } = parameters;
-    if (fcms && fcms.length > 0);
-    else fcms = ["null"];
+    if (!(fcms && fcms.length > 0)) fcms = ["null"];
     data = data ?? {};
     const message = {
       tokens: fcms,
@@ -76,7 +78,8 @@ class FirebaseManager {
       apns: {
         payload: {
           aps: {
-            "mutable-content": 1,
+            mutableContent: true,
+            sound: "default",
           },
         },
         fcm_options: {
@@ -90,11 +93,11 @@ class FirebaseManager {
       },
       topic: topicName,
     };
-    connection
-      .messaging()
-      .sendMulticast(message)
-      .then((res) => console.log(res))
-      .catch((error) => console.error(error));
+    // connection
+    //   .messaging()
+    //   .sendMulticast(message)
+    //   .then((res) => console.log("res =>", JSON.stringify(res, null, 4)))
+    //   .catch((error) => console.error(error));
   }
 }
 

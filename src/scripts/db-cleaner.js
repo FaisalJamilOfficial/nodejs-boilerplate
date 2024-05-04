@@ -1,11 +1,11 @@
 const array = [
   "admins",
   "conversations",
-  "customers",
   "elements",
   "messages",
   "notifications",
   "paymentAccounts",
+  "profiles",
   "users",
   "userTokens",
 ];

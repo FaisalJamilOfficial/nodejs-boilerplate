@@ -56,16 +56,16 @@ const serverFunction = async () => {
 
     app.use("/api/v1", indexRouter);
 
-    app.get("/reset-password", (req, res) => {
+    app.get("/reset-password", (_req, res) => {
       res.sendFile(path.join(__dirname, "public/reset-password.html"));
     });
 
-    app.get("/", (req, res) => {
+    app.get("/", (_req, res) => {
       res.sendFile(path.join(__dirname, "public/image.png"));
     });
 
     // catch 404 and forward to error handler
-    app.use(function (req, res, next) {
+    app.use(function (_req, _res, next) {
       next(new ErrorHandler("Not Found", 404));
     });
 

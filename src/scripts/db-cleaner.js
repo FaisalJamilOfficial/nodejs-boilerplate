@@ -4,10 +4,10 @@ const array = [
   "elements",
   "messages",
   "notifications",
-  "paymentAccounts",
+  "payment_accounts",
   "profiles",
   "users",
-  "userTokens",
+  "user_tokens",
 ];
 
 /**

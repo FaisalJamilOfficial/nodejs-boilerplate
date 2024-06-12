@@ -22,4 +22,4 @@ const userTokenSchema = new Schema({
 
 userTokenSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 
-export default model("userTokens", userTokenSchema);
+export default model("user_tokens", userTokenSchema);

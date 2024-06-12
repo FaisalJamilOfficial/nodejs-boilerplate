@@ -32,4 +32,4 @@ const paymentAccountSchema = new Schema(
   }
 );
 
-export default model("paymentAccounts", paymentAccountSchema);
+export default model("payment_accounts", paymentAccountSchema);

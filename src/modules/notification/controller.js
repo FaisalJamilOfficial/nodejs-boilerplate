@@ -3,7 +3,7 @@
 // file imports
 import FirebaseManager from "../../utils/firebase-manager.js";
 import SocketManager from "../../utils/socket-manager.js";
-import ElementModel from "./model.js";
+import NotificationModel from "./model.js";
 import * as userController from "../user/controller.js";
 import { ErrorHandler } from "../../middlewares/error-handler.js";
 import {
@@ -18,36 +18,36 @@ const { NEW_MESSAGE_, CONVERSATIONS_UPDATED } = SOCKET_EVENTS;
 const { NEW_MESSAGE } = NOTIFICATION_TYPES;
 
 /**
- * @description Add element
- * @param {Object} elementObj element data
- * @returns {Object} element data
+ * @description Add notification
+ * @param {Object} notificationObj notification data
+ * @returns {Object} notification data
  */
-export const addElement = async (elementObj) => {
-  return await ElementModel.create(elementObj);
+export const addNotification = async (notificationObj) => {
+  return await NotificationModel.create(notificationObj);
 };
 
 /**
- * @description Add elements
- * @param {Object[]} elements elements data
- * @returns {Object} element data
+ * @description Add notifications
+ * @param {Object[]} notifications notifications data
+ * @returns {Object} notification data
  */
-export const addElements = async (elements) => {
-  return await ElementModel.create(elements);
+export const addNotifications = async (notifications) => {
+  return await NotificationModel.create(notifications);
 };
 
 /**
- * @description Get elements
- * @param {Object} params elements fetching parameters
- * @returns {Object[]} elements data
+ * @description Get notifications
+ * @param {Object} params notifications fetching parameters
+ * @returns {Object[]} notifications data
  */
-export const getElements = async (params) => {
+export const getNotifications = async (params) => {
   const { user } = params;
   let { page, limit } = params;
   const query = {};
   if (user) query.user = user;
   page = page - 1 || 0;
   limit = limit || 10;
-  const [result] = await ElementModel.aggregate([
+  const [result] = await NotificationModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
@@ -101,10 +101,10 @@ export const notifyUsers = async (params) => {
     if (useFirebase) {
       const queryObj = query ?? {};
       queryObj.limit = Math.pow(2, 32);
-      const { data } = await userController.getElements(queryObj);
+      const { data } = await userController.getUsers(queryObj);
       usersExist = data;
-      usersExist.forEach(async (element) => {
-        element.fcms.forEach((e) => fcms.push(e.token));
+      usersExist.forEach(async (notification) => {
+        notification.fcms.forEach((e) => fcms.push(e.token));
       });
     }
     if (useSocket)
@@ -112,7 +112,7 @@ export const notifyUsers = async (params) => {
       await new SocketManager().emitGroupEvent({ event, data: socketData });
   } else {
     if (useFirebase) {
-      const userExists = await userController.getElementById(user || "");
+      const userExists = await userController.getUserById(user || "");
       userExists?.fcms.forEach((e) => fcms.push(e.token));
     }
     if (useSocket)
@@ -136,11 +136,11 @@ export const notifyUsers = async (params) => {
       // database notification creation
       if (type) notificationData.type = type;
       if (isGrouped) {
-        const elements = usersExist?.map((element) => {
-          return { ...notificationData, user: element._id };
+        const notifications = usersExist?.map((notification) => {
+          return { ...notificationData, user: notification._id };
         });
-        await addElements(elements);
-      } else await addElement(notificationData);
+        await addNotifications(notifications);
+      } else await addNotification(notificationData);
     }
 };
 
@@ -151,9 +151,9 @@ export const notifyUsers = async (params) => {
 export const readNotifications = async (user) => {
   const notificationObj = { status: READ };
   if (!user) throw new ErrorHandler("Please enter user id!", 400);
-  if (!(await userController.checkElementExistence({ _id: user })))
+  if (!(await userController.checkUserExistence({ _id: user })))
     throw new ErrorHandler("Please enter valid user id!", 400);
-  await ElementModel.updateMany({ user }, notificationObj);
+  await NotificationModel.updateMany({ user }, notificationObj);
 };
 
 /**

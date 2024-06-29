@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 
 // file imports
 import "./bin/www.js";
+import urls from "./configs/urls.js";
 import indexRouter from "./routes/index.js";
 import SocketManager from "./utils/socket-manager.js";
 import errorHandler, { ErrorHandler } from "./middlewares/error-handler.js";
@@ -25,12 +26,7 @@ const serverFunction = async () => {
     const app = express();
     const server = http.createServer(app);
     mongoose.set("strictQuery", false);
-    app.use(
-      cors({
-        origin: ["http://localhost:3000", "https://admin.app.com"],
-        credentials: true,
-      })
-    );
+    app.use(cors({ origin: Object.keys(urls), credentials: true }));
 
     new SocketManager().initializeSocket({ server, app });
 

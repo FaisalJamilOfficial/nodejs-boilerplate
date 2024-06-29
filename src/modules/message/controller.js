@@ -2,7 +2,7 @@
 import { isValidObjectId, Types } from "mongoose";
 
 // file imports
-import ElementModel from "./model.js";
+import MessageModel from "./model.js";
 import * as conversationController from "../conversation/controller.js";
 import * as userController from "../user/controller.js";
 import { sendNewMessageNotification } from "../notification/controller.js";
@@ -14,39 +14,39 @@ const { READ } = MESSAGE_STATUSES;
 const { ObjectId } = Types;
 
 /**
- * @description Add element
- * @param {Object} elementObj element data
- * @returns {Object} element data
+ * @description Add message
+ * @param {Object} messageObj message data
+ * @returns {Object} message data
  */
-export const addElement = async (elementObj) => {
-  return await ElementModel.create(elementObj);
+export const addMessage = async (messageObj) => {
+  return await MessageModel.create(messageObj);
 };
 
 /**
- * @description Update element data
- * @param {String} element element id
- * @param {Object} elementObj element data
- * @returns {Object} element data
+ * @description Update message data
+ * @param {String} message message id
+ * @param {Object} messageObj message data
+ * @returns {Object} message data
  */
-export const updateElementById = async (element, elementObj) => {
-  if (!element) throw new ErrorHandler("Please enter element id!", 400);
-  if (!isValidObjectId(element))
-    throw new ErrorHandler("Please enter valid element id!", 400);
-  const elementExists = await ElementModel.findByIdAndUpdate(
-    element,
-    elementObj,
+export const updateMessageById = async (message, messageObj) => {
+  if (!message) throw new ErrorHandler("Please enter message id!", 400);
+  if (!isValidObjectId(message))
+    throw new ErrorHandler("Please enter valid message id!", 400);
+  const messageExists = await MessageModel.findByIdAndUpdate(
+    message,
+    messageObj,
     { new: true }
   );
-  if (!elementExists) throw new ErrorHandler("element not found!", 404);
-  return elementExists;
+  if (!messageExists) throw new ErrorHandler("message not found!", 404);
+  return messageExists;
 };
 
 /**
- * @description Get elements
- * @param {Object} params elements fetching parameters
- * @returns {Object[]} elements data
+ * @description Get messages
+ * @param {Object} params messages fetching parameters
+ * @returns {Object[]} messages data
  */
-export const getElements = async (params) => {
+export const getMessages = async (params) => {
   const { conversation } = params;
   let { page, limit, user1, user2 } = params;
   page = page - 1 || 0;
@@ -65,7 +65,7 @@ export const getElements = async (params) => {
       { $and: [{ userFrom: user1 }, { userTo: user2 }] },
     ];
   } else throw new ErrorHandler("Please enter conversation id!", 400);
-  const [result] = await ElementModel.aggregate([
+  const [result] = await MessageModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
@@ -95,9 +95,9 @@ export const getElements = async (params) => {
 export const send = async (params) => {
   const { username } = params;
 
-  const conversation = await conversationController.addElement(params);
+  const conversation = await conversationController.addConversation(params);
 
-  const message = await addElement({
+  const message = await addMessage({
     ...params,
     conversation: conversation._id,
   });
@@ -129,14 +129,16 @@ export const send = async (params) => {
  * @param {Object} params read messages data
  */
 export const readMessages = async (params) => {
-  const { conversation, userTo } = params;
+  let { conversation, userTo } = params;
+  conversation = new ObjectId(conversation);
+  userTo = new ObjectId(userTo);
   const messageObj = { status: READ };
   if (!userTo) throw new ErrorHandler("Please enter userTo id!", 400);
-  if (!(await userController.checkElementExistence({ _id: userTo })))
+  if (!(await userController.checkUserExistence({ _id: userTo })))
     throw new ErrorHandler("Please enter valid userTo id!", 400);
   if (!conversation)
     throw new ErrorHandler("Please enter conversation id!", 400);
-  if (!(await conversationController.getElementById(conversation)))
+  if (!(await conversationController.getConversationById(conversation)))
     throw new ErrorHandler("Please enter valid conversation id!", 400);
-  await ElementModel.updateMany({ conversation, userTo }, messageObj);
+  await MessageModel.updateMany({ conversation, userTo }, messageObj);
 };

@@ -44,7 +44,7 @@ router
         //   image: image?.key,
         image: image?.filename,
       };
-      const response = await userController.updateElementById(user, args);
+      const response = await userController.updateUserById(user, args);
       res.json(response);
     })
   )
@@ -60,7 +60,7 @@ router
         limit: Number(limit),
         page: Number(page),
       };
-      const response = await userController.getElements(args);
+      const response = await userController.getUsers(args);
       res.json(response);
     })
   )
@@ -68,7 +68,7 @@ router
     exceptionHandler(async (req, res) => {
       let { user } = req.query;
       user = user?.toString() || "";
-      const response = await userController.deleteElementById(user);
+      const response = await userController.deleteUserById(user);
       res.json(response);
     })
   );
@@ -81,7 +81,7 @@ router.put(
   exceptionHandler(async (req, res) => {
     const { _id: user, phone } = req.user;
     const args = { phone };
-    const response = await userController.updateElementById(user, args);
+    const response = await userController.updateUserById(user, args);
     res.json(response);
   })
 );
@@ -95,7 +95,7 @@ router.put(
     const args = { password, email, type };
     await authController.login(args);
     args.password = newPassword;
-    const response = await userController.updateElementById(user, args);
+    const response = await userController.updateUserById(user, args);
     res.json(response);
   })
 );
@@ -130,7 +130,7 @@ router
       const { _id: user } = req.user;
       const { page, limit } = req.query;
       const args = { user, limit: Number(limit), page: Number(page) };
-      const response = await notificationController.getElements(args);
+      const response = await notificationController.getNotifications(args);
       res.json(response);
     })
   )
@@ -161,7 +161,7 @@ router.get(
   verifyAdmin,
   exceptionHandler(async (req, res) => {
     const { user } = req.params;
-    const response = await userController.getElementById(user);
+    const response = await userController.getUserById(user);
     res.json(response);
   })
 );

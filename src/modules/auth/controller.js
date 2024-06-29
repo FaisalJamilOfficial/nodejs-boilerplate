@@ -23,17 +23,17 @@ const {
  */
 export const register = async (params) => {
   const { type } = params;
-  const user = await userController.addElement(params);
+  const user = await userController.addUser(params);
 
   const profileObj = { user: user._id };
   const userObj = {};
   userObj.type = type;
 
   if (type === CUSTOMER)
-    userObj.profile = (await profileController.addElement(profileObj))._id;
+    userObj.profile = (await profileController.addProfile(profileObj))._id;
   else if (type === ADMIN) userObj.isAdmin = true;
 
-  await userController.updateElementById(user._id, userObj);
+  await userController.updateUserById(user._id, userObj);
 
   return user.getSignedjwtToken();
 };
@@ -51,7 +51,7 @@ export const login = async (params) => {
   if (email && password) query.email = email;
   else throw new ErrorHandler("Please enter login credentials!", 400);
 
-  const userExists = await userController.getElement(query);
+  const userExists = await userController.getUser(query);
   if (!userExists) throw new ErrorHandler("User not registered!", 404);
 
   if (userExists.type !== type) throw new ErrorHandler("User not found!", 404);
@@ -62,7 +62,7 @@ export const login = async (params) => {
   if (userExists.status !== ACTIVE)
     throw new ErrorHandler(`User ${userExists.status}!`, 403);
 
-  await userController.updateElement(
+  await userController.updateUser(
     { _id: userExists._id },
     { lastLogin: new Date() }
   );
@@ -131,10 +131,10 @@ export const emailWelcomeUser = async (params) => {
  */
 export const generateEmailToken = async (params) => {
   const { email, tokenExpirationTime } = params;
-  const userExists = await userController.getElement({ email });
+  const userExists = await userController.getUser({ email });
   if (!userExists)
     throw new ErrorHandler("User with given email doesn't exist!", 404);
-  let userTokenExists = await userTokenController.getElement({
+  let userTokenExists = await userTokenController.getUserToken({
     user: userExists._id,
   });
   if (!userTokenExists) {
@@ -143,7 +143,7 @@ export const generateEmailToken = async (params) => {
     userTokenObj.token = userExists.getSignedjwtToken();
     userTokenObj.expireAt = tokenExpirationTime;
 
-    userTokenExists = await userTokenController.addElement(userTokenObj);
+    userTokenExists = await userTokenController.addUserToken(userTokenObj);
   }
   return userTokenExists;
 };
@@ -155,10 +155,10 @@ export const generateEmailToken = async (params) => {
 export const resetPassword = async (params) => {
   const { password, user, token } = params;
 
-  const userExists = await userController.getElementById(user);
+  const userExists = await userController.getUserById(user);
   if (!userExists) throw new ErrorHandler("Invalid link!", 400);
 
-  const userTokenExists = await userTokenController.getElement({
+  const userTokenExists = await userTokenController.getUserToken({
     user,
     token,
   });
@@ -175,10 +175,10 @@ export const resetPassword = async (params) => {
 export const verifyUserEmail = async (params) => {
   const { user, token } = params;
 
-  const userExists = await userController.getElementById(user);
+  const userExists = await userController.getUserById(user);
   if (!userExists) throw new ErrorHandler("Invalid link!", 400);
 
-  const userTokenExists = await userTokenController.getElement({
+  const userTokenExists = await userTokenController.getUserToken({
     user,
     token,
   });

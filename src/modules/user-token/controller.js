@@ -1,27 +1,27 @@
 // file imports
-import ElementModel from "./model.js";
+import UserTokenModel from "./model.js";
 import { ErrorHandler } from "../../middlewares/error-handler.js";
 
 /**
- * @description Add element
- * @param {Object} elementObj element data
- * @returns {Object} element data
+ * @description Add userToken
+ * @param {Object} userTokenObj userToken data
+ * @returns {Object} userToken data
  */
-export const addElement = async (elementObj) => {
-  return await ElementModel.create(elementObj);
+export const addUserToken = async (userTokenObj) => {
+  return await UserTokenModel.create(userTokenObj);
 };
 
 /**
- * @description Get element
- * @param {Object} query element data
- * @returns {Object} element data
+ * @description Get userToken
+ * @param {Object} query userToken data
+ * @returns {Object} userToken data
  */
-export const getElement = async (query) => {
+export const getUserToken = async (query) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler("Please enter query!", 400);
-  const elementExists = await ElementModel.findOne(query).select(
+  const userTokenExists = await UserTokenModel.findOne(query).select(
     "-createdAt -updatedAt -__v"
   );
-  // if (!elementExists) throw new ErrorHandler("element not found!", 404);
-  return elementExists;
+  // if (!userTokenExists) throw new ErrorHandler("userToken not found!", 404);
+  return userTokenExists;
 };

@@ -48,7 +48,7 @@ router.post(
     const { _id: user } = req.user;
     const { device } = req.body;
     const args = { user, device, shallRemoveFCM: true };
-    await userController.updateElementById(user, args);
+    await userController.updateUserById(user, args);
     res.json({ message: "Operation completed successfully!" });
   })
 );
@@ -80,7 +80,7 @@ router.post(
   exceptionHandler(async (req, res) => {
     const { _id: user } = req.user;
     const args = { user };
-    const response = await userController.getElement(args);
+    const response = await userController.getUser(args);
     res.json({ token: response.getSignedjwtToken() });
   })
 );
@@ -90,7 +90,7 @@ router.post(
   exceptionHandler(async (req, res) => {
     const { googleId } = req.body;
     const args = { googleId };
-    const response = await userController.getElement(args);
+    const response = await userController.getUser(args);
     res.json({ token: response.getSignedjwtToken() });
   })
 );
@@ -100,7 +100,7 @@ router.post(
   exceptionHandler(async (req, res) => {
     const { facebookId } = req.body;
     const args = { facebookId };
-    const response = await userController.getElement(args);
+    const response = await userController.getUser(args);
     res.json({ token: response.getSignedjwtToken() });
   })
 );

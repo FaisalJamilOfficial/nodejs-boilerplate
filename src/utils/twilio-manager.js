@@ -33,7 +33,7 @@ class TwilioManager {
     if (user) query.user = user;
     else query.phone = phone;
 
-    const userExists = await userController.getElement(query);
+    const userExists = await userController.getUser(query);
 
     const otp = "111111";
     // const otp = otpGenerator.generate(6, {

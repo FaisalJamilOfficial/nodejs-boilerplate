@@ -49,13 +49,14 @@ export const updateUserById = async (user, userObj) => {
   if (!isValidObjectId(user))
     throw new ErrorHandler("Please enter valid user id!", 400);
 
-  let userExists = await UserModel.findById(user);
+  const userExists = await UserModel.findById(user);
   if (!userExists) throw new ErrorHandler("User not found!", 404);
 
   if (password) {
     await userExists.setPassword(password);
     delete userObj.password;
   }
+
   if (fcm) {
     if (fcm?.token && fcm?.device) {
       let alreadyExists = false;
@@ -67,24 +68,24 @@ export const updateUserById = async (user, userObj) => {
       });
       if (!alreadyExists)
         userExists.fcms.push({ device: fcm.device, token: fcm.token });
+      userObj.fcms = userExists.fcms;
     } else
       throw new ErrorHandler("Please enter FCM token and device both!", 400);
   }
   if (shallRemoveFCM)
     if (device)
-      userExists.fcms = userExists.fcms.filter(
-        (user) => user?.device !== device
-      );
+      userObj.fcms = userExists.fcms.filter((user) => user?.device !== device);
   if (firstName || lastName)
-    userExists.name = (firstName || "") + " " + (lastName || "");
+    userObj.name = (firstName || "") + " " + (lastName || "");
   if (image) {
     if (userExists.image) new FilesRemover().remove([userExists.image]);
-    userExists.image = image;
+    userObj.image = image;
   }
   if (coordinates) {
-    if (coordinates?.length === 2)
+    if (coordinates?.length === 2) {
       userExists.location.coordinates = coordinates;
-    else
+      userObj.location = userExists.location;
+    } else
       throw new ErrorHandler(
         "Please enter location longitude and latitude both!",
         400
@@ -92,19 +93,12 @@ export const updateUserById = async (user, userObj) => {
   }
   if (profile)
     if (await profileController.checkProfileExistence({ _id: profile })) {
-      userExists.profile = profile;
+      userObj.profile = profile;
     } else throw new ErrorHandler("Profile not found!", 404);
 
-  userExists = { ...userExists._doc, ...userObj };
-  userExists = await UserModel.findByIdAndUpdate(
-    userExists._id,
-    userExists,
-    {
-      new: true,
-    }
-  ).select("-createdAt -updatedAt -__v");
-  if (!userExists) throw new ErrorHandler("user not found!", 404);
-  return userExists;
+  return await UserModel.findByIdAndUpdate(userExists._id, userObj, {
+    new: true,
+  }).select("-createdAt -updatedAt -__v");
 };
 
 /**

@@ -64,7 +64,7 @@ class SocketManager {
    */
   async initializeSocket(params) {
     const { server, app } = params;
-    const io = new Server(server, { cors: { origin: Object.keys(urls) } });
+    const io = new Server(server, { cors: { origin: Object.values(urls) } });
     socketIO = io;
     io.on("connection", (socket) => {
       socket.on("join", async (data) => {

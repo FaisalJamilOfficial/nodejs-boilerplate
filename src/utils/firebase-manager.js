@@ -16,34 +16,30 @@ class FirebaseManager {
 
   /**
    * @description Send firebase notification
-   * @param {[String]} fcms firebase cloud messaging user tokens array
+   * @param {[String]} fcm firebase cloud messaging user token
    * @param {String} title notification title
    * @param {String} body notification body
    * @param {Object} data notification data
    */
-  async notify(params) {
+  async send(params) {
     const { title, body, imageUrl } = params;
-    let { data, fcms, fcm } = params;
+    let { data, fcm } = params;
     data = data ?? {};
-    fcms = fcms?.length > 0 ? fcms : fcm ? [fcm] : ["null"];
+    fcm = fcm ?? "null";
     const payload = {
+      token: fcm,
       notification: {
         title,
         body,
         image: imageUrl ?? "https://nodejs.org/static/images/logo.svg",
-        sound: "default",
       },
       data,
     };
     // connection
     //   .messaging()
-    //   .sendToDevice(fcms, payload)
+    //   .send(payload)
     //   .then((response) => {
-    //     console.log("response =>", JSON.stringify(response, null, 4));
-    //     console.log(
-    //       "response.results =>",
-    //       JSON.stringify(response.results, null, 4)
-    //     );
+    //     console.log("response", response);
     //   })
     //   .catch((error) => console.error(error));
   }
@@ -51,6 +47,7 @@ class FirebaseManager {
   /**
    * Send multicast firebase notification
    * @param {[string]} fcms firebase cloud messaging user token
+   * @param {String} fcm firebase cloud messaging user token
    * @param {string} title notification title
    * @param {string} body notification body
    * @param {object} data notification data
@@ -60,8 +57,8 @@ class FirebaseManager {
    */
   async multicast(parameters) {
     const { topicName, title, body, imageUrl } = parameters;
-    let { fcms, data } = parameters;
-    if (!(fcms && fcms.length > 0)) fcms = ["null"];
+    let { fcm, fcms, data } = parameters;
+    fcms = fcms?.length > 0 ? fcms : fcm ? [fcm] : ["null"];
     data = data ?? {};
     const message = {
       tokens: fcms,
@@ -95,8 +92,11 @@ class FirebaseManager {
     };
     // connection
     //   .messaging()
-    //   .sendMulticast(message)
-    //   .then((res) => console.log("res =>", JSON.stringify(res, null, 4)))
+    //   .sendEachForMulticast(message)
+    //   .then((response) => {
+    //     console.log("response", response);
+    //     console.log("response.responses", response.responses);
+    //   })
     //   .catch((error) => console.error(error));
   }
 }

@@ -132,15 +132,16 @@ export const notifyUsers = async (params) => {
       data: firebaseData ? { ...firebaseData, type } : { type },
     });
   if (useDatabase)
-    if (notificationData) {
+    if (type) {
+      const notificationObj = notificationData ?? {};
       // database notification creation
-      if (type) notificationData.type = type;
+      notificationObj.type = type;
       if (isGrouped) {
-        const notifications = usersExist?.map((notification) => {
-          return { ...notificationData, user: notification._id };
+        const notifications = usersExist?.map((e) => {
+          return { ...notificationObj, user: e._id };
         });
         await addNotifications(notifications);
-      } else await addNotification(notificationData);
+      } else await addNotification(notificationObj);
     }
 };
 

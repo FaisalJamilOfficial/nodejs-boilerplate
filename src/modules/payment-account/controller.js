@@ -35,7 +35,7 @@ export const getPaymentAccount = async (params) => {
   if (paymentAccount) query._id = paymentAccount;
   if (user) query.user = user;
   if (key) query[key] = value;
-  else query._id = null;
+  if (Object.keys(query).length === 0) query._id = null;
   const paymentAccountExists = await PaymentAccountModel.findOne(query).select(
     "-createdAt -updatedAt -__v"
   );

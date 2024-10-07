@@ -178,7 +178,7 @@ export const getElements = async (params) => {
 /**
  * @description Check element existence
  * @param {Object} query element data
- * @returns {Boolean} element existence status
+ * @returns {Object} element existence status
  */
 export const checkElementExistence = async (query) => {
   if (!query || Object.keys(query).length === 0)

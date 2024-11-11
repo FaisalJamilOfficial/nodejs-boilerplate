@@ -47,13 +47,15 @@ export const addConversation = async (conversationObj) => {
  * @returns {Object} conversation data
  */
 export const getConversationById = async (conversation) => {
-  if (!conversation) throw new ErrorHandler("Please enter conversation id!", 400);
+  if (!conversation)
+    throw new ErrorHandler("Please enter conversation id!", 400);
   if (!isValidObjectId(conversation))
     throw new ErrorHandler("Please enter valid conversation id!", 400);
-  const conversationExists = await ConversationModel.findById(conversation).select(
-    "-createdAt -updatedAt -__v"
-  );
-  if (!conversationExists) throw new ErrorHandler("conversation not found!", 404);
+  const conversationExists = await ConversationModel.findById(
+    conversation
+  ).select("-createdAt -updatedAt -__v");
+  if (!conversationExists)
+    throw new ErrorHandler("conversation not found!", 404);
   return conversationExists;
 };
 

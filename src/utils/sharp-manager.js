@@ -41,10 +41,10 @@ class SharpManager {
                 images[i].size > 6000000
                   ? 25
                   : images[i].size > 4000000
-                  ? 35
-                  : images[i].size > 2000000
-                  ? 45
-                  : 65,
+                    ? 35
+                    : images[i].size > 2000000
+                      ? 45
+                      : 65,
               // background: "white",
             })
             .toFile(PUBLIC_DIRECTORY + id);
@@ -97,10 +97,10 @@ class SharpManager {
                 images[i].size > 6000000
                   ? 25
                   : images[i].size > 4000000
-                  ? 35
-                  : images[i].size > 2000000
-                  ? 45
-                  : 65,
+                    ? 35
+                    : images[i].size > 2000000
+                      ? 45
+                      : 65,
               // background: "white",
             })
             .toFile(PUBLIC_DIRECTORY + id);

@@ -147,9 +147,8 @@ class StripeManager {
       type: STRIPE_CUSTOMER,
       account: card,
     };
-    const paymentAccount = await paymentAccountController.addPaymentAccount(
-      paymentAccountObj
-    );
+    const paymentAccount =
+      await paymentAccountController.addPaymentAccount(paymentAccountObj);
     return paymentAccount;
   }
 
@@ -196,9 +195,8 @@ class StripeManager {
       type: STRIPE_ACCOUNT,
       account,
     };
-    const paymentAccount = await paymentAccountController.addPaymentAccount(
-      paymentAccountObj
-    );
+    const paymentAccount =
+      await paymentAccountController.addPaymentAccount(paymentAccountObj);
     return paymentAccount;
   }
 
